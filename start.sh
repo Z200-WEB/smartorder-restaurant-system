@@ -38,6 +38,13 @@ if [ ! -d /var/lib/mysql/mysql ]; then
                                                         exit 1
                                                         fi
 
+                                                        # Setup root user for TCP access (fix auth_socket issue)
+                                                        echo "Configuring MariaDB root user for TCP access..."
+                                                        mysql -u root --socket=/var/run/mysqld/mysqld.sock <<EOSQL
+                                                        ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('');
+                                                        FLUSH PRIVILEGES;
+                                                        EOSQL
+
                                                         # Create database if not exists
                                                         echo "Creating database..."
                                                         mysql -u root --socket=/var/run/mysqld/mysqld.sock -e \
