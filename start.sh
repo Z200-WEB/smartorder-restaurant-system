@@ -8,6 +8,10 @@ mkdir -p /var/lib/mysql /var/run/mysqld
 chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
 chmod 777 /var/run/mysqld
 
+# Ensure itemImages directory exists and is writable
+mkdir -p /var/www/html/itemImages
+chmod 777 /var/www/html/itemImages
+
 # Initialize MariaDB data directory if needed
 if [ ! -d /var/lib/mysql/mysql ]; then
 echo "Initializing MariaDB data directory..."
@@ -62,7 +66,7 @@ export MYSQLUSER=root
 export MYSQLPASSWORD=
 export MYSQLPORT=3306
 
-PORT=${PORT:-8080}
+PORT=${PORT:-10000}
 echo "Starting PHP built-in server on 0.0.0.0:${PORT}..."
 cd /var/www/html
 exec php -S 0.0.0.0:${PORT}
