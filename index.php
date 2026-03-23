@@ -44,6 +44,17 @@ foreach ($cartItems as $item) {
     $currentTotal += $item['subtotal'];
     $itemCount += $item['amount'];
 }
+
+// Helper: get item image URL if exists
+function getItemImage($itemId) {
+    $dir = __DIR__ . '/itemImages/';
+    foreach (['jpg','jpeg','png','gif','webp'] as $ext) {
+        if (file_exists($dir . $itemId . '.' . $ext)) {
+            return 'itemImages/' . $itemId . '.' . $ext;
+        }
+    }
+    return null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -55,13 +66,6 @@ foreach ($cartItems as $item) {
 <link rel="stylesheet" href="css/animations.css">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* HOW TO ADD PHOTOS:
-   Replace <div class="item-img-placeholder">
-   with: <img src="itemImages/ITEM_ID.jpg" alt="name"
-               style="width:100%;height:100%;object-fit:cover"
-               onerror="this.style.display='none'">
-   Files go in: itemImages/ folder, named {id}.jpg */
-
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-height:100vh}
 .app-header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,var(--mc-red,#e63946),#c1121f);color:#fff;padding:12px 16px;box-shadow:0 2px 12px rgba(0,0,0,.15)}
@@ -83,7 +87,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
 .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
 .menu-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,.06);cursor:pointer;transition:transform .2s,box-shadow .2s;border:2px solid transparent}
 .menu-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.1);border-color:var(--mc-red,#e63946)}
-.item-img-placeholder{width:100%;aspect-ratio:1;background:linear-gradient(135deg,#fff5f5,#ffe0e0);display:flex;align-items:center;justify-content:center;font-size:2.8rem}
+.item-img-wrap{width:100%;aspect-ratio:1;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.item-img-wrap img{width:100%;height:100%;object-fit:cover}
+.item-img-wrap.no-photo{background:#f9f9f9}
 .item-info{padding:10px}
 .item-name{font-size:.85rem;font-weight:600;color:#222;margin-bottom:4px;line-height:1.3}
 .item-price{font-size:.95rem;font-weight:700;color:var(--mc-red,#e63946)}
@@ -95,7 +101,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
 .cart-items{max-height:400px;overflow-y:auto;padding:10px}
 .cart-empty{text-align:center;padding:30px;color:#bbb;font-size:.9rem}
 .cart-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;margin-bottom:6px;background:#fafafa}
-.cart-item-emoji{width:40px;height:40px;background:#fff5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.cart-item-thumb{width:40px;height:40px;border-radius:8px;overflow:hidden;background:#f5f5f5;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.cart-item-thumb img{width:100%;height:100%;object-fit:cover}
 .cart-item-info{flex:1}
 .cart-item-name{font-size:.82rem;font-weight:600}
 .cart-item-price{font-size:.78rem;color:#888}
@@ -117,7 +124,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
 @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-header{background:linear-gradient(135deg,var(--mc-red,#e63946),#c1121f);color:#fff;padding:16px 20px;font-weight:700;font-size:1.05rem}
 .modal-body{padding:20px}
-.modal-item-img{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#fff5f5,#ffe0e0);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:4rem;margin-bottom:14px}
+.modal-item-img{width:100%;aspect-ratio:16/9;background:#f5f5f5;border-radius:8px;overflow:hidden;margin-bottom:14px;display:flex;align-items:center;justify-content:center}
+.modal-item-img img{width:100%;height:100%;object-fit:cover}
 .modal-item-price{font-size:1.2rem;font-weight:700;color:var(--mc-red,#e63946);margin-bottom:14px}
 .modal-qty-control{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px}
 .modal-qty-btn{width:36px;height:36px;border-radius:50%;border:2px solid var(--mc-red,#e63946);background:#fff;color:var(--mc-red,#e63946);font-size:1.2rem;cursor:pointer}
@@ -154,6 +162,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
 <body>
 <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
 <div class="toast-container" id="toastContainer"></div>
+
 <header class="app-header">
   <div class="header-inner">
     <div>
@@ -166,6 +175,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
     </div>
   </div>
 </header>
+
 <nav class="category-nav">
   <div class="category-inner">
     <button class="cat-btn active" onclick="filterCategory('all',this)">All</button>
@@ -174,14 +184,21 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
     <?php endforeach; ?>
   </div>
 </nav>
+
 <div class="app-layout">
   <section class="menu-section">
     <h2 id="sectionTitle">Menu</h2>
     <div class="menu-grid" id="menuGrid">
-      <?php foreach($items as $item): ?>
-      <div class="menu-card" data-category="<?php echo (int)$item['category_id']; ?>" onclick="openOrderModal(<?php echo (int)$item['id']; ?>,'<?php echo addslashes(htmlspecialchars($item['name'])); ?>',<?php echo (int)$item['price']; ?>)">
-        <!-- To add photo: replace div below with <img src="itemImages/<?php echo (int)$item['id']; ?>.jpg"> -->
-        <div class="item-img-placeholder">🍽️</div>
+      <?php foreach($items as $item):
+        $imgUrl = getItemImage($item['id']);
+      ?>
+      <div class="menu-card" data-category="<?php echo (int)$item['category_id']; ?>"
+           onclick="openOrderModal(<?php echo (int)$item['id']; ?>,'<?php echo addslashes(htmlspecialchars($item['name'])); ?>',<?php echo (int)$item['price']; ?>,'<?php echo $imgUrl ? htmlspecialchars($imgUrl) : ''; ?>')">
+        <div class="item-img-wrap<?php echo $imgUrl ? '' : ' no-photo'; ?>">
+          <?php if ($imgUrl): ?>
+          <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" loading="lazy">
+          <?php endif; ?>
+        </div>
         <div class="item-info">
           <div class="item-name"><?php echo htmlspecialchars($item['name']); ?></div>
           <div class="item-price">¥<?php echo number_format($item['price']); ?></div>
@@ -191,6 +208,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
       <?php endforeach; ?>
     </div>
   </section>
+
   <aside class="cart-sidebar">
     <div class="cart-box">
       <div class="cart-header">Cart</div>
@@ -198,9 +216,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
         <?php if(empty($cartItems)): ?>
         <div class="cart-empty">No items yet</div>
         <?php else: ?>
-        <?php foreach($cartItems as $ci): ?>
+        <?php foreach($cartItems as $ci):
+          $ciImg = getItemImage($ci['itemId']);
+        ?>
         <div class="cart-item" id="cartItem_<?php echo (int)$ci['orderId']; ?>">
-          <div class="cart-item-emoji">🍽️</div>
+          <div class="cart-item-thumb">
+            <?php if($ciImg): ?>
+            <img src="<?php echo htmlspecialchars($ciImg); ?>" alt="">
+            <?php endif; ?>
+          </div>
           <div class="cart-item-info">
             <div class="cart-item-name"><?php echo htmlspecialchars($ci['name']); ?></div>
             <div class="cart-item-price">¥<?php echo number_format($ci['price']); ?> x <?php echo (int)$ci['amount']; ?></div>
@@ -221,12 +245,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
     </div>
   </aside>
 </div>
+
 <button class="float-cart" onclick="showCart()">Cart <span class="cart-count" id="floatCartCount" style="background:#fff;color:var(--mc-red,#e63946)"><?php echo $itemCount; ?></span></button>
+
+<!-- Order Modal -->
 <div class="modal-overlay" id="orderModal">
   <div class="modal-box">
     <div class="modal-header" id="modalTitle">Order</div>
     <div class="modal-body">
-      <div class="modal-item-img">🍽️</div>
+      <div class="modal-item-img" id="modalImgWrap"></div>
       <div class="modal-item-price" id="modalPrice">¥0</div>
       <div class="modal-qty-control">
         <button class="modal-qty-btn" onclick="changeModalQty(-1)">-</button>
@@ -241,6 +268,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
     </div>
   </div>
 </div>
+
+<!-- Cart Modal (mobile) -->
 <div class="cart-modal-overlay" id="cartModalOverlay" onclick="closeCartModal()">
   <div class="cart-modal" onclick="event.stopPropagation()">
     <div style="font-size:1.1rem;font-weight:700;margin-bottom:14px">Cart</div>
@@ -248,9 +277,13 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
       <?php if(empty($cartItems)): ?>
       <div class="cart-empty">No items yet</div>
       <?php else: ?>
-      <?php foreach($cartItems as $ci): ?>
+      <?php foreach($cartItems as $ci):
+        $ciImg = getItemImage($ci['itemId']);
+      ?>
       <div class="cart-item">
-        <div class="cart-item-emoji">🍽️</div>
+        <div class="cart-item-thumb">
+          <?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php endif; ?>
+        </div>
         <div class="cart-item-info">
           <div class="cart-item-name"><?php echo htmlspecialchars($ci['name']); ?></div>
           <div class="cart-item-price">¥<?php echo number_format($ci['price']); ?></div>
@@ -270,6 +303,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
     </div>
   </div>
 </div>
+
+<!-- Confirm Modal -->
 <div class="confirm-overlay" id="confirmModal">
   <div class="confirm-box">
     <div class="confirm-icon" id="confirmIcon">⚠️</div>
@@ -281,9 +316,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f8f9fa;color:#1a1a2e;min-
     </div>
   </div>
 </div>
+
 <script>
 const TABLE_NO = <?php echo (int)$tableNo; ?>;
-let selectedItemId=null,selectedItemName='',selectedItemPrice=0,modalQty=1,pendingAction=null;
+let selectedItemId=null,selectedItemName='',selectedItemPrice=0,selectedItemImg='',modalQty=1,pendingAction=null;
 
 function filterCategory(catId,btn){
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
@@ -294,12 +330,14 @@ function filterCategory(catId,btn){
   document.getElementById('sectionTitle').textContent=catId==='all'?'Menu':btn.textContent;
 }
 
-function openOrderModal(itemId,itemName,itemPrice){
-  selectedItemId=itemId;selectedItemName=itemName;selectedItemPrice=itemPrice;modalQty=1;
+function openOrderModal(itemId,itemName,itemPrice,imgUrl){
+  selectedItemId=itemId;selectedItemName=itemName;selectedItemPrice=itemPrice;selectedItemImg=imgUrl;modalQty=1;
   document.getElementById('modalTitle').textContent=itemName;
   document.getElementById('modalPrice').textContent='¥'+itemPrice.toLocaleString();
   document.getElementById('modalQty').textContent='1';
   document.getElementById('modalNotes').value='';
+  const imgWrap=document.getElementById('modalImgWrap');
+  imgWrap.innerHTML=imgUrl?'<img src="'+imgUrl+'" alt="'+itemName+'" style="width:100%;height:100%;object-fit:cover">':'';
   document.getElementById('orderModal').classList.add('show');
 }
 
@@ -314,8 +352,7 @@ function closeModal(id){document.getElementById(id).classList.remove('show')}
 async function executeOrder(){
   if(!selectedItemId)return;
   const notes=document.getElementById('modalNotes').value;
-  closeModal('orderModal');
-  showLoading(true);
+  closeModal('orderModal');showLoading(true);
   try{
     const fd=new FormData();
     fd.append('tableNo',TABLE_NO);fd.append('itemNo',selectedItemId);
@@ -330,25 +367,16 @@ async function executeOrder(){
 async function updateQuantity(orderId,delta){
   showLoading(true);
   try{
-    const fd=new FormData();
-    fd.append('orderId',orderId);fd.append('delta',delta);fd.append('tableNo',TABLE_NO);
+    const fd=new FormData();fd.append('orderId',orderId);fd.append('delta',delta);fd.append('tableNo',TABLE_NO);
     const res=await fetch('api/updateOrder.php',{method:'POST',body:fd});
     if(res.ok){
       const data=await res.json();
-      if(data.removed){document.getElementById('cartItem_'+orderId)?.remove();showToast('Item removed');}
+      if(data.removed){document.getElementById('cartItem_'+orderId)?.remove();showToast('Removed');}
       else{const el=document.getElementById('qty_'+orderId);if(el)el.textContent=data.newAmount;}
       await refreshCart();
     }
   }catch(e){showToast('Update failed','error');}
   finally{showLoading(false);}
-}
-
-function confirmRemoveItem(orderId,itemName){
-  document.getElementById('confirmIcon').textContent='🗑️';
-  document.getElementById('confirmTitle').textContent='Remove';
-  document.getElementById('confirmMessage').textContent='Remove '+itemName+'?';
-  pendingAction=()=>updateQuantity(orderId,-999);
-  document.getElementById('confirmModal').classList.add('show');
 }
 
 function confirmCheckout(){
@@ -374,10 +402,8 @@ async function executeCheckout(){
 
 async function refreshStatus(){
   showLoading(true);
-  try{
-    await fetch('api/getStatus.php?tableNo='+TABLE_NO);
-    showToast('Status updated','success');
-  }catch(e){showToast('Status check failed','error');}
+  try{await fetch('api/getStatus.php?tableNo='+TABLE_NO);showToast('Updated','success');}
+  catch(e){showToast('Failed','error');}
   finally{showLoading(false);}
 }
 
@@ -392,7 +418,7 @@ async function refreshCart(){
       document.querySelectorAll('#totalPrice').forEach(el=>{el.textContent='¥'+(data.total||0).toLocaleString();});
       const btn=document.getElementById('checkoutBtn');if(btn)btn.disabled=count===0;
     }
-  }catch(e){console.error('Cart refresh failed',e);}
+  }catch(e){console.error(e);}
 }
 
 function showCart(){document.getElementById('cartModalOverlay').classList.add('show');document.body.style.overflow='hidden';}
