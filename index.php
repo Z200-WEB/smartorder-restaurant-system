@@ -149,36 +149,36 @@ function getItemImage($itemId) {
     .spinner{width:40px;height:40px;border:4px solid #eee;border-top-color:#e63946;border-radius:50%;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     </style>
-</head>head>
+</head>
     <body>
 
-        <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div>div></div>div>
-        <div class="toast-container" id="toastContainer"></div>div>
+        <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+        <div class="toast-container" id="toastContainer"></div>
 
         <header class="app-header">
             <div class="header-inner">
                 <div>
-                    <div class="header-title">SmartOrder</div>div>
-                    <div class="header-table">Table <?php echo (int)$tableNo; ?></div>div>
-                </div>div>
+                    <div class="header-title">SmartOrder</div>
+                    <div class="header-table">Table <?php echo (int)$tableNo; ?></div>
+                </div>
                 <div style="display:flex;gap:8px">
-                    <button class="btn-header" onclick="showCart()">Cart <span class="cart-count" id="cartCountBadge"><?php echo $itemCount; ?></span></button>button>
-                </div>div>
-            </div>div>
-        </header>header>
+                    <button class="btn-header" onclick="showCart()">Cart <span class="cart-count" id="cartCountBadge"><?php echo $itemCount; ?></span></button>
+                </div>
+            </div>
+        </header>
 
         <nav class="category-nav">
             <div class="category-inner">
-                <button class="cat-btn active" onclick="filterCategory('all',this)">All</button>button>
+                <button class="cat-btn active" onclick="filterCategory('all',this)">All</button>
                 <?php foreach($categories as $cat): ?>
     <button class="cat-btn" onclick="filterCategory('<?php echo (int)$cat['id']; ?>',this)"><?php echo htmlspecialchars($cat['icon'].' '.$cat['categoryName']); ?></button>
                 <?php endforeach; ?>
-            </div>div>
-        </nav>nav>
+            </div>
+        </nav>
 
         <div class="app-layout">
             <section class="menu-section">
-                <h2 id="sectionTitle">Menu</h2>h2>
+                <h2 id="sectionTitle">Menu</h2>
                 <div class="menu-grid" id="menuGrid">
                     <?php foreach($items as $item):
         $imgUrl = getItemImage($item['id']);
@@ -188,119 +188,119 @@ function getItemImage($itemId) {
             <?php if ($imgUrl): ?>
         <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" loading="lazy">
             <?php else: ?>
-        <span class="placeholder-icon">🍽️</span>span>
+        <span class="placeholder-icon">🍽️</span>
             <?php endif; ?>
-        </div>div>
+        </div>
         <div class="item-info">
             <div class="item-name"><?php echo htmlspecialchars($item['name']); ?></div>
-            <div class="item-price">&yen;<?php echo number_format($item['price']); ?></div>div>
-        </div>div>
-        <button class="item-add-btn">+ Order</button>button>
-    </div>div>
+            <div class="item-price">&yen;<?php echo number_format($item['price']); ?></div>
+        </div>
+        <button class="item-add-btn">+ Order</button>
+    </div>
                     <?php endforeach; ?>
-                </div>div>
-            </section>section>
+                </div>
+            </section>
 
             <aside class="cart-sidebar">
                 <div class="cart-box">
-                    <div class="cart-header">Cart</div>div>
+                    <div class="cart-header">Cart</div>
                     <div class="cart-items" id="cartItemsDesktop">
                         <?php if(empty($cartItems)): ?>
-    <div class="cart-empty">No items yet</div>div>
+    <div class="cart-empty">No items yet</div>
                         <?php else: ?>
     <?php foreach($cartItems as $ci): $ciImg = getItemImage($ci['itemId']); ?>
     <div class="cart-item" id="cartItem_<?php echo (int)$ci['orderId']; ?>">
         <div class="cart-item-thumb">
             <?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?>🍽️<?php endif; ?>
-        </div>div>
+        </div>
         <div class="cart-item-info">
             <div class="cart-item-name"><?php echo htmlspecialchars($ci['name']); ?></div>
-            <div class="cart-item-price">&yen;<?php echo number_format($ci['price']); ?> x <?php echo (int)$ci['amount']; ?></div>div>
-        </div>div>
+            <div class="cart-item-price">&yen;<?php echo number_format($ci['price']); ?> x <?php echo (int)$ci['amount']; ?></div>
+        </div>
         <div class="cart-item-qty">
-            <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,-1)">-</button>button>
+            <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,-1)">-</button>
             <span class="qty-num" id="qty_<?php echo (int)$ci['orderId']; ?>"><?php echo (int)$ci['amount']; ?></span>
-            <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,1)">+</button>button>
-        </div>div>
-    </div>div>
+            <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,1)">+</button>
+        </div>
+    </div>
                         <?php endforeach; ?>
     <?php endif; ?>
-                    </div>div>
+                    </div>
                     <div class="cart-footer">
-                        <div class="cart-total"><span>Total</span>span><span class="cart-total-price" id="totalPrice">&yen;<?php echo number_format($currentTotal); ?></span>span></div>div>
-                        <button class="btn-checkout" id="checkoutBtn" <?php echo empty($cartItems)?'disabled':''; ?> onclick="confirmCheckout()">Confirm Order</button>button>
-                    </div>div>
-                </div>div>
-            </aside>aside>
-        </div>div>
+                        <div class="cart-total"><span>Total</span><span class="cart-total-price" id="totalPrice">&yen;<?php echo number_format($currentTotal); ?></span></div>
+                        <button class="btn-checkout" id="checkoutBtn" <?php echo empty($cartItems)?'disabled':''; ?> onclick="confirmCheckout()">Confirm Order</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
 
-        <button class="float-cart" onclick="showCart()">Cart <span class="cart-count" id="floatCartCount" style="background:#fff;color:#e63946"><?php echo $itemCount; ?></span></button>button>
+        <button class="float-cart" onclick="showCart()">Cart <span class="cart-count" id="floatCartCount" style="background:#fff;color:#e63946"><?php echo $itemCount; ?></span></button>
 
         <!-- Order Modal -->
         <div class="modal-overlay" id="orderModal">
             <div class="modal-box">
-                <div class="modal-header" id="modalTitle">Order</div>div>
+                <div class="modal-header" id="modalTitle">Order</div>
                 <div class="modal-body">
-                    <div class="modal-item-img" id="modalImgWrap"></div>div>
-                    <div class="modal-item-price" id="modalPrice">&yen;0</div>div>
+                    <div class="modal-item-img" id="modalImgWrap"></div>
+                    <div class="modal-item-price" id="modalPrice">&yen;0</div>
                     <div class="modal-qty-control">
-                        <button class="modal-qty-btn" onclick="changeModalQty(-1)">-</button>button>
-                        <span class="modal-qty-num" id="modalQty">1</span>span>
-                        <button class="modal-qty-btn" onclick="changeModalQty(1)">+</button>button>
-                    </div>div>
+                        <button class="modal-qty-btn" onclick="changeModalQty(-1)">-</button>
+                        <span class="modal-qty-num" id="modalQty">1</span>
+                        <button class="modal-qty-btn" onclick="changeModalQty(1)">+</button>
+                    </div>
                     <textarea class="modal-notes" id="modalNotes" placeholder="Special requests..." rows="2"></textarea>
-                </div>div>
+                </div>
                 <div class="modal-footer">
-                    <button class="btn-cancel" onclick="closeModal('orderModal')">Cancel</button>button>
-                    <button class="btn-order" onclick="executeOrder()">Add to Cart</button>button>
-                </div>div>
-            </div>div>
-        </div>div>
+                    <button class="btn-cancel" onclick="closeModal('orderModal')">Cancel</button>
+                    <button class="btn-order" onclick="executeOrder()">Add to Cart</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Cart Modal (mobile) -->
         <div class="cart-modal-overlay" id="cartModalOverlay" onclick="closeCartModal()">
             <div class="cart-modal" onclick="event.stopPropagation()">
-                <div style="font-size:1.1rem;font-weight:700;margin-bottom:14px">Cart</div>div>
+                <div style="font-size:1.1rem;font-weight:700;margin-bottom:14px">Cart</div>
                 <div id="cartItemsMobile">
                     <?php if(empty($cartItems)): ?>
-    <div class="cart-empty">No items yet</div>div>
+    <div class="cart-empty">No items yet</div>
                     <?php else: ?>
     <?php foreach($cartItems as $ci): $ciImg = getItemImage($ci['itemId']); ?>
     <div class="cart-item">
         <div class="cart-item-thumb">
             <?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?>🍽️<?php endif; ?>
-        </div>div>
+        </div>
         <div class="cart-item-info">
             <div class="cart-item-name"><?php echo htmlspecialchars($ci['name']); ?></div>
-            <div class="cart-item-price">&yen;<?php echo number_format($ci['price']); ?></div>div>
-        </div>div>
+            <div class="cart-item-price">&yen;<?php echo number_format($ci['price']); ?></div>
+        </div>
         <div class="cart-item-qty">
-            <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,-1)">-</button>button>
+            <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,-1)">-</button>
             <span class="qty-num"><?php echo (int)$ci['amount']; ?></span>
-            <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,1)">+</button>button>
-        </div>div>
-    </div>div>
+            <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,1)">+</button>
+        </div>
+    </div>
                     <?php endforeach; ?>
     <?php endif; ?>
 <div style="margin-top:14px;border-top:1px solid #eee;padding-top:12px">
-    <div class="cart-total"><span>Total</span>span><span class="cart-total-price">&yen;<?php echo number_format($currentTotal); ?></span>span></div>div>
-    <button class="btn-checkout" <?php echo empty($cartItems)?'disabled':''; ?> onclick="closeCartModal();confirmCheckout()">Confirm Order</button>button>
-</div>div>
-                </div>div>
-            </div>div>
+    <div class="cart-total"><span>Total</span><span class="cart-total-price">&yen;<?php echo number_format($currentTotal); ?></span></div>
+    <button class="btn-checkout" <?php echo empty($cartItems)?'disabled':''; ?> onclick="closeCartModal();confirmCheckout()">Confirm Order</button>
+</div>
+                </div>
+            </div>
 
             <!-- Confirm Modal -->
             <div class="confirm-overlay" id="confirmModal">
                 <div class="confirm-box">
-                    <div class="confirm-icon" id="confirmIcon">&#x26A0;&#xFE0F;</div>div>
-                    <div class="confirm-title" id="confirmTitle">Confirm</div>div>
-                    <div class="confirm-message" id="confirmMessage"></div>div>
+                    <div class="confirm-icon" id="confirmIcon">&#x26A0;&#xFE0F;</div>
+                    <div class="confirm-title" id="confirmTitle">Confirm</div>
+                    <div class="confirm-message" id="confirmMessage"></div>
                     <div class="confirm-buttons">
-                        <button class="btn-confirm-cancel" onclick="closeModal('confirmModal')">Cancel</button>button>
-                        <button class="btn-confirm-ok" onclick="confirmAction()">OK</button>button>
-                    </div>div>
-                </div>div>
-            </div>div>
+                        <button class="btn-confirm-cancel" onclick="closeModal('confirmModal')">Cancel</button>
+                        <button class="btn-confirm-ok" onclick="confirmAction()">OK</button>
+                    </div>
+                </div>
+            </div>
 
             <script>
                 const TABLE_NO = <?php echo (int)$tableNo; ?>;
@@ -397,7 +397,5 @@ function getItemImage($itemId) {
                 document.getElementById('confirmModal').addEventListener('click',function(e){if(e.target===this)closeModal('confirmModal');});
             </script>
         </div>body>
-    </body>html>
+    </body>
             </script>
-</style></title>
-</head>
