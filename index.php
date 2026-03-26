@@ -250,45 +250,29 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
   </div>
 </div>
 <!-- Live2D Widget - cute animated mascot (Japanese messages) -->
-<!-- Available models (switch with the arrows button on the character):
-     Model 1: Epsilon2.1 (default witch girl)  Model 2: Gantzert_Felixander
-     Model 3: Haru (school girl)                Model 4: Haruto (boy)
-     Model 5: hibiki                            Model 6: hijiki (bunny)
-     Model 7: izumi (idol)                      Model 8: koharu (child)
-     Model 9: Miku (Hatsune Miku style)         Model 10: ni-j
-     Model 11: nico                             Model 12: nipsilon
-     Model 13: nietzsche                        Model 14: shizuku (maid)
+<!-- Available models you can switch to using the arrows button on the character:
+  Epsilon2.1 (witch), Gantzert_Felixander, haru (school girl), haruto (boy),
+  hibiki, hijiki (bunny), izumi (idol), koharu, miku, ni-j, nico, nipsilon, nietzsche, shizuku (maid)
 -->
 <script>
+// Patch initWidget to inject our Japanese waifuPath before the autoload runs
 (function(){
-  const live2d_path = 'https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.0-rc.6/dist/';
-  function loadRes(url,type){
-    return new Promise((res,rej)=>{
-      let t;
-      if(type==='css'){t=document.createElement('link');t.rel='stylesheet';t.href=url;}
-      else{t=document.createElement('script');t.src=url;}
-      t.onload=()=>res(url);t.onerror=()=>rej(url);
-      document.head.appendChild(t);
-    });
-  }
-  Promise.all([
-    loadRes(live2d_path+'waifu.css','css'),
-    loadRes('https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.0-rc.6/dist/waifu-tips.js','js')
-  ]).then(()=>{
-    if(typeof initWidget === 'function'){
-      initWidget({
-        waifuPath: '/waifu-tips.json',
-        cdnPath: 'https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/',
-        cubism2Path: live2d_path+'live2d.min.js',
-        cubism5Path: 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js',
-        tools: ['hitokoto','asteroids','switch-model','switch-texture','photo','info','quit'],
-        logLevel: 'warn',
-        drag: false,
-      });
+  const _orig = window.initWidget;
+  Object.defineProperty(window, 'initWidget', {
+    configurable: true,
+    set(fn){
+      window._initWidgetFn = fn;
+    },
+    get(){
+      return function(opts){
+        opts.waifuPath = '/waifu-tips.json';
+        return window._initWidgetFn(opts);
+      };
     }
   });
 })();
 </script>
+<script src="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.0/dist/autoload.js"></script>
 <div class="call-staff-overlay" id="callStaffOverlay">
   <div class="call-staff-box">
     <span class="call-staff-emoji">🔔</span>
