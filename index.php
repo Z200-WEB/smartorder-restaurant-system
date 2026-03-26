@@ -249,29 +249,8 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
     <div class="celebrate-sub" id="celebrateSub">Great choice!</div>
   </div>
 </div>
-<!-- Live2D Widget - cute animated mascot (Japanese messages) -->
-<!-- Available models you can switch to using the arrows button on the character:
-  Epsilon2.1 (witch), Gantzert_Felixander, haru (school girl), haruto (boy),
-  hibiki, hijiki (bunny), izumi (idol), koharu, miku, ni-j, nico, nipsilon, nietzsche, shizuku (maid)
--->
-<script>
-// Patch initWidget to inject our Japanese waifuPath before the autoload runs
-(function(){
-  const _orig = window.initWidget;
-  Object.defineProperty(window, 'initWidget', {
-    configurable: true,
-    set(fn){
-      window._initWidgetFn = fn;
-    },
-    get(){
-      return function(opts){
-        opts.waifuPath = '/waifu-tips.json';
-        return window._initWidgetFn(opts);
-      };
-    }
-  });
-})();
-</script>
+<!-- Live2D Widget - Japanese mascot -->
+<script type="module" src="/live2d-autoload.js"></script>
 <script src="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.0/dist/autoload.js"></script>
 <div class="call-staff-overlay" id="callStaffOverlay">
   <div class="call-staff-box">
