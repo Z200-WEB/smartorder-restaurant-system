@@ -263,6 +263,30 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/live2d-widgets@0.9.1/autoload.js"></script>
+<script>
+// Show Japanese welcome message after mascot loads
+(function() {
+  var welcomeMsgs = [
+    'いらっしゃいませ！今日は何を召し上がりますか？🍽️',
+    'こんにちは！当店へようこそ！ご注文はお決まりですか？',
+    'いらっしゃいませ！おすすめメニューはいかがですか？😊',
+    '本日のメニューをぜひご覧ください！お好みのお料理はありますか？',
+  ];
+  function tryShowWelcome(attempts) {
+    var el = document.getElementById('waifu-tips');
+    if (el && el.style !== undefined) {
+      var msg = welcomeMsgs[Math.floor(Math.random() * welcomeMsgs.length)];
+      el.innerHTML = msg;
+      el.style.opacity = '1';
+      el.style.display = 'block';
+      setTimeout(function() { el.style.opacity = '0'; }, 8000);
+    } else if (attempts > 0) {
+      setTimeout(function() { tryShowWelcome(attempts - 1); }, 500);
+    }
+  }
+  setTimeout(function() { tryShowWelcome(10); }, 3000);
+})();
+</script>
 <div class="call-staff-overlay" id="callStaffOverlay">
   <div class="call-staff-box">
     <span class="call-staff-emoji">🔔</span>
