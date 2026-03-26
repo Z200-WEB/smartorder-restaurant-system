@@ -234,15 +234,8 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .loading-overlay.show{display:flex}
 .spinner{width:42px;height:42px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .75s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.mascot-wrap{position:fixed;bottom:90px;left:24px;z-index:500;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
-@media(max-width:900px){.mascot-wrap{bottom:100px}}
-.mascot-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#134e4a,#0f766e);border:3px solid #fff;box-shadow:var(--shadow-md);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:2rem;transition:transform .2s ease;animation:mascotFloat 3s ease-in-out infinite}
-.mascot-avatar:hover{transform:scale(1.1) !important}
-@keyframes mascotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.mascot-bubble{background:#fff;border-radius:16px 16px 16px 4px;padding:10px 14px;box-shadow:var(--shadow-md);font-size:.82rem;max-width:200px;line-height:1.45;color:var(--text);border:2px solid var(--border);animation:bubblePop .3s cubic-bezier(.17,.67,.35,1.3);position:relative}
-.mascot-bubble::after{content:'';position:absolute;bottom:-8px;left:16px;border:4px solid transparent;border-top-color:#fff;border-bottom:none}
-@keyframes bubblePop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
-.mascot-bubble.hidden{display:none}
+#waifu-tips{position:absolute;top:-80px;left:50%;transform:translateX(-50%);background:#fff;border:2px solid var(--border);border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:.82rem;max-width:220px;line-height:1.45;color:var(--text);box-shadow:var(--shadow-md);white-space:normal;pointer-events:none;text-align:center;animation:bubblePop .3s ease;z-index:10000}
+#waifu-tips::after{content:'';position:absolute;bottom:-8px;left:20px;border:4px solid transparent;border-top-color:#fff}
 </style>
 </head>
 <body>
@@ -256,10 +249,8 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
     <div class="celebrate-sub" id="celebrateSub">Great choice!</div>
   </div>
 </div>
-<div class="mascot-wrap" id="mascotWrap">
-  <div class="mascot-bubble" id="mascotBubble">👋 Hi! I'm Mochi~ Tap me for tips!</div>
-  <div class="mascot-avatar" id="mascotAvatar" onclick="mascotClick()">🐼</div>
-</div>
+<!-- Live2D Widget - cute animated mascot character -->
+<script src="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.0/dist/autoload.js"></script>
 <div class="call-staff-overlay" id="callStaffOverlay">
   <div class="call-staff-box">
     <span class="call-staff-emoji">🔔</span>
@@ -455,41 +446,21 @@ const ALL_ITEMS = <?php
   echo json_encode($jsItems,JSON_UNESCAPED_UNICODE);
 ?>;
 
-/* ── MASCOT ── */
-const MASCOT_MSGS=[
-  "👋 Hi! I'm Mochi~ Need help ordering?",
-  "🍣 Try our sushi! Fresh every day!",
-  "🔔 Need water or plates? Tap 'Call Staff'!",
-  "⭐ Items marked [おすすめ] are staff picks!",
-  "🛒 Don't forget to confirm your order!",
-  "🍺 Thirsty? Check the drinks section!",
-  "😊 Enjoying your meal? Let us know!",
-  "🎉 Thanks for dining with us today!",
-  "💡 Tap a dish to customize your order!",
-];
-let mascotIdx=0,mascotTimer=null;
-function mascotClick(){mascotIdx=(mascotIdx+1)%MASCOT_MSGS.length;showMascotBubble(MASCOT_MSGS[mascotIdx]);}
-function showMascotBubble(msg){
-  const b=document.getElementById('mascotBubble');
-  b.textContent=msg;b.classList.remove('hidden');
-  clearTimeout(mascotTimer);
-  mascotTimer=setTimeout(()=>b.classList.add('hidden'),5000);
-}
+/* ── MASCOT (Live2D widget auto-initialises via CDN) ── */
+// Override Live2D widget tips to react to our app events
 function mascotReact(type){
-  const m={
-    add:["🎉 Great pick!","😋 Yummy choice!","👍 Added!","✨ Excellent taste!"],
-    checkout:["🥳 Order placed! Enjoy!","🎊 Sit back and relax!"],
-    search:["🔍 Let me help you find it!","👀 Looking..."],
-    staff:["🔔 Help is on the way!","👨‍🍳 Staff notified!"]
+  const msgs={
+    add:["🎉 Great pick!","😋 Yummy choice!","👍 Added! Keep going~","✨ Excellent taste!"],
+    checkout:["🥳 Order placed! Enjoy your meal!","🎊 Sit back and relax~"],
+    search:["🔍 Let me help you find it!","👀 Looking for something?"],
+    staff:["🔔 Help is on the way!","👨‍🍳 Staff has been notified!"]
   };
-  const arr=m[type]||m.add;
-  showMascotBubble(arr[Math.floor(Math.random()*arr.length)]);
+  const arr=msgs[type]||msgs.add;
+  const msg=arr[Math.floor(Math.random()*arr.length)];
+  // Try to use Live2D widget tip system if available, fallback to toast
+  if(window.showMessage) showMessage(msg, 3000, 8);
+  else showToast('🐱 '+msg,'success');
 }
-setTimeout(()=>{
-  document.getElementById('mascotBubble').classList.add('hidden');
-  setInterval(()=>{mascotIdx=(mascotIdx+1)%MASCOT_MSGS.length;showMascotBubble(MASCOT_MSGS[mascotIdx]);},12000);
-},5000);
-
 /* ── SEARCH ── */
 function handleSearch(val){
   const q=val.trim().toLowerCase();
