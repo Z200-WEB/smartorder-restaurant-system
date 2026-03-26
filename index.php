@@ -250,7 +250,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
   </div>
 </div>
 <!-- Live2D Widget - Japanese mascot -->
-<script type="module" src="/live2d-autoload.js"></script>
+<script src="/live2d-autoload.js"></script>
 <div class="call-staff-overlay" id="callStaffOverlay">
   <div class="call-staff-box">
     <span class="call-staff-emoji">🔔</span>
