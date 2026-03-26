@@ -236,6 +236,11 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 @keyframes spin{to{transform:rotate(360deg)}}
 #waifu-tips{position:absolute;top:-80px;left:50%;transform:translateX(-50%);background:#fff;border:2px solid var(--border);border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:.82rem;max-width:220px;line-height:1.45;color:var(--text);box-shadow:var(--shadow-md);white-space:normal;pointer-events:none;text-align:center;animation:bubblePop .3s ease;z-index:10000}
 #waifu-tips::after{content:'';position:absolute;bottom:-8px;left:20px;border:4px solid transparent;border-top-color:#fff}
+/* Hide unwanted Live2D toolbar buttons - keep only quit */
+#waifu-tool-switch-model,#waifu-tool-switch-texture,#waifu-tool-asteroids,#waifu-tool-hitokoto,#waifu-tool-photo,#waifu-tool-info{display:none!important}
+/* Custom mascot size */
+#waifu{bottom:0!important;left:10px!important}
+
 </style>
 </head>
 <body>
@@ -264,6 +269,9 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 </script>
 <script src="https://cdn.jsdelivr.net/npm/live2d-widgets@0.9.1/autoload.js"></script>
 <script>
+function speakJP(text){try{if(!window.speechSynthesis)return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=1.0;u.pitch=1.2;const voices=window.speechSynthesis.getVoices();const v=voices.find(x=>x.name.includes('Haruka'))||voices.find(x=>x.name.includes('Sayaka'))||voices.find(x=>x.name.includes('Nanami'))||voices.find(x=>x.lang==='ja-JP');if(v)u.voice=v;window.speechSynthesis.speak(u);}catch(e){}}
+</script>
+<script>
 // Show Japanese welcome message after mascot loads
 (function() {
   var welcomeMsgs = [
@@ -276,7 +284,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
     var el = document.getElementById('waifu-tips');
     if (el && el.style !== undefined) {
       var msg = welcomeMsgs[Math.floor(Math.random() * welcomeMsgs.length)];
-      el.innerHTML = msg;
+      el.innerHTML = msg; speakJP(msg.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}]/gu,'').trim());
       el.style.opacity = '1';
       el.style.display = 'block';
       setTimeout(function() { el.style.opacity = '0'; }, 8000);
@@ -290,36 +298,36 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 <div class="call-staff-overlay" id="callStaffOverlay">
   <div class="call-staff-box">
     <span class="call-staff-emoji">🔔</span>
-    <div class="call-staff-title">Call Staff</div>
-    <div class="call-staff-msg">What do you need? We'll send someone right away!</div>
+    <div class="call-staff-title">スタッフを呼ぶ</div>
+    <div class="call-staff-msg">何が必要ですか？すぐにスタッフが参ります！</div>
     <div class="call-staff-options">
-      <button class="call-option-btn" onclick="selectCallOption(this,'Water')"><span class="call-option-icon">💧</span>Water</button>
-      <button class="call-option-btn" onclick="selectCallOption(this,'Plates')"><span class="call-option-icon">🍽️</span>Plates</button>
-      <button class="call-option-btn" onclick="selectCallOption(this,'Napkins')"><span class="call-option-icon">🧻</span>Napkins</button>
-      <button class="call-option-btn" onclick="selectCallOption(this,'Assistance')"><span class="call-option-icon">❓</span>Assistance</button>
+      <button class="call-option-btn" onclick="selectCallOption(this,'お水')"><span class="call-option-icon">💧</span>お水</button>
+      <button class="call-option-btn" onclick="selectCallOption(this,'お皿')"><span class="call-option-icon">🍽️</span>お皿</button>
+      <button class="call-option-btn" onclick="selectCallOption(this,'おしぼり')"><span class="call-option-icon">🧻</span>おしぼり</button>
+      <button class="call-option-btn" onclick="selectCallOption(this,'お手伝い')"><span class="call-option-icon">❓</span>お手伝い</button>
     </div>
-    <button class="btn-call-confirm" onclick="sendCallRequest()">🔔 Call Staff Now</button>
-    <button class="btn-call-close" onclick="closeCallStaff()">Cancel</button>
+    <button class="btn-call-confirm" onclick="sendCallRequest()">🔔 スタッフを呼ぶ</button>
+    <button class="btn-call-close" onclick="closeCallStaff()">キャンセル</button>
   </div>
 </div>
 <div class="combo-overlay" id="comboOverlay">
   <div class="combo-box">
     <div class="combo-header">
-      <div class="combo-header-title">🍱 Complete Your Meal!</div>
-      <div class="combo-header-sub">Pair it with something delicious</div>
+      <div class="combo-header-title">🍱 セットメニューはいかが？</div>
+      <div class="combo-header-sub">一緒に注文してお得にしよう！</div>
     </div>
     <div class="combo-body">
       <div class="combo-added-item">
         <div class="combo-added-img" id="comboAddedImg"><span style="font-size:1.5rem">🍽️</span></div>
         <div><div class="combo-added-name" id="comboAddedName">Item</div><div class="combo-added-price" id="comboAddedPrice">¥0</div></div>
       </div>
-      <div class="combo-arrow">✨ How about adding...</div>
-      <div class="combo-suggestion-label">Recommended Pairings</div>
+      <div class="combo-arrow">✨ こちらも一緒にどうぞ...</div>
+      <div class="combo-suggestion-label">おすすめの組み合わせ</div>
       <div class="combo-suggestions" id="comboSuggestions"></div>
     </div>
     <div class="combo-footer">
-      <button class="btn-combo-skip" onclick="skipCombo()">No thanks</button>
-      <button class="btn-combo-add" id="btnComboAdd" onclick="addComboItem()" disabled>＋ Add to Order</button>
+      <button class="btn-combo-skip" onclick="skipCombo()">いいえ、結構です</button>
+      <button class="btn-combo-add" id="btnComboAdd" onclick="addComboItem()" disabled>＋ 注文に追加</button>
     </div>
   </div>
 </div>
@@ -330,21 +338,21 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
       <div><div class="header-title">SmartOrder</div><div class="header-table">Table <?php echo (int)$tableNo; ?></div></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
-      <button onclick="openCallStaff()" style="padding:8px 14px;font-size:.78rem;border-radius:999px;background:rgba(245,158,11,.85);border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:5px;transition:background .2s">🔔 Staff</button>
-      <button class="btn-cart-header" onclick="showCart()">🛒 Cart <span class="cart-badge" id="cartCountBadge"><?php echo $itemCount; ?></span></button>
+      <button onclick="openCallStaff()" style="padding:8px 14px;font-size:.78rem;border-radius:999px;background:rgba(245,158,11,.85);border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:5px;transition:background .2s">🔔 スタッフ</button>
+      <button class="btn-cart-header" onclick="showCart()">🛒 カート <span class="cart-badge" id="cartCountBadge"><?php echo $itemCount; ?></span></button>
     </div>
   </div>
 </header>
 <div class="search-bar-wrap">
   <div class="search-bar-inner">
     <span class="search-icon">🔍</span>
-    <input type="text" class="search-input" id="searchInput" placeholder="Search menu... (e.g. sushi, beer, dessert)" oninput="handleSearch(this.value)">
+    <input type="text" class="search-input" id="searchInput" placeholder="メニューを検索... (例：寿司、ビール、デザート)" oninput="handleSearch(this.value)">
     <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
   </div>
 </div>
 <nav class="category-nav">
   <div class="category-inner">
-    <button class="cat-btn active" onclick="filterCategory('all',this)">All</button>
+    <button class="cat-btn active" onclick="filterCategory('all',this)">すべて</button>
     <?php foreach($categories as $cat): ?>
     <button class="cat-btn" onclick="filterCategory('<?php echo (int)$cat['id']; ?>',this)"><?php echo htmlspecialchars($cat['icon'].' '.$cat['categoryName']); ?></button>
     <?php endforeach; ?>
@@ -352,15 +360,15 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 </nav>
 <div class="app-layout">
   <section class="menu-section">
-    <div class="menu-section-title" id="sectionTitle">All Menu</div>
+    <div class="menu-section-title" id="sectionTitle">全メニュー</div>
     <div class="menu-grid" id="menuGrid">
       <?php foreach($items as $item):
         $imgUrl = getItemImage($item['id']);
         $iname  = $item['name'];
         $badge=''; $badgeClass='';
-        if(strpos($iname,'おすすめ')!==false){$badge='⭐ Recommended';$badgeClass='badge-recommended';}
-        elseif(strpos($iname,'期間限定')!==false){$badge='⏳ Limited';$badgeClass='badge-limited';}
-        elseif($item['price']==0){$badge='🎁 Free';$badgeClass='badge-free';}
+        if(strpos($iname,'おすすめ')!==false){$badge='⭐ おすすめ';$badgeClass='badge-recommended';}
+        elseif(strpos($iname,'期間限定')!==false){$badge='⏳ 期間限定';$badgeClass='badge-limited';}
+        elseif($item['price']==0){$badge='🎁 無料';$badgeClass='badge-free';}
       ?>
       <div class="menu-card" data-category="<?php echo (int)$item['category']; ?>" data-name="<?php echo htmlspecialchars(mb_strtolower($iname,'UTF-8')); ?>"
            onclick="openOrderModal(<?php echo (int)$item['id']; ?>,'<?php echo addslashes(htmlspecialchars($iname)); ?>',<?php echo (int)$item['price']; ?>,'<?php echo $imgUrl?htmlspecialchars($imgUrl):''; ?>')">
@@ -373,18 +381,18 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
           <div class="item-name"><?php echo htmlspecialchars($iname); ?></div>
           <div class="item-price">¥<?php echo number_format($item['price']); ?></div>
         </div>
-        <button class="item-add-btn">＋ Add to Cart</button>
+        <button class="item-add-btn">＋ カートに追加</button>
       </div>
       <?php endforeach; ?>
     </div>
-    <div class="search-no-results" id="searchNoResults"><div style="font-size:3rem;margin-bottom:12px">🔍</div><div>No items found.<br><small>Try a different keyword!</small></div></div>
+    <div class="search-no-results" id="searchNoResults"><div style="font-size:3rem;margin-bottom:12px">🔍</div><div>見つかりませんでした。<br><small>別のキーワードで試してみてください！</small></div></div>
   </section>
   <aside class="cart-sidebar">
     <div class="cart-box">
-      <div class="cart-header-bar">🛒 Your Cart</div>
+      <div class="cart-header-bar">🛒 カート</div>
       <div class="cart-items" id="cartItemsDesktop">
         <?php if(empty($cartItems)): ?>
-        <div class="cart-empty"><div class="cart-empty-icon">🛒</div>No items yet<br><small>Tap a menu item to start ordering</small></div>
+        <div class="cart-empty"><div class="cart-empty-icon">🛒</div>まだ何も入っていません<br><small>メニューをタップして注文しましょう！</small></div>
         <?php else: foreach($cartItems as $ci): $ciImg=getItemImage($ci['itemId']); ?>
         <div class="cart-item" id="cartItem_<?php echo (int)$ci['orderId']; ?>">
           <div class="cart-item-thumb"><?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?>🍽️<?php endif; ?></div>
@@ -401,14 +409,14 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
         <?php endforeach; endif; ?>
       </div>
       <div class="cart-footer">
-        <div class="cart-total"><span>Total</span><span class="cart-total-price" id="totalPrice">¥<?php echo number_format($currentTotal); ?></span></div>
-        <button class="btn-checkout" id="checkoutBtn" <?php echo empty($cartItems)?'disabled':''; ?> onclick="confirmCheckout()">✓ Confirm Order</button>
-        <button class="btn-call-staff" onclick="openCallStaff()">🔔 Call Staff</button>
+        <div class="cart-total"><span>合計</span><span class="cart-total-price" id="totalPrice">¥<?php echo number_format($currentTotal); ?></span></div>
+        <button class="btn-checkout" id="checkoutBtn" <?php echo empty($cartItems)?'disabled':''; ?> onclick="confirmCheckout()">✓ 注文を確定する</button>
+        <button class="btn-call-staff" onclick="openCallStaff()">🔔 スタッフを呼ぶ</button>
       </div>
     </div>
   </aside>
 </div>
-<button class="float-cart" onclick="showCart()">🛒 Cart <span class="cart-badge" id="floatCartCount"><?php echo $itemCount; ?></span></button>
+<button class="float-cart" onclick="showCart()">🛒 カート <span class="cart-badge" id="floatCartCount"><?php echo $itemCount; ?></span></button>
 <div class="modal-overlay" id="orderModal">
   <div class="modal-box">
     <div class="modal-header-bar" id="modalTitle">Order Item</div>
@@ -420,20 +428,20 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
         <span class="modal-qty-num" id="modalQty">1</span>
         <button class="modal-qty-btn" onclick="changeModalQty(1)">＋</button>
       </div>
-      <textarea class="modal-notes" id="modalNotes" placeholder="Special requests, allergies..." rows="2"></textarea>
+      <textarea class="modal-notes" id="modalNotes" placeholder="特別なリクエスト、アレルギーなど..." rows="2"></textarea>
     </div>
     <div class="modal-footer-row">
-      <button class="btn-cancel-modal" onclick="closeModal('orderModal')">Cancel</button>
-      <button class="btn-order-modal" onclick="executeOrder()">Add to Cart</button>
+      <button class="btn-cancel-modal" onclick="closeModal('orderModal')">キャンセル</button>
+      <button class="btn-order-modal" onclick="executeOrder()">カートに追加</button>
     </div>
   </div>
 </div>
 <div class="cart-modal-overlay" id="cartModalOverlay" onclick="closeCartModal()">
   <div class="cart-modal" onclick="event.stopPropagation()">
-    <div class="cart-modal-title">🛒 Your Cart</div>
+    <div class="cart-modal-title">🛒 ショッピングカート</div>
     <div id="cartItemsMobile">
       <?php if(empty($cartItems)): ?>
-      <div class="cart-empty"><div class="cart-empty-icon">🛒</div>No items yet</div>
+      <div class="cart-empty"><div class="cart-empty-icon">🛒</div>まだ何も入っていません</div>
       <?php else: foreach($cartItems as $ci): $ciImg=getItemImage($ci['itemId']); ?>
       <div class="cart-item">
         <div class="cart-item-thumb"><?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?>🍽️<?php endif; ?></div>
@@ -450,8 +458,8 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
       <?php endforeach; endif; ?>
       <div style="margin-top:16px;border-top:2px solid var(--border);padding-top:14px">
         <div class="cart-total"><span>Total</span><span class="cart-total-price">¥<?php echo number_format($currentTotal); ?></span></div>
-        <button class="btn-checkout" <?php echo empty($cartItems)?'disabled':''; ?> onclick="closeCartModal();confirmCheckout()">✓ Confirm Order</button>
-        <button class="btn-call-staff" onclick="closeCartModal();openCallStaff()">🔔 Call Staff</button>
+        <button class="btn-checkout" <?php echo empty($cartItems)?'disabled':''; ?> onclick="closeCartModal();confirmCheckout()">✓ 注文を確定する</button>
+        <button class="btn-call-staff" onclick="closeCartModal();openCallStaff()">🔔 スタッフを呼ぶ</button>
       </div>
     </div>
   </div>
@@ -462,8 +470,8 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
     <div class="confirm-title" id="confirmTitle">Confirm</div>
     <div class="confirm-message" id="confirmMessage"></div>
     <div class="confirm-buttons">
-      <button class="btn-confirm-cancel" onclick="closeModal('confirmModal')">Cancel</button>
-      <button class="btn-confirm-ok" onclick="confirmAction()">OK</button>
+      <button class="btn-confirm-cancel" onclick="closeModal('confirmModal')">キャンセル</button>
+      <button class="btn-confirm-ok" onclick="confirmAction()">確認</button>
     </div>
   </div>
 </div>
@@ -486,16 +494,11 @@ const ALL_ITEMS = <?php
 // Override Live2D widget tips to react to our app events
 function mascotReact(type){
   const msgs={
-    add:["🎉 Great pick!","😋 Yummy choice!","👍 Added! Keep going~","✨ Excellent taste!"],
-    checkout:["🥳 Order placed! Enjoy your meal!","🎊 Sit back and relax~"],
-    search:["🔍 Let me help you find it!","👀 Looking for something?"],
-    staff:["🔔 Help is on the way!","👨‍🍳 Staff has been notified!"]
-  };
-  const arr=msgs[type]||msgs.add;
-  const msg=arr[Math.floor(Math.random()*arr.length)];
+    add:["美味しそう！いい選択ですね！","やったー！そのメニュー大好き！","追加しました！他にも見てみて！","センスがいい！おすすめです！","このメニュー、すごく人気ですよ！"], checkout:["ご注文ありがとうございます！お食事をお楽しみください！","ゆっくりくつろいでてね！","ご注文確定！美味しい時間をどうぞ！"], search:["何をお探しですか？","お気に入りを探してみてね！","メニューを検索中"], staff:["スタッフがすぐに参ります！","お知らせしました！少々お待ちください！","スタッフを呼びました！"] }; const arr=msgs[type]||msgs.add;
+  const msg=arr[Math.floor(Math.random()*arr.length)]; speakJP(msg.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}]/gu,'').trim());
   // Try to use Live2D widget tip system if available, fallback to toast
   if(window.showMessage) showMessage(msg, 3000, 8);
-  else showToast('🐱 '+msg,'success');
+  else showToast('🌸 '+msg,'success');
 }
 /* ── SEARCH ── */
 function handleSearch(val){
@@ -526,7 +529,7 @@ function selectCallOption(btn,label){
 function sendCallRequest(){
   const req=selectedCallOption||'Assistance';
   closeCallStaff();
-  showToast('🔔 Staff notified: '+req+' — Table '+TABLE_NO,'success');
+  showToast('🔔 スタッフ通知：' + req + ' — テーブル' + TABLE_NO, 'success');
   mascotReact('staff');
 }
 
@@ -575,7 +578,7 @@ async function addComboItem(){
     const fd=new FormData();fd.append('tableNo',TABLE_NO);fd.append('itemId',selectedComboId);fd.append('amount',1);
     const res=await fetch('logic.php',{method:'POST',body:fd});
     if(res.ok){showLoading(false);showCelebration(selectedComboName,true);setTimeout(()=>location.reload(),1200);}
-  }catch(e){showToast('Failed to add combo item','error');}
+  }catch(e){showToast('コンボアイテムの追加に失敗しました。','error');}
   finally{showLoading(false);}
 }
 function skipCombo(){
@@ -592,8 +595,8 @@ function showCelebration(name,isCombo){
   const cel=document.getElementById('orderCelebrate');
   const mascots=['🐼','🍣','🎉','🌟','🥳','👨‍🍳','🍱'];
   document.getElementById('celebrateMascot').textContent=mascots[Math.floor(Math.random()*mascots.length)];
-  document.getElementById('celebrateText').textContent=isCombo?'Combo added! 🎊':name+' added! 🎉';
-  document.getElementById('celebrateSub').textContent=isCombo?'Great combo!':['Delicious!','Excellent pick!','Nice choice!','Enjoy!'][Math.floor(Math.random()*4)];
+  document.getElementById('celebrateText').textContent=isCombo?'コンボ追加！🎊':name+' を追加しました！🎉';
+  document.getElementById('celebrateSub').textContent=isCombo?'最高の組み合わせ！':['美味しそう！','いい選択！','ナイスチョイス！','楽しんでね！'][Math.floor(Math.random()*4)];
   cel.classList.add('show');
   launchConfetti();mascotReact('add');
   setTimeout(()=>cel.classList.remove('show'),1800);
@@ -614,7 +617,7 @@ function filterCategory(catId,btn){
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');clearSearch();
   document.querySelectorAll('.menu-card').forEach(card=>{card.style.display=(catId==='all'||card.dataset.category===catId)?'':'none';});
-  document.getElementById('sectionTitle').textContent=catId==='all'?'All Menu':btn.textContent+' Menu';
+  document.getElementById('sectionTitle').textContent=catId==='all'?'全メニュー':btn.textContent+' メニュー';
 }
 function openOrderModal(itemId,itemName,itemPrice,imgUrl){
   selectedItemId=itemId;selectedItemName=itemName;selectedItemPrice=itemPrice;selectedItemImg=imgUrl;modalQty=1;
@@ -646,7 +649,7 @@ async function executeOrder(){
       if(sugg.length>0){showCombo(addedItem,sugg);}
       else{showCelebration(selectedItemName,false);setTimeout(()=>location.reload(),1200);}
     }else throw new Error('failed');
-  }catch(e){showToast('Order failed. Please try again.','error');showLoading(false);}
+  }catch(e){showToast('注文に失敗しました。もう一度お試しください。','error');showLoading(false);}
 }
 async function updateQuantity(orderId,delta){
   showLoading(true);
@@ -654,13 +657,13 @@ async function updateQuantity(orderId,delta){
     const fd=new FormData();fd.append('orderId',orderId);fd.append('change',delta);
     const res=await fetch('cart_update.php',{method:'POST',body:fd});
     if(res.ok)setTimeout(()=>location.reload(),300);
-  }catch(e){showToast('Update failed','error');}
+  }catch(e){showToast('更新に失敗しました。','error');}
   finally{showLoading(false);}
 }
 function confirmCheckout(){
   document.getElementById('confirmIcon').textContent='✅';
-  document.getElementById('confirmTitle').textContent='Confirm Order';
-  document.getElementById('confirmMessage').textContent='Ready to place your order?';
+  document.getElementById('confirmTitle').textContent='ご注文の確認';
+  document.getElementById('confirmMessage').textContent='ご注文を確定しますか？';
   pendingAction=executeCheckout;
   document.getElementById('confirmModal').classList.add('show');
 }
@@ -670,9 +673,9 @@ async function executeCheckout(){
   try{
     const fd=new FormData();fd.append('tableNo',TABLE_NO);
     const res=await fetch('checkout.php',{method:'POST',body:fd});
-    if(res.ok){mascotReact('checkout');launchConfetti();showToast('Order placed successfully! 🎉','success');setTimeout(()=>location.reload(),900);}
+    if(res.ok){mascotReact('checkout');launchConfetti();showToast('ご注文ありがとうございます！🎉','success');setTimeout(()=>location.reload(),900);}
     else throw new Error('failed');
-  }catch(e){showToast('Checkout failed. Please try again.','error');}
+  }catch(e){showToast('会計に失敗しました。もう一度お試しください。','error');}
   finally{showLoading(false);}
 }
 function showCart(){document.getElementById('cartModalOverlay').classList.add('show');document.body.style.overflow='hidden';}
