@@ -269,22 +269,48 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 </script>
 <script src="https://cdn.jsdelivr.net/npm/live2d-widgets@0.9.1/autoload.js"></script>
 <script>
-function speakJP(text){try{if(!window.speechSynthesis)return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=1.0;u.pitch=1.2;const voices=window.speechSynthesis.getVoices();const v=voices.find(x=>x.name.includes('Haruka'))||voices.find(x=>x.name.includes('Sayaka'))||voices.find(x=>x.name.includes('Nanami'))||voices.find(x=>x.lang==='ja-JP');if(v)u.voice=v;window.speechSynthesis.speak(u);}catch(e){}}
+// Block widget's own showMessage to prevent unexpected greetings
+window.showMessage = function(){};
+</script>
+<script>
+function speakVoicevox(text){
+  try{
+    const clean=text.replace(/[！？。、～♪♡🎉🎊😊😋👍✨🍽️🥳🔍👀🔎🔔👨‍🍳🙋🌸]/gu,'').trim();
+    if(!clean)return;
+    const url='https://api.tts.quest/v3/voicevox/synthesis?text='+encodeURIComponent(clean)+'&speaker=20';
+    fetch(url).then(r=>r.json()).then(d=>{
+      if(!d||!d.mp3DownloadUrl)return;
+      function tryPlay(attempts){
+        fetch(d.audioStatusUrl).then(r=>r.json()).then(s=>{
+          if(s.isAudioReady){
+            if(window._mascotAudio){window._mascotAudio.pause();}
+            const a=new Audio(d.mp3DownloadUrl);
+            window._mascotAudio=a;
+            a.play().catch(()=>{});
+          } else if(attempts>0){
+            setTimeout(()=>tryPlay(attempts-1),600);
+          }
+        }).catch(()=>{});
+      }
+      setTimeout(()=>tryPlay(8),400);
+    }).catch(()=>{});
+  }catch(e){}
+}
 </script>
 <script>
 // Show Japanese welcome message after mascot loads
 (function() {
   var welcomeMsgs = [
-    'いらっしゃいませ！今日は何を召し上がりますか？🍽️',
-    'こんにちは！当店へようこそ！ご注文はお決まりですか？',
-    'いらっしゃいませ！おすすめメニューはいかがですか？😊',
-    '本日のメニューをぜひご覧ください！お好みのお料理はありますか？',
+    'いらっしゃい！今日は何食べる？',
+    'きた！好きなメニュー選んでね',
+    'お腹すいた？一緒に選ぼ！',
+    'いらっしゃ～い！何にしようかな',
   ];
   function tryShowWelcome(attempts) {
     var el = document.getElementById('waifu-tips');
     if (el && el.style !== undefined) {
       var msg = welcomeMsgs[Math.floor(Math.random() * welcomeMsgs.length)];
-      el.innerHTML = msg; speakJP(msg.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}]/gu,'').trim());
+      el.innerHTML = msg; speakVoicevox(msg);
       el.style.opacity = '1';
       el.style.display = 'block';
       setTimeout(function() { el.style.opacity = '0'; }, 8000);
@@ -494,11 +520,10 @@ const ALL_ITEMS = <?php
 // Override Live2D widget tips to react to our app events
 function mascotReact(type){
   const msgs={
-    add:["美味しそう！いい選択ですね！","やったー！そのメニュー大好き！","追加しました！他にも見てみて！","センスがいい！おすすめです！","このメニュー、すごく人気ですよ！"], checkout:["ご注文ありがとうございます！お食事をお楽しみください！","ゆっくりくつろいでてね！","ご注文確定！美味しい時間をどうぞ！"], search:["何をお探しですか？","お気に入りを探してみてね！","メニューを検索中"], staff:["スタッフがすぐに参ります！","お知らせしました！少々お待ちください！","スタッフを呼びました！"] }; const arr=msgs[type]||msgs.add;
-  const msg=arr[Math.floor(Math.random()*arr.length)]; speakJP(msg.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}]/gu,'').trim());
+    add:["わあ、おいしそう！","それ好き！","いい選択～！","人気メニューだよ！","ナイスチョイス！"], checkout:["ありがとう！ゆっくり楽しんでね♪","注文してくれてありがとう！","おいしいといいね！"], search:["なに探してるの？","見つかった？","おすすめあるよ～！"], staff:["すぐ来るよ！","ちょっと待っててね！","呼んだよ！"] }; const arr=msgs[type]||msgs.add;
+  const msg=arr[Math.floor(Math.random()*arr.length)]; speakVoicevox(msg);
   // Try to use Live2D widget tip system if available, fallback to toast
-  if(window.showMessage) showMessage(msg, 3000, 8);
-  else showToast('🌸 '+msg,'success');
+  showToast('🌸 '+msg,'success');
 }
 /* ── SEARCH ── */
 function handleSearch(val){
@@ -529,7 +554,7 @@ function selectCallOption(btn,label){
 function sendCallRequest(){
   const req=selectedCallOption||'Assistance';
   closeCallStaff();
-  showToast('🔔 スタッフ通知：' + req + ' — テーブル' + TABLE_NO, 'success');
+  showToast('🔔 ' + req + ' 呼んだよ！', 'success');
   mascotReact('staff');
 }
 
@@ -578,7 +603,7 @@ async function addComboItem(){
     const fd=new FormData();fd.append('tableNo',TABLE_NO);fd.append('itemId',selectedComboId);fd.append('amount',1);
     const res=await fetch('logic.php',{method:'POST',body:fd});
     if(res.ok){showLoading(false);showCelebration(selectedComboName,true);setTimeout(()=>location.reload(),1200);}
-  }catch(e){showToast('コンボアイテムの追加に失敗しました。','error');}
+  }catch(e){showToast('追加できなかった…ごめんね','error');}
   finally{showLoading(false);}
 }
 function skipCombo(){
@@ -595,8 +620,8 @@ function showCelebration(name,isCombo){
   const cel=document.getElementById('orderCelebrate');
   const mascots=['🐼','🍣','🎉','🌟','🥳','👨‍🍳','🍱'];
   document.getElementById('celebrateMascot').textContent=mascots[Math.floor(Math.random()*mascots.length)];
-  document.getElementById('celebrateText').textContent=isCombo?'コンボ追加！🎊':name+' を追加しました！🎉';
-  document.getElementById('celebrateSub').textContent=isCombo?'最高の組み合わせ！':['美味しそう！','いい選択！','ナイスチョイス！','楽しんでね！'][Math.floor(Math.random()*4)];
+  document.getElementById('celebrateText').textContent=isCombo?'いいね！🎊':name+'、追加したよ！🎉';
+  document.getElementById('celebrateSub').textContent=isCombo?'最高の組み合わせ♪':['おいしそ～！','いいじゃん！','やったね！','楽しみ！'][Math.floor(Math.random()*4)];
   cel.classList.add('show');
   launchConfetti();mascotReact('add');
   setTimeout(()=>cel.classList.remove('show'),1800);
@@ -649,7 +674,7 @@ async function executeOrder(){
       if(sugg.length>0){showCombo(addedItem,sugg);}
       else{showCelebration(selectedItemName,false);setTimeout(()=>location.reload(),1200);}
     }else throw new Error('failed');
-  }catch(e){showToast('注文に失敗しました。もう一度お試しください。','error');showLoading(false);}
+  }catch(e){showToast('うまくいかなかった…もう一回試してみて','error');showLoading(false);}
 }
 async function updateQuantity(orderId,delta){
   showLoading(true);
@@ -657,7 +682,7 @@ async function updateQuantity(orderId,delta){
     const fd=new FormData();fd.append('orderId',orderId);fd.append('change',delta);
     const res=await fetch('cart_update.php',{method:'POST',body:fd});
     if(res.ok)setTimeout(()=>location.reload(),300);
-  }catch(e){showToast('更新に失敗しました。','error');}
+  }catch(e){showToast('更新できなかった…','error');}
   finally{showLoading(false);}
 }
 function confirmCheckout(){
@@ -673,9 +698,9 @@ async function executeCheckout(){
   try{
     const fd=new FormData();fd.append('tableNo',TABLE_NO);
     const res=await fetch('checkout.php',{method:'POST',body:fd});
-    if(res.ok){mascotReact('checkout');launchConfetti();showToast('ご注文ありがとうございます！🎉','success');setTimeout(()=>location.reload(),900);}
+    if(res.ok){mascotReact('checkout');launchConfetti();showToast('注文したよ！ゆっくり待ってね🎉','success');setTimeout(()=>location.reload(),900);}
     else throw new Error('failed');
-  }catch(e){showToast('会計に失敗しました。もう一度お試しください。','error');}
+  }catch(e){showToast('会計がうまくいかなかった…もう一回試して','error');}
   finally{showLoading(false);}
 }
 function showCart(){document.getElementById('cartModalOverlay').classList.add('show');document.body.style.overflow='hidden';}
