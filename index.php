@@ -262,7 +262,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
   };
 })();
 </script>
-<script src="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.0/dist/autoload.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/live2d-widgets@0.9.1/autoload.js"></script>
 <div class="call-staff-overlay" id="callStaffOverlay">
   <div class="call-staff-box">
     <span class="call-staff-emoji">🔔</span>
