@@ -249,8 +249,20 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
     <div class="celebrate-sub" id="celebrateSub">Great choice!</div>
   </div>
 </div>
-<!-- Live2D Widget - Japanese mascot -->
-<script src="/live2d-autoload.js"></script>
+<!-- Live2D Widget - Japanese mascot with fetch interceptor -->
+<script>
+// Intercept fetch to serve Japanese tips instead of CDN default
+(function() {
+  const origFetch = window.fetch;
+  window.fetch = function(url, opts) {
+    if (typeof url === 'string' && url.includes('waifu-tips.json')) {
+      return origFetch('/waifu-tips.json', opts);
+    }
+    return origFetch(url, opts);
+  };
+})();
+</script>
+<script src="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.0/dist/autoload.js"></script>
 <div class="call-staff-overlay" id="callStaffOverlay">
   <div class="call-staff-box">
     <span class="call-staff-emoji">🔔</span>
