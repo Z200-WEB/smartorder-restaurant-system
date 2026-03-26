@@ -4,19 +4,19 @@ require_once 'pdo.php';
 
 $tableNo = isset($_GET['tableNo']) ? (int)$_GET['tableNo'] : 1;
 
-// カテゴリ取得
+// ã«ãã´ãªåå¾
 $sqlCategory = "SELECT * FROM sCategory WHERE state = 1 ORDER BY sort_order ASC, id ASC";
 $stmtCategory = $pdo->prepare($sqlCategory);
 $stmtCategory->execute();
 $categories = $stmtCategory->fetchAll(PDO::FETCH_ASSOC);
 
-// 商品取得
+// åååå¾
 $sqlItem = "SELECT * FROM sItem WHERE state = 1 ORDER BY sort_order ASC, id ASC";
 $stmtItem = $pdo->prepare($sqlItem);
 $stmtItem->execute();
 $items = $stmtItem->fetchAll(PDO::FETCH_ASSOC);
 
-// 現在の注文内容取得（カート）
+// ç¾å¨ã®æ³¨æåå®¹åå¾ï¼ã«ã¼ãï¼
 $sqlCart = "
   SELECT o.id as orderId, o.itemNo, o.amount, o.item_notes,
            i.id as itemId, i.name, i.price, (i.price * o.amount) as subtotal
@@ -188,7 +188,7 @@ function getItemImage($itemId) {
             <?php if ($imgUrl): ?>
         <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" loading="lazy">
             <?php else: ?>
-        <span class="placeholder-icon">🍽️</span>
+        <span class="placeholder-icon">ð½ï¸</span>
             <?php endif; ?>
         </div>
         <div class="item-info">
@@ -211,7 +211,7 @@ function getItemImage($itemId) {
     <?php foreach($cartItems as $ci): $ciImg = getItemImage($ci['itemId']); ?>
     <div class="cart-item" id="cartItem_<?php echo (int)$ci['orderId']; ?>">
         <div class="cart-item-thumb">
-            <?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?>🍽️<?php endif; ?>
+            <?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?>ð½ï¸<?php endif; ?>
         </div>
         <div class="cart-item-info">
             <div class="cart-item-name"><?php echo htmlspecialchars($ci['name']); ?></div>
@@ -268,7 +268,7 @@ function getItemImage($itemId) {
     <?php foreach($cartItems as $ci): $ciImg = getItemImage($ci['itemId']); ?>
     <div class="cart-item">
         <div class="cart-item-thumb">
-            <?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?>🍽️<?php endif; ?>
+            <?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?>ð½ï¸<?php endif; ?>
         </div>
         <div class="cart-item-info">
             <div class="cart-item-name"><?php echo htmlspecialchars($ci['name']); ?></div>
@@ -289,7 +289,8 @@ function getItemImage($itemId) {
                 </div>
             </div>
 
-            <!-- Confirm Modal -->
+            </div>
+        <!-- Confirm Modal -->
             <div class="confirm-overlay" id="confirmModal">
                 <div class="confirm-box">
                     <div class="confirm-icon" id="confirmIcon">&#x26A0;&#xFE0F;</div>
@@ -325,7 +326,7 @@ function getItemImage($itemId) {
                         if(imgUrl){
                                     imgWrap.innerHTML='<img src="'+imgUrl+'" alt="'+itemName+'" style="width:100%;height:100%;object-fit:cover">';
                         } else {
-                                    imgWrap.innerHTML='<span style="font-size:3rem;color:#ddd">🍽️</span>';
+                                    imgWrap.innerHTML='<span style="font-size:3rem;color:#ddd">ð½ï¸</span>';
                         }
                         document.getElementById('orderModal').classList.add('show');
                 }
