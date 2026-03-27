@@ -236,12 +236,151 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 @keyframes spin{to{transform:rotate(360deg)}}
 #waifu-tips{position:absolute;top:-80px;left:50%;transform:translateX(-50%);background:#fff;border:2px solid var(--border);border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:.82rem;max-width:220px;line-height:1.45;color:var(--text);box-shadow:var(--shadow-md);white-space:normal;pointer-events:none;text-align:center;animation:bubblePop .3s ease;z-index:10000}
 #waifu-tips::after{content:'';position:absolute;bottom:-8px;left:20px;border:4px solid transparent;border-top-color:#fff}
-/* Hide unwanted Live2D toolbar buttons - keep only quit */
+/* Hide unwanted Live2D toolbar buttons */
 #waifu-tool-switch-model,#waifu-tool-switch-texture,#waifu-tool-asteroids,#waifu-tool-hitokoto,#waifu-tool-photo,#waifu-tool-info{display:none!important}
-/* Custom mascot size */
-#waifu{bottom:0!important;left:10px!important}
 
-</style>
+/* ── MASCOT RESPONSIVE ── */
+#waifu{bottom:0!important;left:10px!important;transition:width .3s,height .3s!important}
+/* Desktop: normal 300px */
+@media(min-width:901px){
+  #waifu{width:280px!important;height:280px!important}
+  #waifu canvas{width:280px!important;height:280px!important}
+}
+/* Tablet (iPad): smaller */
+@media(min-width:481px) and (max-width:900px){
+  #waifu{width:180px!important;height:180px!important;left:6px!important}
+  #waifu canvas{width:180px!important;height:180px!important}
+  #waifu-tips{font-size:.75rem!important;max-width:160px!important;top:-70px!important}
+}
+/* Phone: small, corner only */
+@media(max-width:480px){
+  #waifu{width:120px!important;height:120px!important;left:4px!important}
+  #waifu canvas{width:120px!important;height:120px!important}
+  #waifu-tips{font-size:.7rem!important;max-width:150px!important;top:-60px!important;padding:7px 10px!important}
+}
+
+
+/* ═══════════════════════════════════════
+   RESPONSIVE - Phone, Tablet, Desktop
+═══════════════════════════════════════ */
+
+/* ── TABLET (iPad 481-900px) ── */
+@media(min-width:481px) and (max-width:900px){
+  /* Header */
+  .app-header{padding:10px 14px}
+  .header-title{font-size:1rem}
+  .btn-cart-header{padding:7px 12px;font-size:.78rem}
+
+  /* Search */
+  .search-bar-wrap{padding:8px 14px;top:56px}
+  .search-bar-inner{top:100px}
+
+  /* Category nav */
+  .category-nav{top:100px}
+  .cat-btn{padding:6px 14px;font-size:.78rem}
+
+  /* Menu grid - 3 columns on tablet */
+  .app-layout{padding:16px 14px;gap:16px}
+  .menu-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .menu-section-title{font-size:.88rem;margin-bottom:12px}
+
+  /* Cards */
+  .item-name{font-size:.82rem}
+  .item-price{font-size:.88rem}
+  .item-add-btn{font-size:.78rem;padding:7px}
+
+  /* Float cart always visible on tablet */
+  .float-cart{display:flex!important;bottom:16px;right:16px;padding:12px 18px;font-size:.85rem}
+}
+
+/* ── PHONE (≤480px) ── */
+@media(max-width:480px){
+  /* Header - compact */
+  .app-header{padding:8px 12px}
+  .header-inner{gap:8px}
+  .header-logo{width:30px;height:30px;font-size:1rem}
+  .header-title{font-size:.95rem}
+  .header-table{font-size:.7rem}
+  .btn-cart-header{padding:6px 10px;font-size:.75rem;gap:5px}
+  .cart-badge{width:18px;height:18px;font-size:.65rem}
+
+  /* Staff button in header */
+  .app-header button[onclick="openCallStaff()"]{padding:6px 10px;font-size:.72rem}
+
+  /* Search */
+  .search-bar-wrap{padding:7px 12px;top:54px}
+  .search-input{font-size:.82rem;padding:8px 14px 8px 36px}
+  .search-icon{font-size:.88rem;left:11px}
+
+  /* Category nav */
+  .category-nav{top:98px}
+  .category-inner{padding:7px 12px;gap:5px}
+  .cat-btn{padding:5px 11px;font-size:.74rem}
+
+  /* Layout - single column, no sidebar */
+  .app-layout{padding:12px 10px;gap:0}
+
+  /* Menu grid - 2 columns on phone */
+  .menu-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .menu-section-title{font-size:.82rem;margin-bottom:10px}
+
+  /* Cards - compact */
+  .menu-card{border-radius:12px}
+  .item-img-wrap{aspect-ratio:1}
+  .item-info{padding:8px}
+  .item-name{font-size:.78rem;margin-bottom:3px}
+  .item-price{font-size:.85rem}
+  .item-add-btn{font-size:.75rem;padding:7px}
+  .item-badge{font-size:.62rem;padding:2px 7px;top:6px;left:6px}
+
+  /* Float cart - always show on phone */
+  .float-cart{display:flex!important;bottom:16px;right:12px;padding:10px 16px;font-size:.82rem;gap:6px}
+
+  /* Modals - full width on phone */
+  .modal-overlay{padding:10px}
+  .modal-box{max-width:100%;border-radius:16px}
+  .modal-body-inner{padding:14px}
+  .modal-footer-row{padding:10px 14px;gap:8px}
+
+  /* Combo overlay */
+  .combo-overlay{padding:10px}
+  .combo-box{max-width:100%;border-radius:16px}
+  .combo-header{padding:13px 16px}
+  .combo-body{padding:13px}
+  .combo-footer{padding:11px 14px}
+
+  /* Confirm dialog */
+  .confirm-box{padding:20px 16px;max-width:95%}
+
+  /* Call staff */
+  .call-staff-box{padding:20px 16px;max-width:95%}
+  .call-staff-options{gap:8px}
+  .call-option-btn{padding:10px 8px;font-size:.8rem}
+
+  /* Toast */
+  .toast-container{top:70px;right:10px;left:10px}
+  .toast{min-width:unset;font-size:.8rem;padding:9px 14px}
+
+  /* Celebrate card */
+  .celebrate-card{padding:20px 18px;max-width:92%}
+  .celebrate-mascot{font-size:2.8rem}
+  .celebrate-text{font-size:.95rem}
+
+  /* Cart modal */
+  .cart-modal{padding:16px;border-radius:20px 20px 0 0}
+  .cart-modal-title{font-size:.95rem;margin-bottom:12px}
+  .cart-item{padding:8px;gap:8px}
+  .cart-item-thumb{width:38px;height:38px}
+  .cart-item-name{font-size:.78rem}
+  .cart-item-price{font-size:.72rem}
+  .qty-btn{width:24px;height:24px;font-size:.82rem}
+  .qty-num{font-size:.8rem;min-width:18px}
+}
+
+/* ── LARGE PHONE landscape / small tablet (481-600px) ── */
+@media(min-width:481px) and (max-width:600px){
+  .menu-grid{grid-template-columns:repeat(2,1fr)!important}
+}</style>
 </head>
 <body>
 <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
@@ -788,6 +927,30 @@ function buildMobileFooter(total, count){
     +'<button class="btn-call-staff" onclick="closeCartModal();openCallStaff()">🔔 スタッフを呼ぶ</button>'
     +'</div>';
 }
+
+/* ── MASCOT RESPONSIVE RESIZE ── */
+function resizeMascot(){
+  const waifu = document.getElementById('waifu');
+  if(!waifu) return;
+  const w = window.innerWidth;
+  let size;
+  if(w <= 480) size = 120;
+  else if(w <= 900) size = 180;
+  else size = 280;
+  waifu.style.setProperty('width', size+'px', 'important');
+  waifu.style.setProperty('height', size+'px', 'important');
+  const canvas = waifu.querySelector('canvas');
+  if(canvas){
+    canvas.style.setProperty('width', size+'px', 'important');
+    canvas.style.setProperty('height', size+'px', 'important');
+  }
+}
+// Apply on load and resize
+window.addEventListener('resize', resizeMascot);
+// Apply after widget loads (it takes a moment)
+setTimeout(resizeMascot, 1000);
+setTimeout(resizeMascot, 2500);
+setTimeout(resizeMascot, 4000);
 
 document.getElementById('orderModal').addEventListener('click',function(e){if(e.target===this)closeModal('orderModal');});
 document.getElementById('confirmModal').addEventListener('click',function(e){if(e.target===this)closeModal('confirmModal');});
