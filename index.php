@@ -301,10 +301,10 @@ function speakVoicevox(text){
 // Show Japanese welcome message after mascot loads
 (function() {
   var welcomeMsgs = [
-    'いらっしゃい！今日は何食べる？',
-    'きた！好きなメニュー選んでね',
-    'お腹すいた？一緒に選ぼ！',
-    'いらっしゃ～い！何にしようかな',
+    'いらっしゃいませ！今日は何になさいますか？',
+    'いらっしゃいませ！ごゆっくりお選びください♪',
+    'いらっしゃいませ！本日もご来店ありがとうございます！',
+    'いらっしゃいませ！お好みのメニューはございますか？',
   ];
   function tryShowWelcome(attempts) {
     var el = document.getElementById('waifu-tips');
@@ -520,7 +520,7 @@ const ALL_ITEMS = <?php
 // Override Live2D widget tips to react to our app events
 function mascotReact(type){
   const msgs={
-    add:["わあ、おいしそう！","それ好き！","いい選択～！","人気メニューだよ！","ナイスチョイス！"], checkout:["ありがとう！ゆっくり楽しんでね♪","注文してくれてありがとう！","おいしいといいね！"], search:["なに探してるの？","見つかった？","おすすめあるよ～！"], staff:["すぐ来るよ！","ちょっと待っててね！","呼んだよ！"] }; const arr=msgs[type]||msgs.add;
+    add:["ご選択ありがとうございます！","こちら人気メニューでございます！","素晴らしいお選びですね！","ぜひお楽しみください！","おすすめでございます！"], checkout:["ご注文ありがとうございます！ごゆっくりどうぞ♪","ありがとうございます！すぐにお持ちします！","ご注文確かに承りました！"], search:["何かお探しでしょうか？","お好みのものは見つかりましたか？","他にもおすすめがございます！"], staff:["スタッフがすぐに参ります！","少々お待ちください！","ただいまお呼びしております！"] }; const arr=msgs[type]||msgs.add;
   const msg=arr[Math.floor(Math.random()*arr.length)]; speakVoicevox(msg);
   // Try to use Live2D widget tip system if available, fallback to toast
   showToast('🌸 '+msg,'success');
@@ -554,7 +554,7 @@ function selectCallOption(btn,label){
 function sendCallRequest(){
   const req=selectedCallOption||'Assistance';
   closeCallStaff();
-  showToast('🔔 ' + req + ' 呼んだよ！', 'success');
+  showToast('🔔 ' + req + ' のご依頼を承りました！', 'success');
   mascotReact('staff');
 }
 
@@ -602,8 +602,8 @@ async function addComboItem(){
   try{
     const fd=new FormData();fd.append('tableNo',TABLE_NO);fd.append('itemId',selectedComboId);fd.append('amount',1);
     const res=await fetch('logic.php',{method:'POST',body:fd});
-    if(res.ok){showLoading(false);showCelebration(selectedComboName,true);setTimeout(()=>location.reload(),1200);}
-  }catch(e){showToast('追加できなかった…ごめんね','error');}
+    if(res.ok){showLoading(false);showCelebration(selectedComboName,true);refreshCart();}
+  }catch(e){showToast('申し訳ございません。追加できませんでした。','error');}
   finally{showLoading(false);}
 }
 function skipCombo(){
@@ -611,7 +611,7 @@ function skipCombo(){
   if(_pendingOrderAfterCombo){
     showCelebration(_pendingOrderAfterCombo.name,false);
     _pendingOrderAfterCombo=null;
-    setTimeout(()=>location.reload(),1200);
+    refreshCart();
   }
 }
 
@@ -620,8 +620,8 @@ function showCelebration(name,isCombo){
   const cel=document.getElementById('orderCelebrate');
   const mascots=['🐼','🍣','🎉','🌟','🥳','👨‍🍳','🍱'];
   document.getElementById('celebrateMascot').textContent=mascots[Math.floor(Math.random()*mascots.length)];
-  document.getElementById('celebrateText').textContent=isCombo?'いいね！🎊':name+'、追加したよ！🎉';
-  document.getElementById('celebrateSub').textContent=isCombo?'最高の組み合わせ♪':['おいしそ～！','いいじゃん！','やったね！','楽しみ！'][Math.floor(Math.random()*4)];
+  document.getElementById('celebrateText').textContent=isCombo?'セット追加完了！🎊':name+'を追加しました！🎉';
+  document.getElementById('celebrateSub').textContent=isCombo?'素敵な組み合わせですね♪':['美味しそうでございます！','素晴らしいお選びです！','ありがとうございます！','ぜひお楽しみください！'][Math.floor(Math.random()*4)];
   cel.classList.add('show');
   launchConfetti();mascotReact('add');
   setTimeout(()=>cel.classList.remove('show'),1800);
@@ -672,17 +672,17 @@ async function executeOrder(){
       const sugg=getSuggestions(addedItem);
       _pendingOrderAfterCombo={name:selectedItemName,img:selectedItemImg};
       if(sugg.length>0){showCombo(addedItem,sugg);}
-      else{showCelebration(selectedItemName,false);setTimeout(()=>location.reload(),1200);}
+      else{showCelebration(selectedItemName,false);refreshCart();}
     }else throw new Error('failed');
-  }catch(e){showToast('うまくいかなかった…もう一回試してみて','error');showLoading(false);}
+  }catch(e){showToast('申し訳ございません。もう一度お試しください。','error');showLoading(false);}
 }
 async function updateQuantity(orderId,delta){
   showLoading(true);
   try{
     const fd=new FormData();fd.append('orderId',orderId);fd.append('change',delta);
     const res=await fetch('cart_update.php',{method:'POST',body:fd});
-    if(res.ok)setTimeout(()=>location.reload(),300);
-  }catch(e){showToast('更新できなかった…','error');}
+    if(res.ok)refreshCart();
+  }catch(e){showToast('申し訳ございません。更新できませんでした。','error');}
   finally{showLoading(false);}
 }
 function confirmCheckout(){
@@ -698,9 +698,9 @@ async function executeCheckout(){
   try{
     const fd=new FormData();fd.append('tableNo',TABLE_NO);
     const res=await fetch('checkout.php',{method:'POST',body:fd});
-    if(res.ok){mascotReact('checkout');launchConfetti();showToast('注文したよ！ゆっくり待ってね🎉','success');setTimeout(()=>location.reload(),900);}
+    if(res.ok){mascotReact('checkout');launchConfetti();showToast('ご注文ありがとうございます！少々お待ちください🎉','success');refreshCart();}
     else throw new Error('failed');
-  }catch(e){showToast('会計がうまくいかなかった…もう一回試して','error');}
+  }catch(e){showToast('申し訳ございません。もう一度お試しください。','error');}
   finally{showLoading(false);}
 }
 function showCart(){document.getElementById('cartModalOverlay').classList.add('show');document.body.style.overflow='hidden';}
@@ -710,6 +710,85 @@ function showToast(msg,type=''){
   const c=document.getElementById('toastContainer');const t=document.createElement('div');
   t.className='toast'+(type?' '+type:'');t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),3200);
 }
+/* ── AJAX CART REFRESH (no page reload) ── */
+async function refreshCart(){
+  try{
+    const res = await fetch('cart_get.php?tableNo='+TABLE_NO);
+    if(!res.ok) return;
+    const data = await res.json();
+    
+    // Update cart count badges
+    const count = data.itemCount || 0;
+    document.querySelectorAll('#cartCountBadge,#floatCartCount').forEach(el=>el.textContent=count);
+    
+    // Update total price
+    const totalEl = document.getElementById('totalPrice');
+    if(totalEl) totalEl.textContent = '¥' + (data.total||0).toLocaleString();
+    
+    // Update checkout button state
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if(checkoutBtn) checkoutBtn.disabled = count === 0;
+    
+    // Rebuild desktop cart items
+    const cartDesktop = document.getElementById('cartItemsDesktop');
+    const cartMobile = document.getElementById('cartItemsMobile');
+    if(cartDesktop) cartDesktop.innerHTML = buildCartHTML(data.items, false);
+    if(cartMobile) {
+      const mobileContent = document.getElementById('cartItemsMobile');
+      if(mobileContent){
+        // Keep the footer buttons, only update items
+        const items = data.items || [];
+        let html = items.length === 0 
+          ? '<div class="cart-empty"><div class="cart-empty-icon">🛒</div>まだ何も入っていません</div>'
+          : items.map(ci => buildCartItemHTML(ci)).join('');
+        // Replace only the items part (before the footer div)
+        const existing = mobileContent.innerHTML;
+        const footerIdx = existing.indexOf('<div style="margin-top');
+        const footer = footerIdx >= 0 ? existing.substring(footerIdx) : '';
+        mobileContent.innerHTML = html + (footer || buildMobileFooter(data.total, count));
+      }
+    }
+    
+    // Update mobile cart footer total
+    const mobileTotals = document.querySelectorAll('.cart-modal .cart-total-price');
+    mobileTotals.forEach(el => el.textContent = '¥' + (data.total||0).toLocaleString());
+    const mobileCheckout = document.querySelector('.cart-modal .btn-checkout');
+    if(mobileCheckout) mobileCheckout.disabled = count === 0;
+    
+  }catch(e){ console.warn('refreshCart error:', e); }
+}
+
+function buildCartItemHTML(ci){
+  const img = ci.img ? '<img src="'+ci.img+'" alt="" style="width:100%;height:100%;object-fit:cover">' : '🍽️';
+  return '<div class="cart-item" id="cartItem_'+ci.orderId+'">'
+    +'<div class="cart-item-thumb">'+img+'</div>'
+    +'<div class="cart-item-info">'
+    +'<div class="cart-item-name">'+ci.name+'</div>'
+    +'<div class="cart-item-price">¥'+Number(ci.price).toLocaleString()+' × '+ci.amount+'</div>'
+    +'</div>'
+    +'<div class="cart-item-qty">'
+    +'<button class="qty-btn" onclick="event.stopPropagation();updateQuantity('+ci.orderId+',-1)">−</button>'
+    +'<span class="qty-num" id="qty_'+ci.orderId+'">'+ci.amount+'</span>'
+    +'<button class="qty-btn" onclick="event.stopPropagation();updateQuantity('+ci.orderId+',1)">＋</button>'
+    +'</div></div>';
+}
+
+function buildCartHTML(items, isMobile){
+  if(!items || items.length === 0){
+    return '<div class="cart-empty"><div class="cart-empty-icon">🛒</div>まだ何も入っていません<br><small>メニューをタップして注文しましょう！</small></div>';
+  }
+  return items.map(ci => buildCartItemHTML(ci)).join('');
+}
+
+function buildMobileFooter(total, count){
+  return '<div style="margin-top:16px;border-top:2px solid var(--border);padding-top:14px">'
+    +'<div class="cart-total"><span>合計</span><span class="cart-total-price">¥'+(total||0).toLocaleString()+'</span></div>'
+    +'<button class="btn-checkout" '+(count===0?'disabled':'')
+    +' onclick="closeCartModal();confirmCheckout()">✓ 注文を確定する</button>'
+    +'<button class="btn-call-staff" onclick="closeCartModal();openCallStaff()">🔔 スタッフを呼ぶ</button>'
+    +'</div>';
+}
+
 document.getElementById('orderModal').addEventListener('click',function(e){if(e.target===this)closeModal('orderModal');});
 document.getElementById('confirmModal').addEventListener('click',function(e){if(e.target===this)closeModal('confirmModal');});
 document.getElementById('callStaffOverlay').addEventListener('click',function(e){if(e.target===this)closeCallStaff();});
