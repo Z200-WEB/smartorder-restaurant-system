@@ -380,7 +380,45 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 /* ── LARGE PHONE landscape / small tablet (481-600px) ── */
 @media(min-width:481px) and (max-width:600px){
   .menu-grid{grid-template-columns:repeat(2,1fr)!important}
-}</style>
+}
+/* ── FAVORITES ── */
+.fav-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.85);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;z-index:3;transition:all .2s;backdrop-filter:blur(2px);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.fav-btn:hover{transform:scale(1.15)}
+.fav-btn.active{background:rgba(255,80,80,.12)}
+.fav-btn.pop{animation:favPop .3s cubic-bezier(.17,.67,.35,1.5)}
+@keyframes favPop{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
+
+/* ── STAMP CARD ── */
+.stamp-card-bar{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#fff9e6,#fff3cc);border:2px solid #f59e0b;border-radius:999px;padding:6px 16px;display:flex;align-items:center;gap:8px;z-index:150;box-shadow:0 4px 16px rgba(245,158,11,.3);font-size:.82rem;font-weight:700;color:#b45309;transition:all .3s;white-space:nowrap}
+.stamp-dots{display:flex;gap:4px;align-items:center}
+.stamp-dot{width:18px;height:18px;border-radius:50%;border:2px solid #f59e0b;background:#fff;transition:all .3s;font-size:.7rem;display:flex;align-items:center;justify-content:center}
+.stamp-dot.filled{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:#d97706;color:#fff}
+.stamp-dot.new{animation:stampPop .4s cubic-bezier(.17,.67,.35,1.5)}
+@keyframes stampPop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+.stamp-reward-overlay{display:none;position:fixed;inset:0;z-index:4000;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(6px)}
+.stamp-reward-overlay.show{display:flex}
+.stamp-reward-box{background:linear-gradient(135deg,#fff9e6,#fffbeb);border-radius:24px;padding:32px 28px;text-align:center;max-width:320px;width:90%;box-shadow:0 20px 60px rgba(245,158,11,.4);border:3px solid #f59e0b;animation:celebPop .4s cubic-bezier(.17,.67,.35,1.3)}
+.stamp-reward-emoji{font-size:4rem;display:block;margin-bottom:8px;animation:bounce 1s ease infinite}
+.stamp-reward-title{font-size:1.25rem;font-weight:800;color:#92400e;margin-bottom:6px}
+.stamp-reward-sub{font-size:.9rem;color:#b45309;margin-bottom:20px}
+.stamp-reward-btn{padding:12px 28px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:999px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(245,158,11,.4)}
+
+/* ── STAFF ARRIVAL ── */
+.staff-arrival-toast{display:none;position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#134e4a,#0f766e);color:#fff;border-radius:999px;padding:10px 22px;font-size:.88rem;font-weight:700;z-index:3500;white-space:nowrap;box-shadow:0 4px 16px rgba(15,118,110,.4);align-items:center;gap:8px}
+.staff-arrival-toast.show{display:flex}
+.staff-progress-ring{width:22px;height:22px;transform:rotate(-90deg)}
+.staff-progress-circle{stroke-dasharray:60;stroke-dashoffset:60;transition:stroke-dashoffset .3s linear;stroke:#14b8a6;stroke-width:3;fill:none}
+
+/* Stamp bar mobile - keep above menu but below float cart */
+@media(max-width:900px){
+  .stamp-card-bar{bottom:80px;font-size:.75rem;padding:5px 12px;gap:6px}
+  .stamp-dot{width:16px;height:16px;font-size:.65rem}
+}
+@media(max-width:480px){
+  .stamp-card-bar{bottom:74px;padding:4px 10px;font-size:.72rem;gap:5px}
+  .stamp-dot{width:14px;height:14px}
+}
+</style>
 </head>
 <body>
 <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
@@ -393,6 +431,32 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
     <div class="celebrate-sub" id="celebrateSub">ぜひお楽しみください！</div>
   </div>
 </div>
+
+<!-- Stamp Card Bar -->
+<div class="stamp-card-bar" id="stampBar" style="display:none">
+  <span>🎯 スタンプ</span>
+  <div class="stamp-dots" id="stampDots"></div>
+  <span id="stampLabel">0/5</span>
+</div>
+
+<!-- Stamp Reward Overlay -->
+<div class="stamp-reward-overlay" id="stampReward">
+  <div class="stamp-reward-box">
+    <span class="stamp-reward-emoji">🎁</span>
+    <div class="stamp-reward-title">スタンプ達成！</div>
+    <div class="stamp-reward-sub">5回ご注文ありがとうございます！<br>スタッフにこの画面をお見せください✨</div>
+    <button class="stamp-reward-btn" onclick="closeStampReward()">✓ 閉じる</button>
+  </div>
+</div>
+
+<!-- Staff Arrival Toast -->
+<div class="staff-arrival-toast" id="staffArrivalToast">
+  <svg class="staff-progress-ring" viewBox="0 0 24 24">
+    <circle class="staff-progress-circle" id="staffProgressCircle" cx="12" cy="12" r="9"/>
+  </svg>
+  <span id="staffArrivalMsg">スタッフが向かっています...</span>
+</div>
+
 <!-- Live2D Widget - Japanese mascot with fetch interceptor -->
 <script>
 // Intercept fetch to serve Japanese tips instead of CDN default
@@ -406,7 +470,40 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
   };
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/live2d-widgets@0.9.1/autoload.js"></script>
+<script>
+// Custom Live2D loader - works on ALL screen sizes (no mobile block)
+(function() {
+  const base = "https://fastly.jsdelivr.net/npm/live2d-widgets@0/";
+  function loadRes(url, type) {
+    return new Promise((resolve, reject) => {
+      let tag;
+      if (type === "css") {
+        tag = document.createElement("link");
+        tag.rel = "stylesheet";
+        tag.href = url;
+      } else {
+        tag = document.createElement("script");
+        tag.src = url;
+      }
+      tag.onload = () => resolve(url);
+      tag.onerror = () => reject(url);
+      document.head.appendChild(tag);
+    });
+  }
+  // Load ALL devices - no screen.width check!
+  Promise.all([
+    loadRes(base + "waifu.css", "css"),
+    loadRes(base + "live2d.min.js", "js"),
+    loadRes(base + "waifu-tips.js", "js")
+  ]).then(() => {
+    initWidget({
+      waifuPath: base + "waifu-tips.json",
+      cdnPath: "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/",
+      tools: ["hitokoto","asteroids","switch-model","switch-texture","photo","info","quit"]
+    });
+  }).catch(e => console.warn("Live2D load error:", e));
+})();
+</script>
 <script>
 // Block widget's own showMessage to prevent unexpected greetings
 window.showMessage = function(){};
@@ -416,7 +513,7 @@ function speakVoicevox(text){
   try{
     const clean=text.replace(/[！？。、～♪♡🎉🎊😊😋👍✨🍽️🥳🔍👀🔎🔔👨‍🍳🙋🌸]/gu,'').trim();
     if(!clean)return;
-    const url='https://api.tts.quest/v3/voicevox/synthesis?text='+encodeURIComponent(clean)+'&speaker=20';
+    const url='https://api.tts.quest/v3/voicevox/synthesis?text='+encodeURIComponent(clean)+'&speaker=22';
     fetch(url).then(r=>r.json()).then(d=>{
       if(!d||!d.mp3DownloadUrl)return;
       function tryPlay(attempts){
@@ -537,6 +634,7 @@ function speakVoicevox(text){
       ?>
       <div class="menu-card" data-category="<?php echo (int)$item['category']; ?>" data-name="<?php echo htmlspecialchars(mb_strtolower($iname,'UTF-8')); ?>"
            onclick="openOrderModal(<?php echo (int)$item['id']; ?>,'<?php echo addslashes(htmlspecialchars($iname)); ?>',<?php echo (int)$item['price']; ?>,'<?php echo $imgUrl?htmlspecialchars($imgUrl):''; ?>')">
+        <button class="fav-btn" id="fav_<?php echo (int)$item['id']; ?>" onclick="event.stopPropagation();toggleFav(<?php echo (int)$item['id']; ?>,this)" title="お気に入り">🤍</button>
         <?php if($badge): ?><div class="item-badge <?php echo $badgeClass; ?>"><?php echo $badge; ?></div><?php endif; ?>
         <div class="item-img-wrap">
           <?php if($imgUrl): ?><img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="<?php echo htmlspecialchars($iname); ?>" loading="lazy">
@@ -695,6 +793,7 @@ function sendCallRequest(){
   closeCallStaff();
   showToast('🔔 ' + req + ' のご依頼を承りました！', 'success');
   mascotReact('staff');
+  showStaffArrival();
 }
 
 /* ── COMBO ── */
@@ -741,7 +840,7 @@ async function addComboItem(){
   try{
     const fd=new FormData();fd.append('tableNo',TABLE_NO);fd.append('itemId',selectedComboId);fd.append('amount',1);
     const res=await fetch('logic.php',{method:'POST',body:fd});
-    if(res.ok){showLoading(false);showCelebration(selectedComboName,true);refreshCart();}
+    if(res.ok){showLoading(false);showCelebration(selectedComboName,true);refreshCart();addStamp();}
   }catch(e){showToast('申し訳ございません。追加できませんでした。','error');}
   finally{showLoading(false);}
 }
@@ -811,7 +910,7 @@ async function executeOrder(){
       const sugg=getSuggestions(addedItem);
       _pendingOrderAfterCombo={name:selectedItemName,img:selectedItemImg};
       if(sugg.length>0){showCombo(addedItem,sugg);}
-      else{showCelebration(selectedItemName,false);refreshCart();}
+      else{showCelebration(selectedItemName,false);refreshCart();addStamp();}
     }else throw new Error('failed');
   }catch(e){showToast('申し訳ございません。もう一度お試しください。','error');showLoading(false);}
 }
@@ -939,6 +1038,8 @@ function resizeMascot(){
   else size = 280;
   waifu.style.setProperty('width', size+'px', 'important');
   waifu.style.setProperty('height', size+'px', 'important');
+  waifu.style.setProperty('bottom', '0px', 'important');
+  waifu.style.setProperty('display', 'block', 'important');
   const canvas = waifu.querySelector('canvas');
   if(canvas){
     canvas.style.setProperty('width', size+'px', 'important');
@@ -947,10 +1048,115 @@ function resizeMascot(){
 }
 // Apply on load and resize
 window.addEventListener('resize', resizeMascot);
-// Apply after widget loads (it takes a moment)
-setTimeout(resizeMascot, 1000);
-setTimeout(resizeMascot, 2500);
-setTimeout(resizeMascot, 4000);
+// Apply after widget loads - more retries for slow mobile networks
+[500, 1000, 2000, 3000, 5000, 8000].forEach(t => setTimeout(resizeMascot, t));
+
+
+/* ── FAVORITES ── */
+function initFavs(){
+  const favs = JSON.parse(localStorage.getItem('smartorder_favs')||'[]');
+  favs.forEach(id => {
+    const btn = document.getElementById('fav_'+id);
+    if(btn){ btn.textContent='❤️'; btn.classList.add('active'); }
+  });
+}
+function toggleFav(itemId, btn){
+  let favs = JSON.parse(localStorage.getItem('smartorder_favs')||'[]');
+  const idx = favs.indexOf(itemId);
+  if(idx > -1){
+    favs.splice(idx,1);
+    btn.textContent='🤍'; btn.classList.remove('active');
+    showToast('お気に入りから外しました','');
+  } else {
+    favs.push(itemId);
+    btn.textContent='❤️'; btn.classList.add('active');
+    btn.classList.add('pop');
+    setTimeout(()=>btn.classList.remove('pop'),400);
+    showToast('❤️ お気に入りに追加しました！','success');
+    const msg = 'こちらはお気に入りに追加されましたね！素敵なお選びです！';
+    speakVoicevox(msg);
+  }
+  localStorage.setItem('smartorder_favs', JSON.stringify(favs));
+}
+
+/* ── STAMP CARD ── */
+let stampCount = parseInt(localStorage.getItem('smartorder_stamps')||'0');
+function initStamps(){
+  const bar = document.getElementById('stampBar');
+  if(!bar) return;
+  if(stampCount > 0) bar.style.display='flex';
+  renderStamps(false);
+}
+function renderStamps(isNew){
+  const dots = document.getElementById('stampDots');
+  const label = document.getElementById('stampLabel');
+  if(!dots||!label) return;
+  const total = 5;
+  const shown = Math.min(stampCount, total);
+  dots.innerHTML = '';
+  for(let i=0;i<total;i++){
+    const d = document.createElement('div');
+    d.className = 'stamp-dot' + (i < shown ? ' filled'+(isNew&&i===shown-1?' new':'') : '');
+    d.textContent = i < shown ? '⭐' : '';
+    dots.appendChild(d);
+  }
+  label.textContent = shown + '/' + total;
+}
+function addStamp(){
+  stampCount++;
+  localStorage.setItem('smartorder_stamps', stampCount);
+  const bar = document.getElementById('stampBar');
+  if(bar) bar.style.display='flex';
+  renderStamps(true);
+  if(stampCount > 0 && stampCount % 5 === 0){
+    setTimeout(()=>{
+      document.getElementById('stampReward').classList.add('show');
+      speakVoicevox('スタンプカードが完成しました！ありがとうございます！');
+    }, 1200);
+  }
+}
+function closeStampReward(){
+  document.getElementById('stampReward').classList.remove('show');
+  // Reset stamps after reward
+  stampCount = 0;
+  localStorage.setItem('smartorder_stamps', '0');
+  renderStamps(false);
+  document.getElementById('stampBar').style.display='none';
+}
+
+/* ── STAFF ARRIVAL COUNTDOWN ── */
+let _staffTimer = null;
+function showStaffArrival(){
+  const toast = document.getElementById('staffArrivalToast');
+  const msg = document.getElementById('staffArrivalMsg');
+  const circle = document.getElementById('staffProgressCircle');
+  if(!toast) return;
+  if(_staffTimer) clearInterval(_staffTimer);
+  let secs = 60; // 60 second countdown
+  const totalDash = 56.5; // circumference approx 2*pi*9
+  toast.classList.add('show');
+  circle.style.strokeDashoffset = totalDash;
+  msg.textContent = 'スタッフが向かっています... あと ' + secs + '秒';
+  _staffTimer = setInterval(()=>{
+    secs--;
+    const progress = (secs / 60) * totalDash;
+    circle.style.strokeDashoffset = progress;
+    if(secs <= 0){
+      clearInterval(_staffTimer);
+      msg.textContent = 'スタッフが到着しました！🙋';
+      speakVoicevox('スタッフが到着しました！少々お待ちください。');
+      setTimeout(()=>toast.classList.remove('show'), 3000);
+    } else if(secs === 30){
+      msg.textContent = 'もうすぐスタッフが参ります！ あと ' + secs + '秒';
+    } else {
+      msg.textContent = 'スタッフが向かっています... あと ' + secs + '秒';
+    }
+  }, 1000);
+}
+
+// Init on load
+window.addEventListener('DOMContentLoaded', ()=>{ initFavs(); initStamps(); });
+setTimeout(()=>{ initFavs(); initStamps(); }, 500);
 
 document.getElementById('orderModal').addEventListener('click',function(e){if(e.target===this)closeModal('orderModal');});
 document.getElementById('confirmModal').addEventListener('click',function(e){if(e.target===this)closeModal('confirmModal');});
