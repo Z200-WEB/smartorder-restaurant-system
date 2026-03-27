@@ -418,12 +418,85 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
   .stamp-card-bar{bottom:74px;padding:4px 10px;font-size:.72rem;gap:5px}
   .stamp-dot{width:14px;height:14px}
 }
+/* ── FEATURE: Mobile mascot fix ── */
+@media(max-width:480px){
+  #waifu{width:200px!important;height:200px!important;left:4px!important;bottom:0px!important}
+  #waifu canvas{width:200px!important;height:200px!important}
+  #waifu-tips{font-size:.75rem!important;max-width:170px!important;top:-65px!important;padding:8px 11px!important}
+}
+@media(min-width:481px) and (max-width:900px){
+  #waifu{width:220px!important;height:220px!important;left:6px!important;bottom:0px!important}
+  #waifu canvas{width:220px!important;height:220px!important}
+}
+/* ── FEATURE: Popular / History badges ── */
+.badge-hot{background:linear-gradient(135deg,#ef4444,#f97316)!important;color:#fff!important;animation:hotPulse 2s infinite}
+@keyframes hotPulse{0%,100%{box-shadow:0 2px 6px rgba(239,68,68,.3)}50%{box-shadow:0 4px 14px rgba(239,68,68,.7)}}
+.badge-before-corner{position:absolute;bottom:8px;left:8px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border-radius:999px;padding:2px 8px;font-size:.62rem;font-weight:700;z-index:4;white-space:nowrap}
+/* ── FEATURE: Lucky Roulette button ── */
+#lucky-btn{position:fixed;right:24px;bottom:90px;z-index:200;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-size:.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(139,92,246,.45);display:flex;align-items:center;gap:6px;transition:transform .2s,box-shadow .2s;white-space:nowrap}
+#lucky-btn:hover{transform:scale(1.06);box-shadow:0 6px 22px rgba(139,92,246,.6)}
+#lucky-btn.spinning{animation:luckySpin .6s ease}
+@keyframes luckySpin{0%{transform:rotate(0)scale(1)}50%{transform:rotate(180deg)scale(1.1)}100%{transform:rotate(360deg)scale(1)}}
+#lucky-reveal{display:none;position:fixed;inset:0;z-index:3500;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);align-items:center;justify-content:center}
+#lucky-reveal.show{display:flex}
+#lucky-reveal-box{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:3px solid #8b5cf6;border-radius:24px;padding:32px 28px;text-align:center;max-width:320px;width:90%;animation:celebPop .4s cubic-bezier(.17,.67,.35,1.3)}
+#lucky-reveal-emoji{font-size:4rem;display:block;margin-bottom:10px;animation:bounce 1s ease infinite}
+#lucky-reveal-label{font-size:.8rem;color:#7c3aed;font-weight:600;margin-bottom:6px}
+#lucky-reveal-name{font-size:1.25rem;font-weight:800;color:#1e1b4b;margin-bottom:6px}
+#lucky-reveal-price{font-size:1rem;color:#7c3aed;font-weight:700;margin-bottom:20px}
+.lucky-btn-row{display:flex;gap:10px;justify-content:center}
+.btn-lucky-add{padding:12px 24px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;border:none;border-radius:999px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(139,92,246,.4)}
+.btn-lucky-skip{padding:12px 20px;background:#f1f5f9;color:#64748b;border:none;border-radius:999px;font-size:.95rem;cursor:pointer}
+/* ── FEATURE: Staff Chat ── */
+#chat-btn{position:fixed;left:16px;bottom:90px;z-index:200;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;border-radius:999px;padding:10px 16px;font-size:.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(15,118,110,.4);display:flex;align-items:center;gap:6px;transition:transform .2s;white-space:nowrap}
+#chat-btn:hover{transform:scale(1.06)}
+#chat-btn .chat-badge{background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;display:none;align-items:center;justify-content:center;font-weight:700}
+#chat-btn .chat-badge.show{display:flex}
+#chat-overlay{display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}
+#chat-overlay.show{display:flex}
+#chat-box{background:var(--surface,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:480px;max-height:75vh;display:flex;flex-direction:column;animation:slideUp .3s ease}
+#chat-title{font-size:1rem;font-weight:700;margin-bottom:4px;color:#0f766e}
+#chat-subtitle{font-size:.78rem;color:#94a3b8;margin-bottom:14px}
+#chat-messages{flex:1;overflow-y:auto;min-height:80px;max-height:200px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.chat-msg{padding:8px 12px;border-radius:12px;font-size:.82rem;max-width:85%;line-height:1.4}
+.chat-msg.sent{background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-msg.system{background:#f0fdf4;color:#0f766e;align-self:flex-start;border-bottom-left-radius:4px;border:1px solid #a7f3d0}
+.chat-msg-time{font-size:.65rem;opacity:.7;margin-top:2px}
+#chat-input-row{display:flex;gap:8px;align-items:flex-end}
+#chat-input{flex:1;border:2px solid #e2e8f0;border-radius:14px;padding:10px 14px;font-size:.85rem;resize:none;min-height:42px;max-height:100px;font-family:inherit;outline:none;transition:border-color .2s}
+#chat-input:focus{border-color:#14b8a6}
+#chat-send{padding:10px 16px;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;border-radius:12px;font-size:.85rem;font-weight:700;cursor:pointer;white-space:nowrap}
+#chat-close{display:block;margin-top:10px;text-align:center;color:#94a3b8;font-size:.8rem;cursor:pointer;background:none;border:none;width:100%;padding:4px}
+.chat-empty{color:#cbd5e1;text-align:center;font-size:.82rem;padding:20px 0}
+/* ── FEATURE: Last-Call Banner ── */
+#last-call-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:2500;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;text-align:center;padding:10px 16px;font-size:.88rem;font-weight:700;animation:lastCallPulse 1.5s infinite;cursor:pointer;box-shadow:0 4px 16px rgba(239,68,68,.5)}
+@keyframes lastCallPulse{0%,100%{background:linear-gradient(135deg,#ef4444,#dc2626)}50%{background:linear-gradient(135deg,#f97316,#ef4444)}}
+#last-call-banner .lc-close{float:right;background:rgba(255,255,255,.25);border:none;color:#fff;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;line-height:22px}
+#last-call-banner.show{display:block}
+/* ── FEATURE: Wait Time Estimator ── */
+#wait-time-indicator{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:12px;padding:10px 14px;margin:12px 0;font-size:.85rem;color:#166534;font-weight:600}
+#wait-time-indicator .wt-icon{font-size:1.3rem}
+#wait-time-indicator .wt-detail{font-size:.72rem;color:#4ade80;font-weight:400}
+/* ── FEATURE: Mascot Speech bubble ── */
+@keyframes mascotJump{0%{transform:translateY(0)}30%{transform:translateY(-18px)rotate(-5deg)}60%{transform:translateY(-8px)rotate(3deg)}100%{transform:translateY(0)rotate(0)}}
+@keyframes mascotWave{0%{transform:rotate(0)}25%{transform:rotate(15deg)}75%{transform:rotate(-15deg)}100%{transform:rotate(0)}}
+.mascot-jumping{animation:mascotJump .7s ease!important}
+.mascot-waving{animation:mascotWave .5s ease 3!important}
+#mascot-speech{position:fixed;bottom:290px;left:10px;background:#fff;border:2px solid var(--primary-light,#5eead4);border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:.82rem;max-width:220px;line-height:1.45;color:#1e293b;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:250;opacity:0;transition:opacity .3s;pointer-events:none}
+#mascot-speech.show{opacity:1}
+#mascot-speech::after{content:'';position:absolute;bottom:-8px;left:20px;border-width:4px;border-style:solid;border-color:#fff transparent transparent}
+@media(max-width:480px){
+  #lucky-btn{right:12px;bottom:80px;padding:9px 14px;font-size:.76rem}
+  #chat-btn{left:4px;bottom:80px;padding:9px 12px;font-size:.74rem}
+  #mascot-speech{bottom:210px;max-width:170px;font-size:.76rem}
+}
 </style>
 </head>
 <body>
 <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
 <div class="toast-container" id="toastContainer"></div>
 <div class="confetti-container" id="confettiContainer"></div>
+<div id="last-call-banner">⏰ ラストオーダーが近づいています。気になる一品は今のうちにどうぞ <button class="lc-close" onclick="event.stopPropagation();closeLastCallBanner()">×</button></div>
 <div class="order-celebrate" id="orderCelebrate">
   <div class="celebrate-card">
     <span class="celebrate-mascot" id="celebrateMascot">🐼</span>
@@ -457,6 +530,33 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
   <span id="staffArrivalMsg">スタッフが向かっています...</span>
 </div>
 
+<button id="chat-btn" type="button" onclick="toggleStaffChat(true)">💬 スタッフ相談 <span class="chat-badge" id="chatBadge">1</span></button>
+<button id="lucky-btn" type="button" onclick="spinLuckyRoulette()">🎲 おまかせ</button>
+<div id="mascot-speech"></div>
+<div id="chat-overlay" onclick="if(event.target===this)toggleStaffChat(false)">
+  <div id="chat-box">
+    <div id="chat-title">スタッフチャット</div>
+    <div id="chat-subtitle">注文前の相談やおすすめ確認にどうぞ</div>
+    <div id="chat-messages"><div class="chat-empty">まだメッセージはありません</div></div>
+    <div id="chat-input-row">
+      <textarea id="chat-input" placeholder="例: おすすめのドリンクはありますか？"></textarea>
+      <button id="chat-send" type="button" onclick="sendStaffChat()">送信</button>
+    </div>
+    <button id="chat-close" type="button" onclick="toggleStaffChat(false)">閉じる</button>
+  </div>
+</div>
+<div id="lucky-reveal" onclick="if(event.target===this)closeLuckyReveal()">
+  <div id="lucky-reveal-box">
+    <span id="lucky-reveal-emoji">🎉</span>
+    <div id="lucky-reveal-label">今日のラッキーセレクト</div>
+    <div id="lucky-reveal-name">おすすめメニュー</div>
+    <div id="lucky-reveal-price">¥0</div>
+    <div class="lucky-btn-row">
+      <button class="btn-lucky-add" type="button" onclick="addLuckyPick()">これにする</button>
+      <button class="btn-lucky-skip" type="button" onclick="closeLuckyReveal()">また今度</button>
+    </div>
+  </div>
+</div>
 <!-- Live2D Widget - Japanese mascot with fetch interceptor -->
 <script>
 // Intercept fetch to serve Japanese tips instead of CDN default
@@ -623,6 +723,13 @@ function speakVoicevox(text){
 <div class="app-layout">
   <section class="menu-section">
     <div class="menu-section-title" id="sectionTitle">全メニュー</div>
+    <div id="wait-time-indicator">
+      <span class="wt-icon">⏱️</span>
+      <div>
+        <div id="waitTimeMain">ただいまの目安: 8〜12分</div>
+        <div class="wt-detail" id="waitTimeDetail">ご注文数に応じて更新されます</div>
+      </div>
+    </div>
     <div class="menu-grid" id="menuGrid">
       <?php foreach($items as $item):
         $imgUrl = getItemImage($item['id']);
@@ -632,7 +739,7 @@ function speakVoicevox(text){
         elseif(strpos($iname,'期間限定')!==false){$badge='⏳ 期間限定';$badgeClass='badge-limited';}
         elseif($item['price']==0){$badge='🎁 無料';$badgeClass='badge-free';}
       ?>
-      <div class="menu-card" data-category="<?php echo (int)$item['category']; ?>" data-name="<?php echo htmlspecialchars(mb_strtolower($iname,'UTF-8')); ?>"
+      <div class="menu-card" data-item-id="<?php echo (int)$item['id']; ?>" data-item-name="<?php echo htmlspecialchars($iname); ?>" data-item-price="<?php echo (int)$item['price']; ?>" data-item-img="<?php echo $imgUrl?htmlspecialchars($imgUrl):''; ?>" data-category="<?php echo (int)$item['category']; ?>" data-name="<?php echo htmlspecialchars(mb_strtolower($iname,'UTF-8')); ?>"
            onclick="openOrderModal(<?php echo (int)$item['id']; ?>,'<?php echo addslashes(htmlspecialchars($iname)); ?>',<?php echo (int)$item['price']; ?>,'<?php echo $imgUrl?htmlspecialchars($imgUrl):''; ?>')">
         <button class="fav-btn" id="fav_<?php echo (int)$item['id']; ?>" onclick="event.stopPropagation();toggleFav(<?php echo (int)$item['id']; ?>,this)" title="お気に入り">🤍</button>
         <?php if($badge): ?><div class="item-badge <?php echo $badgeClass; ?>"><?php echo $badge; ?></div><?php endif; ?>
@@ -1029,22 +1136,19 @@ function buildMobileFooter(total, count){
 
 /* ── MASCOT RESPONSIVE RESIZE ── */
 function resizeMascot(){
-  const waifu = document.getElementById('waifu');
-  if(!waifu) return;
-  const w = window.innerWidth;
+  const waifu=document.getElementById('waifu');
+  if(!waifu)return;
+  const w=window.innerWidth;
   let size;
-  if(w <= 480) size = 120;
-  else if(w <= 900) size = 180;
-  else size = 280;
-  waifu.style.setProperty('width', size+'px', 'important');
-  waifu.style.setProperty('height', size+'px', 'important');
-  waifu.style.setProperty('bottom', '0px', 'important');
-  waifu.style.setProperty('display', 'block', 'important');
-  const canvas = waifu.querySelector('canvas');
-  if(canvas){
-    canvas.style.setProperty('width', size+'px', 'important');
-    canvas.style.setProperty('height', size+'px', 'important');
-  }
+  if(w<=480)size=200;
+  else if(w<=900)size=220;
+  else size=280;
+  waifu.style.setProperty('width',size+'px','important');
+  waifu.style.setProperty('height',size+'px','important');
+  waifu.style.setProperty('bottom','0px','important');
+  waifu.style.setProperty('display','block','important');
+  const canvas=waifu.querySelector('canvas');
+  if(canvas){canvas.style.setProperty('width',size+'px','important');canvas.style.setProperty('height',size+'px','important');}
 }
 // Apply on load and resize
 window.addEventListener('resize', resizeMascot);
@@ -1154,9 +1258,305 @@ function showStaffArrival(){
   }, 1000);
 }
 
+/* ── FEATURE BLOCK: Lucky / Chat / Last-Call / History / WaitTime / MascotReact ── */
+window.luckyPick = null;
+window.staffChatMessages = [];
+window.staffChatUnread = 1;
+
+function mascotReact(type){
+  const msgs={
+    add:["ご注文ありがとうございます。できあがりをお楽しみに。","人気の一品ですね。良いお選びです。","こちら、相性の良いセットもございます。"],
+    checkout:["ご注文を承りました。少々お待ちください。","ありがとうございます。順番にご用意いたします。","ただいま厨房へ共有しました。"],
+    search:["気になるメニューは見つかりましたか。","お好みがあればおすすめもご案内できます。","迷ったらおまかせボタンもどうぞ。"],
+    staff:["スタッフへお声がけしました。","まもなくスタッフが参ります。","ご用件をしっかりお伝えしますね。"],
+    lucky:["今日の運試しメニューです。","新しいお気に入りに出会えるかもしれません。","直感で選ぶのも楽しいですよ。"]
+  };
+  const arr=msgs[type]||msgs.add;
+  const msg=arr[Math.floor(Math.random()*arr.length)];
+  showMascotSpeech(msg, type==='staff' ? 'wave' : 'jump');
+  speakVoicevox(msg);
+  showToast('🌸 '+msg,'success');
+}
+function showMascotSpeech(message, motion){
+  const bubble=document.getElementById('mascot-speech');
+  if(bubble){
+    bubble.textContent=message;
+    bubble.classList.add('show');
+    clearTimeout(window._mascotSpeechTimer);
+    window._mascotSpeechTimer=setTimeout(()=>bubble.classList.remove('show'),3200);
+  }
+  const waifu=document.getElementById('waifu');
+  if(waifu){
+    waifu.classList.remove('mascot-jumping','mascot-waving');
+    void waifu.offsetWidth;
+    waifu.classList.add(motion==='wave'?'mascot-waving':'mascot-jumping');
+    setTimeout(()=>waifu.classList.remove('mascot-jumping','mascot-waving'),1800);
+  }
+}
+
+function getItemStats(){
+  try{return JSON.parse(localStorage.getItem('smartorder_item_stats')||'{}');}catch(e){return {};}
+}
+function setItemStats(stats){
+  localStorage.setItem('smartorder_item_stats', JSON.stringify(stats));
+}
+function rememberHistoryItem(itemId){
+  const id=String(itemId);
+  const history=Array.from(new Set([id].concat(JSON.parse(localStorage.getItem('smartorder_history')||'[]')))).slice(0,12);
+  localStorage.setItem('smartorder_history', JSON.stringify(history));
+  const stats=getItemStats();
+  stats[id]=(stats[id]||0)+1;
+  setItemStats(stats);
+  applyHistoryBadges();
+}
+function applyHistoryBadges(){
+  const history=JSON.parse(localStorage.getItem('smartorder_history')||'[]');
+  const stats=getItemStats();
+  const topIds=Object.entries(stats).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id])=>id);
+  const cards=Array.from(document.querySelectorAll('.menu-card'));
+  cards.forEach((card, idx)=>{
+    const itemId=card.dataset.itemId;
+    let corner=card.querySelector('.badge-before-corner');
+    if(history.includes(itemId)){
+      if(!corner){
+        corner=document.createElement('div');
+        corner.className='badge-before-corner';
+        corner.textContent='以前に注文';
+        card.appendChild(corner);
+      }
+    }else if(corner){
+      corner.remove();
+    }
+    let badge=card.querySelector('.item-badge');
+    const shouldHot=topIds.length ? topIds.includes(itemId) : idx < 3;
+    if(shouldHot){
+      if(!badge){
+        badge=document.createElement('div');
+        badge.className='item-badge';
+        badge.textContent='人気';
+        card.appendChild(badge);
+      }
+      badge.classList.add('badge-hot');
+      if(!badge.dataset.originalLabel) badge.dataset.originalLabel=badge.textContent;
+      badge.textContent='🔥 人気';
+    }else if(badge && badge.classList.contains('badge-hot')){
+      badge.classList.remove('badge-hot');
+      badge.textContent=badge.dataset.originalLabel || 'おすすめ';
+    }
+  });
+}
+
+function updateWaitTimeIndicator(){
+  const count=parseInt((document.getElementById('cartCountBadge')||{}).textContent||'0',10)||0;
+  const hour=(new Date()).getHours();
+  let min=8+count*2;
+  let max=12+count*3;
+  if(hour>=19){min+=4;max+=6;}
+  const main=document.getElementById('waitTimeMain');
+  const detail=document.getElementById('waitTimeDetail');
+  if(main) main.textContent='ただいまの目安: '+min+'〜'+max+'分';
+  if(detail) detail.textContent=count>0 ? 'カート '+count+'点。混雑状況を反映しています' : '少なめのご注文なら比較的スムーズです';
+}
+
+function closeLastCallBanner(){
+  const banner=document.getElementById('last-call-banner');
+  if(banner) banner.classList.remove('show');
+  localStorage.setItem('smartorder_last_call_closed','1');
+}
+function maybeShowLastCallBanner(force){
+  const banner=document.getElementById('last-call-banner');
+  if(!banner) return;
+  const hour=(new Date()).getHours();
+  if(force || hour>=21 || ((parseInt((document.getElementById('cartCountBadge')||{}).textContent||'0',10)||0)>=3)){
+    if(localStorage.getItem('smartorder_last_call_closed')!=='1'){
+      banner.classList.add('show');
+    }
+  }
+}
+
+function getVisibleMenuCards(){
+  return Array.from(document.querySelectorAll('.menu-card')).filter(card=>card.style.display!=='none');
+}
+function spinLuckyRoulette(){
+  const btn=document.getElementById('lucky-btn');
+  const cards=getVisibleMenuCards();
+  if(!cards.length){
+    showToast('表示中のメニューがありません。検索をクリアしてお試しください。','error');
+    return;
+  }
+  btn.classList.add('spinning');
+  const card=cards[Math.floor(Math.random()*cards.length)];
+  const itemId=parseInt(card.dataset.itemId||'0',10);
+  window.luckyPick=ALL_ITEMS.find(i=>i.id===itemId)||{
+    id:itemId,
+    name:card.dataset.itemName||'おすすめメニュー',
+    price:parseInt(card.dataset.itemPrice||'0',10),
+    img:card.dataset.itemImg||''
+  };
+  setTimeout(()=>{
+    btn.classList.remove('spinning');
+    document.getElementById('lucky-reveal-name').textContent=window.luckyPick.name;
+    document.getElementById('lucky-reveal-price').textContent='¥'+Number(window.luckyPick.price||0).toLocaleString();
+    document.getElementById('lucky-reveal-emoji').textContent=['🎯','🎲','✨','🍀'][Math.floor(Math.random()*4)];
+    document.getElementById('lucky-reveal').classList.add('show');
+    mascotReact('lucky');
+  },600);
+}
+function closeLuckyReveal(){
+  const el=document.getElementById('lucky-reveal');
+  if(el) el.classList.remove('show');
+}
+async function addLuckyPick(){
+  if(!window.luckyPick) return;
+  closeLuckyReveal();
+  showLoading(true);
+  try{
+    const fd=new FormData();
+    fd.append('tableNo',TABLE_NO);
+    fd.append('itemId',window.luckyPick.id);
+    fd.append('amount',1);
+    const res=await fetch('logic.php',{method:'POST',body:fd});
+    if(!res.ok) throw new Error('failed');
+    rememberHistoryItem(window.luckyPick.id);
+    refreshCart();
+    addStamp();
+    showCelebration(window.luckyPick.name,false);
+  }catch(e){
+    showToast('申し訳ございません。追加できませんでした。','error');
+  }finally{
+    showLoading(false);
+  }
+}
+
+function updateChatBadge(){
+  const badge=document.getElementById('chatBadge');
+  if(!badge) return;
+  badge.textContent=String(window.staffChatUnread);
+  badge.classList.toggle('show', window.staffChatUnread>0);
+}
+function renderStaffChat(){
+  const box=document.getElementById('chat-messages');
+  if(!box) return;
+  if(!window.staffChatMessages.length){
+    box.innerHTML='<div class="chat-empty">まだメッセージはありません</div>';
+    return;
+  }
+  box.innerHTML=window.staffChatMessages.map(msg=>
+    '<div class="chat-msg '+msg.type+'">'+msg.text+'<div class="chat-msg-time">'+msg.time+'</div></div>'
+  ).join('');
+  box.scrollTop=box.scrollHeight;
+}
+function addStaffSystemMessage(text, unread){
+  window.staffChatMessages.push({type:'system',text:text,time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
+  if(unread) window.staffChatUnread++;
+  renderStaffChat();
+  updateChatBadge();
+}
+function toggleStaffChat(show){
+  const overlay=document.getElementById('chat-overlay');
+  if(!overlay) return;
+  overlay.classList.toggle('show', !!show);
+  if(show){
+    window.staffChatUnread=0;
+    updateChatBadge();
+    renderStaffChat();
+    const input=document.getElementById('chat-input');
+    if(input) input.focus();
+  }
+}
+function getStaffReply(text){
+  const lower=text.toLowerCase();
+  if(lower.includes('おすすめ') || lower.includes('osusume')) return '本日のおすすめは人気メニューと季節限定です。気分に合わせてご案内できます。';
+  if(lower.includes('drink') || lower.includes('ドリンク') || lower.includes('飲み物')) return 'さっぱり系ならハイボール、食事と合わせるなら生ビールが人気です。';
+  if(lower.includes('dessert') || lower.includes('デザート') || lower.includes('甘')) return '食後でしたらデザート系が相性良いです。軽めならアイス系がおすすめです。';
+  if(lower.includes('allergy') || lower.includes('アレルギ') || lower.includes('苦手')) return 'アレルギーや苦手な食材があれば、このまま送っていただければスタッフへ共有します。';
+  return '確認ありがとうございます。スタッフ側でも確認し、必要ならすぐ伺います。';
+}
+function sendStaffChat(){
+  const input=document.getElementById('chat-input');
+  if(!input) return;
+  const text=input.value.trim();
+  if(!text) return;
+  const stamp=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  window.staffChatMessages.push({type:'sent',text:text,time:stamp});
+  input.value='';
+  renderStaffChat();
+  setTimeout(()=>addStaffSystemMessage(getStaffReply(text), document.getElementById('chat-overlay') && !document.getElementById('chat-overlay').classList.contains('show')), 900);
+}
+
+const _origRefreshCart = refreshCart;
+refreshCart = async function(){
+  await _origRefreshCart();
+  updateWaitTimeIndicator();
+  applyHistoryBadges();
+  maybeShowLastCallBanner(false);
+};
+const _origExecuteOrder = executeOrder;
+executeOrder = async function(){
+  const id=selectedItemId;
+  await _origExecuteOrder();
+  if(id) rememberHistoryItem(id);
+};
+const _origAddComboItem = addComboItem;
+addComboItem = async function(){
+  const id=selectedComboId;
+  await _origAddComboItem();
+  if(id) rememberHistoryItem(id);
+};
+const _origSendCallRequest = sendCallRequest;
+sendCallRequest = function(){
+  _origSendCallRequest();
+  addStaffSystemMessage('スタッフをお呼びしました。内容を確認して向かいます。', true);
+};
+const _origFilterCategory = filterCategory;
+filterCategory = function(catId, btn){
+  _origFilterCategory(catId, btn);
+  applyHistoryBadges();
+};
+const _origClearSearch = clearSearch;
+clearSearch = function(){
+  _origClearSearch();
+  applyHistoryBadges();
+};
+const _origHandleSearch = handleSearch;
+handleSearch = function(val){
+  _origHandleSearch(val);
+  applyHistoryBadges();
+};
+
 // Init on load
 window.addEventListener('DOMContentLoaded', ()=>{ initFavs(); initStamps(); });
 setTimeout(()=>{ initFavs(); initStamps(); }, 500);
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  applyHistoryBadges();
+  updateWaitTimeIndicator();
+  maybeShowLastCallBanner(false);
+  updateChatBadge();
+  if(window.staffChatMessages.length===0){
+    addStaffSystemMessage('ご相談があればこちらからどうぞ。おすすめやアレルギー確認も承ります。', false);
+  }
+  const input=document.getElementById('chat-input');
+  if(input){
+    input.addEventListener('keydown', e=>{
+      if(e.key==='Enter' && !e.shiftKey){
+        e.preventDefault();
+        sendStaffChat();
+      }
+    });
+  }
+  const banner=document.getElementById('last-call-banner');
+  if(banner){
+    banner.addEventListener('click', ()=>{
+      const search=document.getElementById('searchInput');
+      if(search){
+        search.focus();
+        search.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    });
+  }
+  setTimeout(()=>maybeShowLastCallBanner(false), 25000);
+});
 
 document.getElementById('orderModal').addEventListener('click',function(e){if(e.target===this)closeModal('orderModal');});
 document.getElementById('confirmModal').addEventListener('click',function(e){if(e.target===this)closeModal('confirmModal');});
