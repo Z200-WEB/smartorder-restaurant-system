@@ -254,8 +254,8 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 }
 /* Phone: small, corner only */
 @media(max-width:480px){
-  #waifu{width:120px!important;height:120px!important;left:4px!important}
-  #waifu canvas{width:120px!important;height:120px!important}
+  #waifu{width:200px!important;height:200px!important;left:4px!important}
+  #waifu canvas{width:200px!important;height:200px!important}
   #waifu-tips{font-size:.7rem!important;max-width:150px!important;top:-60px!important;padding:7px 10px!important}
 }
 
@@ -596,11 +596,25 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
     loadRes(base + "live2d.min.js", "js"),
     loadRes(base + "waifu-tips.js", "js")
   ]).then(() => {
+    // MASCOT FIX: Force blue-hair girl (bilibili-live/22) on ALL devices
+    // Without this, mobile/fresh visits default to modelId:1 (blonde character)
+    localStorage.setItem('modelId', '2');
+    localStorage.setItem('modelTexturesId', '0');
     initWidget({
       waifuPath: base + "waifu-tips.json",
       cdnPath: "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/",
       tools: ["hitokoto","asteroids","switch-model","switch-texture","photo","info","quit"]
     });
+    // Double-guarantee: force correct model after CDN loads (handles slow mobile)
+    [1000, 3000, 6000].forEach(t => setTimeout(() => {
+      if (localStorage.getItem('modelId') !== '2') {
+        localStorage.setItem('modelId', '2');
+        localStorage.setItem('modelTexturesId', '0');
+      }
+      if (typeof loadlive2d === 'function') {
+        loadlive2d('live2d', 'https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/bilibili-live/22/index.json');
+      }
+    }, t));
   }).catch(e => console.warn("Live2D load error:", e));
 })();
 </script>
