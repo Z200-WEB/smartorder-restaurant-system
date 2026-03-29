@@ -550,10 +550,253 @@ document.getElementById('paymentModal').addEventListener('click', function(e) {
   if (e.target === this) closePaymentModal();
 });
 
-// Auto-refresh every 10 seconds
-setInterval(() => {
-  if (document.getElementById('paymentModal').style.display === 'none') location.reload();
-}, 10000);
+// Real-time order refresh (polling every 3s instead of page reload)
+let _orderPollActive = true;
+let _lastOrderHash = '';
+
+function fetchOrdersRealtime(){
+  if(!_orderPollActive) return;
+  // Only fetch if payment modal is not open
+  if(document.getElementById('paymentModal') && document.getElementById('paymentModal').style.display === 'flex') return;
+  
+  fetch(location.href, {headers:{'X-Requested-With':'XMLHttpRequest','Accept':'text/html'}})
+  .then(r=>r.text())
+  .then(html=>{
+    // Extract orders table content
+    const parser = new DOMParser();
+    const doc2 = parser.parseFromString(html, 'text/html');
+    const newTable = doc2.querySelector('.orders-table, .order-list, [data-orders]');
+    const oldTable = document.querySelector('.orders-table, .order-list, [data-orders]');
+    if(newTable && oldTable){
+      const newHash = newTable.innerHTML.length;
+      if(newHash !== _lastOrderHash){
+        _lastOrderHash = newHash;
+        oldTable.innerHTML = newTable.innerHTML;
+        // Re-attach event listeners
+        attachOrderEvents();
+        // Notification for new orders
+        if(_lastOrderHash && Notification.permission==='granted'){
+          new Notification('新しい注文が入りました', {icon:'/favicon.ico'});
+        }
+      }
+    }
+  })
+  .catch(()=>{});
+}
+
+function attachOrderEvents(){
+  // Re-bind any onclick handlers after DOM update
+  document.querySelectorAll('[data-action]').forEach(el=>{
+    // buttons already have onclick in HTML
+  });
+}
+
+// Request notification permission
+if(Notification && Notification.permission==='default'){
+  Notification.requestPermission();
+}
+
+// Poll every 3 seconds
+setInterval(fetchOrdersRealtime, 3000);
+
+// Also keep a fallback full reload every 60s
+setInterval(()=>{
+  if(!document.getElementById('paymentModal') || document.getElementById('paymentModal').style.display !== 'flex'){
+    location.reload();
+  }
+}, 60000);
+</script>
+
+<!-- ===== STAFF CHAT PANEL ===== -->
+<style>
+#staff-chat-fab{position:fixed;bottom:80px;right:20px;z-index:9999;background:#00897B;color:#fff;border:none;border-radius:50px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(0,137,123,0.4);display:flex;align-items:center;gap:8px;}
+#staff-chat-badge{background:#ff5252;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;display:none;align-items:center;justify-content:center;font-weight:700;}
+#staff-chat-badge.show{display:flex;}
+#staff-chat-panel{position:fixed;bottom:140px;right:20px;z-index:9998;width:360px;max-height:600px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);display:none;flex-direction:column;overflow:hidden;}
+#staff-chat-panel.open{display:flex;}
+.scp-header{background:linear-gradient(135deg,#00897B,#26A69A);color:#fff;padding:16px;font-weight:700;font-size:15px;}
+.scp-tabs{display:flex;border-bottom:1px solid #eee;background:#f8f8f8;}
+.scp-tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;color:#666;border-bottom:3px solid transparent;}
+.scp-tab.active{color:#00897B;border-bottom-color:#00897B;}
+.scp-table-list{flex:1;overflow-y:auto;max-height:300px;}
+.scp-table-item{padding:12px 16px;border-bottom:1px solid #f0f0f0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.scp-table-item:hover{background:#f5f5f5;}
+.scp-table-item .scp-unread{background:#ff5252;color:#fff;border-radius:10px;padding:2px 8px;font-size:12px;}
+.scp-msgs{flex:1;overflow-y:auto;max-height:250px;padding:12px;background:#f5f5f5;display:none;}
+.scp-msgs.active{display:block;}
+.scp-msg{margin-bottom:10px;padding:10px 14px;border-radius:12px;max-width:85%;font-size:13px;line-height:1.5;}
+.scp-msg.user{background:#e3f2fd;margin-left:0;border-radius:12px 12px 12px 4px;}
+.scp-msg.ai{background:#fff;border:1px solid #e0e0e0;margin-left:0;}
+.scp-msg.staff{background:#00897B;color:#fff;margin-left:auto;border-radius:12px 12px 4px 12px;}
+.scp-msg-time{font-size:10px;opacity:0.6;margin-top:4px;}
+.scp-msg-table{font-size:11px;font-weight:700;color:#00897B;margin-bottom:4px;}
+.scp-reply-area{padding:12px;border-top:1px solid #eee;display:none;}
+.scp-reply-area.active{display:flex;gap:8px;}
+.scp-reply-input{flex:1;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:13px;resize:none;height:60px;font-family:inherit;}
+.scp-reply-btn{background:#00897B;color:#fff;border:none;border-radius:8px;padding:10px 16px;cursor:pointer;font-weight:700;font-size:13px;}
+.scp-back{color:#fff;background:none;border:none;cursor:pointer;font-size:16px;margin-right:8px;padding:0;}
+</style>
+
+<button id="staff-chat-fab" onclick="toggleStaffChatPanel()">
+  💬 チャット <span id="staff-chat-badge" class="staff-chat-badge"></span>
+</button>
+<div id="staff-chat-panel">
+  <div class="scp-header">
+    <button class="scp-back" id="scp-back-btn" onclick="scpShowTableList()" style="display:none">←</button>
+    <span id="scp-title">スタッフチャット管理</span>
+  </div>
+  <div class="scp-tabs">
+    <div class="scp-tab active" onclick="scpSetTab('active')">アクティブ</div>
+    <div class="scp-tab" onclick="scpSetTab('all')">全テーブル</div>
+  </div>
+  <div id="scp-table-list" class="scp-table-list"></div>
+  <div id="scp-msgs" class="scp-msgs"></div>
+  <div id="scp-reply-area" class="scp-reply-area">
+    <textarea id="scp-reply-input" class="scp-reply-input" placeholder="返信を入力..."></textarea>
+    <button class="scp-reply-btn" onclick="scpSendReply()">送信</button>
+  </div>
+</div>
+
+<script>
+// ===== STAFF CHAT PANEL =====
+let scpCurrentTable = 0;
+let scpMessages = {};
+let scpUnread = {};
+let scpTab = 'active';
+let scpPanelOpen = false;
+
+function toggleStaffChatPanel(){
+  scpPanelOpen = !scpPanelOpen;
+  document.getElementById('staff-chat-panel').classList.toggle('open', scpPanelOpen);
+  if(scpPanelOpen) scpLoadTables();
+}
+
+function scpSetTab(tab){
+  scpTab = tab;
+  document.querySelectorAll('.scp-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='active'?0:1)));
+  scpLoadTables();
+}
+
+function scpLoadTables(){
+  fetch('chat_api.php?action=get&tableNo=0')
+  .then(r=>r.json())
+  .then(data=>{
+    if(!data.ok) return;
+    // Group by table
+    const tables = {};
+    data.messages.forEach(m=>{
+      if(!tables[m.tableNo]) tables[m.tableNo] = {tableNo:m.tableNo, msgs:[], hasNew:false};
+      tables[m.tableNo].msgs.push(m);
+      if(m.role==='user') tables[m.tableNo].hasNew = true;
+    });
+    
+    const list = document.getElementById('scp-table-list');
+    const entries = Object.values(tables).sort((a,b)=>b.tableNo-a.tableNo);
+    
+    if(entries.length === 0){
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#999;font-size:13px;">チャットはありません</div>';
+      return;
+    }
+    
+    list.innerHTML = entries.map(t=>{
+      const lastMsg = t.msgs[t.msgs.length-1];
+      const preview = lastMsg ? lastMsg.message.substring(0,30) : '';
+      const unreadDot = t.hasNew ? '<span class="scp-unread">NEW</span>' : '';
+      return '<div class="scp-table-item" onclick="scpOpenTable('+t.tableNo+')"><div><div style="font-weight:700">テーブル'+t.tableNo+'</div><div style="font-size:12px;color:#999">'+preview+'</div></div>'+unreadDot+'</div>';
+    }).join('');
+  })
+  .catch(e=>console.error(e));
+}
+
+function scpOpenTable(tableNo){
+  scpCurrentTable = tableNo;
+  document.getElementById('scp-title').textContent = 'テーブル'+tableNo;
+  document.getElementById('scp-back-btn').style.display = 'inline';
+  document.getElementById('scp-table-list').style.display = 'none';
+  document.getElementById('scp-msgs').classList.add('active');
+  document.getElementById('scp-reply-area').classList.add('active');
+  scpLoadMessages(tableNo);
+}
+
+function scpShowTableList(){
+  scpCurrentTable = 0;
+  document.getElementById('scp-title').textContent = 'スタッフチャット管理';
+  document.getElementById('scp-back-btn').style.display = 'none';
+  document.getElementById('scp-table-list').style.display = 'block';
+  document.getElementById('scp-msgs').classList.remove('active');
+  document.getElementById('scp-reply-area').classList.remove('active');
+  scpLoadTables();
+}
+
+function scpLoadMessages(tableNo){
+  fetch('chat_api.php?action=get&tableNo='+tableNo)
+  .then(r=>r.json())
+  .then(data=>{
+    if(!data.ok) return;
+    const msgs = (data.messages||[]).reverse();
+    const box = document.getElementById('scp-msgs');
+    box.innerHTML = msgs.map(m=>{
+      const time = new Date(m.created_at).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+      const roleLabel = m.role==='user'?'👤 お客様':m.role==='ai'?'🤖 AI':'👔 スタッフ';
+      return '<div class="scp-msg '+m.role+'"><div class="scp-msg-table">'+roleLabel+'</div>'+m.message+'<div class="scp-msg-time">'+time+'</div></div>';
+    }).join('');
+    box.scrollTop = box.scrollHeight;
+  });
+}
+
+function scpSendReply(){
+  const input = document.getElementById('scp-reply-input');
+  const msg = input.value.trim();
+  if(!msg || !scpCurrentTable) return;
+  input.value = '';
+  
+  fetch('chat_api.php', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'reply', tableNo:scpCurrentTable, message:msg})
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    if(data.ok) scpLoadMessages(scpCurrentTable);
+  });
+}
+
+// Enter key in reply input
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp = document.getElementById('scp-reply-input');
+  if(inp) inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); scpSendReply(); }
+  });
+});
+
+// Auto-poll for new messages when panel is open
+setInterval(()=>{
+  if(!scpPanelOpen) return;
+  if(scpCurrentTable > 0) scpLoadMessages(scpCurrentTable);
+  else scpLoadTables();
+  
+  // Update badge
+  fetch('chat_api.php?action=get&tableNo=0')
+  .then(r=>r.json())
+  .then(data=>{
+    if(!data.ok) return;
+    const hasUser = data.messages.some(m=>m.role==='user');
+    const badge = document.getElementById('staff-chat-badge');
+    if(badge){ badge.textContent='!'; badge.classList.toggle('show',hasUser); }
+  }).catch(()=>{});
+}, 5000);
+
+// Check badge on load
+setTimeout(()=>{
+  fetch('chat_api.php?action=get&tableNo=0')
+  .then(r=>r.json())
+  .then(data=>{
+    if(!data.ok) return;
+    const count = data.messages.filter(m=>m.role==='user').length;
+    const badge = document.getElementById('staff-chat-badge');
+    if(badge && count > 0){ badge.textContent=count; badge.classList.add('show'); }
+  }).catch(()=>{});
+}, 1000);
 </script>
 </body>
 </html>
