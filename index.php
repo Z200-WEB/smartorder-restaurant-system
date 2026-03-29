@@ -1552,29 +1552,32 @@ document.getElementById('callStaffOverlay').addEventListener('click',function(e)
 document.getElementById('comboOverlay').addEventListener('click',function(e){if(e.target===this)skipCombo();});
 
 
-// ========== SSE REAL-TIME (staff replies) ==========
-(function initSSE(){
+// ========== REAL-TIME STAFF REPLY POLLING ==========
+(function initStaffReplyPoll(){
   const tableNo = new URLSearchParams(location.search).get('tableNo') || '1';
   let lastId = 0;
   
   function pollForStaffReply(){
-    fetch('chat_api.php?action=get&tableNo='+tableNo+'&since='+lastId)
+    fetch('chat_api.php?action=check_staff_reply&tableNo='+tableNo+'&since='+lastId)
     .then(r=>r.json())
     .then(data=>{
       if(data.ok && data.messages && data.messages.length > 0){
         data.messages.forEach(msg=>{
-          if(msg.id > lastId) lastId = parseInt(msg.id);
-          if(msg.role === 'staff'){
-            // Staff replied! Show it
-            const stamp=new Date(msg.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-            window.staffChatMessages.push({type:'received',text:'👤 スタッフ: '+msg.message,time:stamp});
-            window.staffChatUnread++;
-            renderStaffChat();
-            updateChatBadge();
-            // Browser notification
-            if(Notification.permission==='granted'){
-              new Notification('スタッフからメッセージ',{body:msg.message,icon:'/favicon.ico'});
-            }
+          if(parseInt(msg.id) > lastId) lastId = parseInt(msg.id);
+          // Show staff reply in chat
+          const stamp = new Date(msg.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+          window.staffChatMessages = (window.staffChatMessages||[]).filter(m=>m.type!=='typing');
+          window.staffChatMessages.push({
+            type:'received',
+            text:'👔 スタッフ: '+msg.message,
+            time:stamp
+          });
+          window.staffChatUnread = (window.staffChatUnread||0) + 1;
+          renderStaffChat();
+          updateChatBadge();
+          // Browser notification
+          if(Notification && Notification.permission==='granted'){
+            new Notification('スタッフからメッセージ',{body:msg.message,icon:'/favicon.ico'});
           }
         });
       }
@@ -1582,15 +1585,32 @@ document.getElementById('comboOverlay').addEventListener('click',function(e){if(
     .catch(()=>{});
   }
   
-  // Request notification permission on first chat open
+  // Request notification permission
   window._requestNotifPermission = function(){
     if(Notification && Notification.permission==='default'){
       Notification.requestPermission();
     }
   };
   
-  // Poll every 3 seconds for staff replies
+  // Poll every 3 seconds
   setInterval(pollForStaffReply, 3000);
+  
+  // Also load existing staff messages on page load
+  setTimeout(()=>{
+    fetch('chat_api.php?action=get&tableNo='+tableNo)
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.ok && data.messages){
+        const staffMsgs = data.messages.filter(m=>m.role==='staff').reverse();
+        if(staffMsgs.length > 0){
+          staffMsgs.forEach(msg=>{
+            if(parseInt(msg.id) > lastId) lastId = parseInt(msg.id);
+          });
+          // Don't auto-show old staff messages on load to avoid confusion
+        }
+      }
+    }).catch(()=>{});
+  }, 1000);
 })();
 
 </script>
