@@ -546,61 +546,85 @@ document.getElementById('paymentModal').addEventListener('click', function(e) {
   if (e.target === this) closePaymentModal();
 });
 
-// Real-time order refresh (polling every 3s instead of page reload)
+// Real-time order refresh - polls orders_api.php every 3s
 let _orderPollActive = true;
-let _lastOrderHash = '';
+let _lastOrderData = '';
 
 function fetchOrdersRealtime(){
   if(!_orderPollActive) return;
-  // Only fetch if payment modal is not open
-  if(document.getElementById('paymentModal') && document.getElementById('paymentModal').style.display === 'flex') return;
-  
-  fetch(location.href, {headers:{'X-Requested-With':'XMLHttpRequest','Accept':'text/html'}})
-  .then(r=>r.text())
-  .then(html=>{
-    // Extract orders table content
-    const parser = new DOMParser();
-    const doc2 = parser.parseFromString(html, 'text/html');
-    const newTable = doc2.querySelector('.orders-table, .order-list, [data-orders]');
-    const oldTable = document.querySelector('.orders-table, .order-list, [data-orders]');
-    if(newTable && oldTable){
-      const newHash = newTable.innerHTML.length;
-      if(newHash !== _lastOrderHash){
-        _lastOrderHash = newHash;
-        oldTable.innerHTML = newTable.innerHTML;
-        // Re-attach event listeners
-        attachOrderEvents();
-        // Notification for new orders
-        if(_lastOrderHash && Notification.permission==='granted'){
-          new Notification('新しい注文が入りました', {icon:'/favicon.ico'});
-        }
-      }
-    }
-  })
-  .catch(()=>{});
+  // Skip if payment modal is open
+  const modal = document.getElementById('paymentModal');
+  if(modal && modal.style.display === 'flex') return;
+
+  fetch('orders_api.php', {credentials:'same-origin'})
+    .then(r => r.json())
+    .then(data => {
+      if(!data.ok) return;
+      const sig = JSON.stringify(data.orders);
+      if(sig === _lastOrderData) return; // no change
+      _lastOrderData = sig;
+      renderOrders(data.orders);
+      updateStats(data.orders);
+    })
+    .catch(()=>{});
 }
 
-function attachOrderEvents(){
-  // Re-bind any onclick handlers after DOM update
-  document.querySelectorAll('[data-action]').forEach(el=>{
-    // buttons already have onclick in HTML
-  });
+function renderOrders(orders){
+  const grid = document.querySelector('.orders-grid');
+  if(!grid) return;
+  if(!orders || orders.length === 0){
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">注文がありません</div><div class="empty-text">新しい注文が入るとここに表示されます</div></div>';
+    return;
+  }
+  // Check if new orders appeared
+  const oldCount = grid.querySelectorAll('.order-card').length;
+  const newCount = orders.length;
+  grid.innerHTML = orders.map((order, i) => {
+    const dateStr = new Date(order.dateB).toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const shortOrderNo = order.orderNo.slice(-8);
+    return `<div class="order-card" style="animation-delay:${i*0.05}s">
+      <div class="order-header">
+        <div class="table-badge">🍽️ Table ${order.tableNo}</div>
+        <div class="order-time">🕐 ${dateStr}</div>
+      </div>
+      <div class="order-body">
+        <div class="order-info-row"><span class="order-label">注文番号:</span><span class="order-value">${shortOrderNo}</span></div>
+        <div class="order-info-row"><span class="order-label">商品点数:</span><span class="order-value">${order.itemCount} 点</span></div>
+      </div>
+      <div class="order-total"><div class="order-total-row"><span>💴 合計金額</span><span>¥${Number(order.totalAmount).toLocaleString()}</span></div></div>
+      <div class="order-actions">
+        <a href="order.php?orderNo=${encodeURIComponent(order.orderNo)}" class="btn-details">📋 詳細を見る</a>
+        <button onclick="confirmPayment('${order.orderNo}', ${order.tableNo}, ${order.totalAmount})" class="btn-payment">✅ 会計済み</button>
+      </div>
+    </div>`;
+  }).join('');
+  // Notify if new orders
+  if(newCount > oldCount && oldCount > 0 && Notification.permission === 'granted'){
+    new Notification('新しい注文が入りました！', {icon:'/favicon.ico'});
+  }
+}
+
+function updateStats(orders){
+  const countEl = document.querySelector('.stat-number');
+  if(!countEl) return;
+  const allNums = document.querySelectorAll('.stat-number');
+  if(allNums.length >= 4){
+    allNums[0].textContent = orders.length;
+    const rev = orders.reduce((s,o)=>s+parseFloat(o.totalAmount||0),0);
+    allNums[1].textContent = '¥' + Math.round(rev).toLocaleString();
+    const items = orders.reduce((s,o)=>s+parseInt(o.itemCount||0),0);
+    allNums[2].textContent = items;
+    const tables = new Set(orders.map(o=>o.tableNo)).size;
+    allNums[3].textContent = tables;
+  }
 }
 
 // Request notification permission
-if(Notification && Notification.permission==='default'){
-  Notification.requestPermission();
-}
+if(Notification && Notification.permission === 'default') Notification.requestPermission();
 
 // Poll every 3 seconds
 setInterval(fetchOrdersRealtime, 3000);
-
-// Also keep a fallback full reload every 60s
-setInterval(()=>{
-  if(!document.getElementById('paymentModal') || document.getElementById('paymentModal').style.display !== 'flex'){
-    location.reload();
-  }
-}, 60000);
+fetchOrdersRealtime(); // immediate first call
 </script>
 
 <!-- ===== STAFF CHAT PANEL ===== -->
