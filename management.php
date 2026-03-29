@@ -362,10 +362,6 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <p>お客様からの注文をリアルタイムで管理</p>
     </div>
     <div class="header-actions">
-      <div class="refresh-badge">
-        <div class="refresh-dot"></div>
-        10秒ごとに更新
-      </div>
       <a href="admin.php" class="back-button">← 管理画面に戻る</a>
     </div>
   </div>
@@ -745,46 +741,66 @@ function scpLoadMessages(tableNo){
 }
 
 function scpSendReply(){
-  const input = document.getElementById('scp-reply-input');
-  const msg = input.value.trim();
-  if(!msg || !scpCurrentTable) return;
-  input.value = '';
+  const inputEl = document.getElementById('scp-reply-input');
+  if(!inputEl) { alert('入力フィールドが見つかりません'); return; }
+  const msg = inputEl.value.trim();
+  if(!msg) return;
+  if(!scpCurrentTable) { alert('テーブルを選択してください'); return; }
+  inputEl.value = '';
+  inputEl.disabled = true;
+  
+  const btn = document.querySelector('.scp-reply-btn');
+  if(btn) btn.disabled = true;
   
   fetch('chat_api.php', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
+    credentials:'same-origin',
     body:JSON.stringify({action:'reply', tableNo:scpCurrentTable, message:msg})
   })
-  .then(r=>r.json())
+  .then(r=>{
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  })
   .then(data=>{
-    if(data.ok) scpLoadMessages(scpCurrentTable);
+    inputEl.disabled = false;
+    if(btn) btn.disabled = false;
+    if(data.ok){
+      scpLoadMessages(scpCurrentTable);
+    } else {
+      alert('送信失敗: ' + (data.error || '不明なエラー'));
+      inputEl.value = msg; // restore
+    }
+  })
+  .catch(e=>{
+    inputEl.disabled = false;
+    if(btn) btn.disabled = false;
+    console.error('Reply error:', e);
+    inputEl.value = msg; // restore
+    alert('通信エラー: ' + e.message);
   });
 }
 
-// Enter key in reply input
-document.addEventListener('DOMContentLoaded',()=>{
-  const inp = document.getElementById('scp-reply-input');
-  if(inp) inp.addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); scpSendReply(); }
-  });
-});
+// Enter key in reply input - event delegation
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter' && !e.shiftKey){
+    const active = document.activeElement;
+    if(active && active.id === 'scp-reply-input'){
+      e.preventDefault();
+      scpSendReply();
+    }
+  }
+}););
 
-// Auto-poll for new messages when panel is open
+// Auto-poll for new messages when panel is open (every 2s for real-time feel)
 setInterval(()=>{
   if(!scpPanelOpen) return;
-  if(scpCurrentTable > 0) scpLoadMessages(scpCurrentTable);
-  else scpLoadTables();
-  
-  // Update badge
-  fetch('chat_api.php?action=get&tableNo=0')
-  .then(r=>r.json())
-  .then(data=>{
-    if(!data.ok) return;
-    const hasUser = data.messages.some(m=>m.role==='user');
-    const badge = document.getElementById('staff-chat-badge');
-    if(badge){ badge.textContent='!'; badge.classList.toggle('show',hasUser); }
-  }).catch(()=>{});
-}, 5000);
+  if(scpCurrentTable > 0){
+    scpLoadMessages(scpCurrentTable);
+  } else {
+    scpLoadTables();
+  }
+}, 2000);
 
 // Check badge on load
 setTimeout(()=>{
