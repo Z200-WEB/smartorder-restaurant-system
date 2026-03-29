@@ -1400,9 +1400,10 @@ function renderStaffChat(){
     box.innerHTML='<div class="chat-empty">まだメッセージはありません</div>';
     return;
   }
-  box.innerHTML=window.staffChatMessages.map(msg=>
-    '<div class="chat-msg '+msg.type+'">'+msg.text+'<div class="chat-msg-time">'+msg.time+'</div></div>'
-  ).join('');
+  box.innerHTML=window.staffChatMessages.map(msg=>{
+    if(msg.type==='typing') return '<div class="chat-msg received"><span class="typing-dots">●●●</span></div>';
+    return '<div class="chat-msg '+msg.type+'">'+msg.text+(msg.time?'<div class="chat-msg-time">'+msg.time+'</div>':'')+'</div>';
+  }).join('');
   box.scrollTop=box.scrollHeight;
 }
 function addStaffSystemMessage(text, unread){
@@ -1419,28 +1420,54 @@ function toggleStaffChat(show){
     window.staffChatUnread=0;
     updateChatBadge();
     renderStaffChat();
+  if(show && window._requestNotifPermission) window._requestNotifPermission();
     const input=document.getElementById('chat-input');
     if(input) input.focus();
   }
-}
-function getStaffReply(text){
-  const lower=text.toLowerCase();
-  if(lower.includes('おすすめ') || lower.includes('osusume')) return '本日のおすすめは人気メニューと季節限定です。気分に合わせてご案内できます。';
-  if(lower.includes('drink') || lower.includes('ドリンク') || lower.includes('飲み物')) return 'さっぱり系ならハイボール、食事と合わせるなら生ビールが人気です。';
-  if(lower.includes('dessert') || lower.includes('デザート') || lower.includes('甘')) return '食後でしたらデザート系が相性良いです。軽めならアイス系がおすすめです。';
-  if(lower.includes('allergy') || lower.includes('アレルギ') || lower.includes('苦手')) return 'アレルギーや苦手な食材があれば、このまま送っていただければスタッフへ共有します。';
-  return '確認ありがとうございます。スタッフ側でも確認し、必要ならすぐ伺います。';
 }
 function sendStaffChat(){
   const input=document.getElementById('chat-input');
   if(!input) return;
   const text=input.value.trim();
   if(!text) return;
-  const stamp=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  window.staffChatMessages.push({type:'sent',text:text,time:stamp});
   input.value='';
+  const stamp=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  window.staffChatMessages.push({type:'sent',text:text,time:stamp});
   renderStaffChat();
-  setTimeout(()=>addStaffSystemMessage(getStaffReply(text), document.getElementById('chat-overlay') && !document.getElementById('chat-overlay').classList.contains('show')), 900);
+  
+  // Show typing indicator
+  window.staffChatMessages.push({type:'typing',text:'...',time:''});
+  renderStaffChat();
+  
+  // Get tableNo from URL
+  const tableNo = new URLSearchParams(location.search).get('tableNo') || '1';
+  
+  // History for context (last 6 messages)
+  const history = window.staffChatMessages.filter(m=>m.type==='sent'||m.type==='received').slice(-6).map(m=>({role:m.type,text:m.text}));
+  
+  // Call Gemini AI API
+  fetch('gemini_chat.php', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:text, tableNo:parseInt(tableNo), history:history})
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    // Remove typing indicator
+    window.staffChatMessages = window.staffChatMessages.filter(m=>m.type!=='typing');
+    const reply = data.reply || 'ありがとうございます。スタッフが対応いたします。';
+    const stamp2=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    window.staffChatMessages.push({type:'received',text:reply,time:stamp2});
+    window.staffChatUnread++;
+    renderStaffChat();
+    updateChatBadge();
+  })
+  .catch(()=>{
+    window.staffChatMessages = window.staffChatMessages.filter(m=>m.type!=='typing');
+    const stamp2=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    window.staffChatMessages.push({type:'received',text:'申し訳ございません。ただいま接続中です。スタッフを呼んでください。',time:stamp2});
+    renderStaffChat();
+  });
 }
 
 const _origRefreshCart = refreshCart;
@@ -1523,6 +1550,49 @@ document.getElementById('orderModal').addEventListener('click',function(e){if(e.
 document.getElementById('confirmModal').addEventListener('click',function(e){if(e.target===this)closeModal('confirmModal');});
 document.getElementById('callStaffOverlay').addEventListener('click',function(e){if(e.target===this)closeCallStaff();});
 document.getElementById('comboOverlay').addEventListener('click',function(e){if(e.target===this)skipCombo();});
+
+
+// ========== SSE REAL-TIME (staff replies) ==========
+(function initSSE(){
+  const tableNo = new URLSearchParams(location.search).get('tableNo') || '1';
+  let lastId = 0;
+  
+  function pollForStaffReply(){
+    fetch('chat_api.php?action=get&tableNo='+tableNo+'&since='+lastId)
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.ok && data.messages && data.messages.length > 0){
+        data.messages.forEach(msg=>{
+          if(msg.id > lastId) lastId = parseInt(msg.id);
+          if(msg.role === 'staff'){
+            // Staff replied! Show it
+            const stamp=new Date(msg.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+            window.staffChatMessages.push({type:'received',text:'👤 スタッフ: '+msg.message,time:stamp});
+            window.staffChatUnread++;
+            renderStaffChat();
+            updateChatBadge();
+            // Browser notification
+            if(Notification.permission==='granted'){
+              new Notification('スタッフからメッセージ',{body:msg.message,icon:'/favicon.ico'});
+            }
+          }
+        });
+      }
+    })
+    .catch(()=>{});
+  }
+  
+  // Request notification permission on first chat open
+  window._requestNotifPermission = function(){
+    if(Notification && Notification.permission==='default'){
+      Notification.requestPermission();
+    }
+  };
+  
+  // Poll every 3 seconds for staff replies
+  setInterval(pollForStaffReply, 3000);
+})();
+
 </script>
 </body>
 </html>
