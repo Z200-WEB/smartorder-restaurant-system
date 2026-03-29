@@ -790,7 +790,7 @@ document.addEventListener('keydown', function(e){
       scpSendReply();
     }
   }
-}););
+});
 
 // Auto-poll for new messages when panel is open (every 2s for real-time feel)
 setInterval(()=>{
