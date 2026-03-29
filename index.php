@@ -94,7 +94,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 @media(max-width:900px){.app-layout{grid-template-columns:1fr}.cart-sidebar{display:none}}
 .menu-section-title{font-size:1rem;font-weight:700;color:var(--text2);margin-bottom:16px;text-transform:uppercase;letter-spacing:.06em}
 .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
-.menu-card{background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer;transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition);border:2px solid transparent;position:relative}
+.menu-card{background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer;transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition);border:2px solid transparent;position:relative;display:flex;flex-direction:column}
 .menu-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--primary-light)}
 .item-img-wrap{width:100%;aspect-ratio:1;background:linear-gradient(135deg,#e0fdfa 0%,#ccfbf1 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 .item-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
@@ -103,7 +103,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .item-info{padding:12px}
 .item-name{font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:5px;line-height:1.3}
 .item-price{font-size:.95rem;font-weight:700;color:var(--primary)}
-.item-add-btn{width:100%;padding:8px;background:var(--primary);color:#fff;border:none;font-size:.82rem;font-weight:600;cursor:pointer;transition:background var(--transition);letter-spacing:.02em}
+.item-add-btn{width:100%;padding:8px;background:var(--primary);color:#fff;border:none;font-size:.82rem;font-weight:600;cursor:pointer;transition:background var(--transition);letter-spacing:.02em;margin-top:auto;display:block;flex-shrink:0}
 .item-add-btn:hover{background:var(--primary-dark)}
 .item-badge{position:absolute;top:8px;left:8px;padding:3px 9px;border-radius:999px;font-size:.7rem;font-weight:700;z-index:2;letter-spacing:.03em;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 .badge-popular{background:linear-gradient(135deg,#ef4444,#f97316);color:#fff}
@@ -590,31 +590,29 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
       document.head.appendChild(tag);
     });
   }
-  // Load ALL devices - no screen.width check!
   Promise.all([
     loadRes(base + "waifu.css", "css"),
     loadRes(base + "live2d.min.js", "js"),
     loadRes(base + "waifu-tips.js", "js")
   ]).then(() => {
-    // MASCOT FIX: Force blue-hair girl (bilibili-live/22) on ALL devices
-    // Without this, mobile/fresh visits default to modelId:1 (blonde character)
     localStorage.setItem('modelId', '2');
     localStorage.setItem('modelTexturesId', '0');
     initWidget({
-      waifuPath: base + "waifu-tips.json",
+      waifuPath: '/waifu-tips.json',
       cdnPath: "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/",
-      tools: ["hitokoto","asteroids","switch-model","switch-texture","photo","info","quit"]
+      tools: ["switch-model","switch-texture","quit"]
     });
-    // Double-guarantee: force correct model after CDN loads (handles slow mobile)
-    [1000, 3000, 6000].forEach(t => setTimeout(() => {
-      if (localStorage.getItem('modelId') !== '2') {
-        localStorage.setItem('modelId', '2');
-        localStorage.setItem('modelTexturesId', '0');
-      }
+    setTimeout(function() {
       if (typeof loadlive2d === 'function') {
         loadlive2d('live2d', 'https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/bilibili-live/22/index.json');
       }
-    }, t));
+      localStorage.setItem('modelId', '2');
+    }, 800);
+    setTimeout(function() {
+      if (typeof loadlive2d === 'function') {
+        loadlive2d('live2d', 'https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/bilibili-live/22/index.json');
+      }
+    }, 2500);
   }).catch(e => console.warn("Live2D load error:", e));
 })();
 </script>
@@ -622,55 +620,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 // Block widget's own showMessage to prevent unexpected greetings
 window.showMessage = function(){};
 </script>
-<script>
-function speakVoicevox(text){
-  try{
-    const clean=text.replace(/[！？。、～♪♡🎉🎊😊😋👍✨🍽️🥳🔍👀🔎🔔👨‍🍳🙋🌸]/gu,'').trim();
-    if(!clean)return;
-    const url='https://api.tts.quest/v3/voicevox/synthesis?text='+encodeURIComponent(clean)+'&speaker=22';
-    fetch(url).then(r=>r.json()).then(d=>{
-      if(!d||!d.mp3DownloadUrl)return;
-      function tryPlay(attempts){
-        fetch(d.audioStatusUrl).then(r=>r.json()).then(s=>{
-          if(s.isAudioReady){
-            if(window._mascotAudio){window._mascotAudio.pause();}
-            const a=new Audio(d.mp3DownloadUrl);
-            window._mascotAudio=a;
-            a.play().catch(()=>{});
-          } else if(attempts>0){
-            setTimeout(()=>tryPlay(attempts-1),600);
-          }
-        }).catch(()=>{});
-      }
-      setTimeout(()=>tryPlay(8),400);
-    }).catch(()=>{});
-  }catch(e){}
-}
-</script>
-<script>
-// Show Japanese welcome message after mascot loads
-(function() {
-  var welcomeMsgs = [
-    'いらっしゃいませ！今日は何になさいますか？',
-    'いらっしゃいませ！ごゆっくりお選びください♪',
-    'いらっしゃいませ！本日もご来店ありがとうございます！',
-    'いらっしゃいませ！お好みのメニューはございますか？',
-  ];
-  function tryShowWelcome(attempts) {
-    var el = document.getElementById('waifu-tips');
-    if (el && el.style !== undefined) {
-      var msg = welcomeMsgs[Math.floor(Math.random() * welcomeMsgs.length)];
-      el.innerHTML = msg; speakVoicevox(msg);
-      el.style.opacity = '1';
-      el.style.display = 'block';
-      setTimeout(function() { el.style.opacity = '0'; }, 8000);
-    } else if (attempts > 0) {
-      setTimeout(function() { tryShowWelcome(attempts - 1); }, 500);
-    }
-  }
-  setTimeout(function() { tryShowWelcome(10); }, 3000);
-})();
-</script>
+
 <div class="call-staff-overlay" id="callStaffOverlay">
   <div class="call-staff-box">
     <span class="call-staff-emoji">🔔</span>
@@ -728,7 +678,6 @@ function speakVoicevox(text){
 </div>
 <nav class="category-nav">
   <div class="category-inner">
-    <button class="cat-btn active" onclick="filterCategory('all',this)">すべて</button>
     <?php foreach($categories as $cat): ?>
     <button class="cat-btn" onclick="filterCategory('<?php echo (int)$cat['id']; ?>',this)"><?php echo htmlspecialchars($cat['icon'].' '.$cat['categoryName']); ?></button>
     <?php endforeach; ?>
@@ -879,7 +828,7 @@ const ALL_ITEMS = <?php
 function mascotReact(type){
   const msgs={
     add:["ご選択ありがとうございます！","こちら人気メニューでございます！","素晴らしいお選びですね！","ぜひお楽しみください！","おすすめでございます！"], checkout:["ご注文ありがとうございます！ごゆっくりどうぞ♪","ありがとうございます！すぐにお持ちします！","ご注文確かに承りました！"], search:["何かお探しでしょうか？","お好みのものは見つかりましたか？","他にもおすすめがございます！"], staff:["スタッフがすぐに参ります！","少々お待ちください！","ただいまお呼びしております！"] }; const arr=msgs[type]||msgs.add;
-  const msg=arr[Math.floor(Math.random()*arr.length)]; speakVoicevox(msg);
+  const msg=arr[Math.floor(Math.random()*arr.length)];
   // Try to use Live2D widget tip system if available, fallback to toast
   showToast('🌸 '+msg,'success');
 }
@@ -1192,7 +1141,6 @@ function toggleFav(itemId, btn){
     setTimeout(()=>btn.classList.remove('pop'),400);
     showToast('❤️ お気に入りに追加しました！','success');
     const msg = 'こちらはお気に入りに追加されましたね！素敵なお選びです！';
-    speakVoicevox(msg);
   }
   localStorage.setItem('smartorder_favs', JSON.stringify(favs));
 }
@@ -1229,7 +1177,6 @@ function addStamp(){
   if(stampCount > 0 && stampCount % 5 === 0){
     setTimeout(()=>{
       document.getElementById('stampReward').classList.add('show');
-      speakVoicevox('スタンプカードが完成しました！ありがとうございます！');
     }, 1200);
   }
 }
@@ -1262,7 +1209,6 @@ function showStaffArrival(){
     if(secs <= 0){
       clearInterval(_staffTimer);
       msg.textContent = 'スタッフが到着しました！🙋';
-      speakVoicevox('スタッフが到着しました！少々お待ちください。');
       setTimeout(()=>toast.classList.remove('show'), 3000);
     } else if(secs === 30){
       msg.textContent = 'もうすぐスタッフが参ります！ あと ' + secs + '秒';
@@ -1288,7 +1234,6 @@ function mascotReact(type){
   const arr=msgs[type]||msgs.add;
   const msg=arr[Math.floor(Math.random()*arr.length)];
   showMascotSpeech(msg, type==='staff' ? 'wave' : 'jump');
-  speakVoicevox(msg);
   showToast('🌸 '+msg,'success');
 }
 function showMascotSpeech(message, motion){
@@ -1540,7 +1485,9 @@ handleSearch = function(val){
 
 // Init on load
 window.addEventListener('DOMContentLoaded', ()=>{ initFavs(); initStamps(); });
-setTimeout(()=>{ initFavs(); initStamps(); }, 500);
+setTimeout(()=>{ initFavs(); initStamps();
+  const _fc=document.querySelector('.cat-btn'); if(_fc)_fc.click();
+}, 500);
 
 window.addEventListener('DOMContentLoaded', ()=>{
   applyHistoryBadges();
