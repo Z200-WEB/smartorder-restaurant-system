@@ -571,7 +571,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 })();
 </script>
 <script>
-// Custom Live2D loader - works on ALL screen sizes (no mobile block)
+// Custom Live2D loader - works on ALL screen sizes (no mobile block) - v2
 (function() {
   const base = "https://fastly.jsdelivr.net/npm/live2d-widgets@0/";
   function loadRes(url, type) {
