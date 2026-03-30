@@ -159,7 +159,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .btn-call-confirm:hover{opacity:.9}
 .btn-call-close{margin-top:10px;width:100%;padding:10px;border:2px solid var(--border);background:#fff;border-radius:var(--radius);cursor:pointer;font-weight:600;color:var(--text2);transition:all var(--transition)}
 .btn-call-close:hover{border-color:var(--primary);color:var(--primary)}
-.float-cart{display:none;position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#134e4a,var(--primary));color:#fff;border:none;border-radius:999px;padding:14px 22px;font-size:.9rem;font-weight:700;cursor:pointer;box-shadow:0 6px 24px var(--primary-glow);z-index:200;align-items:center;gap:8px;transition:all var(--transition)}
+.float-cart{display:none;position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#134e4a,var(--primary));color:#fff;border:none;border-radius:999px;padding:14px 22px;font-size:.9rem;font-weight:700;cursor:pointer;box-shadow:0 6px 24px var(--primary-glow);z-index:400;align-items:center;gap:8px;transition:all var(--transition)}
 .float-cart:hover{transform:translateY(-2px);box-shadow:0 8px 32px var(--primary-glow)}
 @media(max-width:900px){.float-cart{display:flex}}
 @media(max-width:480px){.float-cart{bottom:16px!important;right:12px!important;padding:10px 16px!important;font-size:.82rem!important}}
@@ -251,8 +251,8 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 #waifu-tool-switch-model,#waifu-tool-switch-texture,#waifu-tool-asteroids,#waifu-tool-hitokoto,#waifu-tool-photo,#waifu-tool-info{display:none!important}
 
 /* ── MASCOT RESPONSIVE ── */
-#waifu{bottom:0!important;left:10px!important;z-index:300!important;pointer-events:none!important;transition:width .3s,height .3s!important}
-#waifu canvas,#waifu-tool{pointer-events:auto!important}
+#waifu,#waifu *,#waifu canvas{pointer-events:none!important}
+#waifu{bottom:0!important;left:10px!important;z-index:50!important;transition:width .3s,height .3s!important}
 /* Desktop: normal 300px */
 @media(min-width:901px){
   #waifu{width:280px!important;height:280px!important}
@@ -444,7 +444,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 @keyframes hotPulse{0%,100%{box-shadow:0 2px 6px rgba(239,68,68,.3)}50%{box-shadow:0 4px 14px rgba(239,68,68,.7)}}
 .badge-before-corner{position:absolute;bottom:8px;left:8px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border-radius:999px;padding:2px 8px;font-size:.62rem;font-weight:700;z-index:4;white-space:nowrap}
 /* ── FEATURE: Lucky Roulette button ── */
-#lucky-btn{position:fixed;right:24px;bottom:90px;z-index:200;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-size:.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(139,92,246,.45);display:flex;align-items:center;gap:6px;transition:transform .2s,box-shadow .2s;white-space:nowrap}
+#lucky-btn{position:fixed;right:24px;bottom:90px;z-index:400;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-size:.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(139,92,246,.45);display:flex;align-items:center;gap:6px;transition:transform .2s,box-shadow .2s;white-space:nowrap}
 #lucky-btn:hover{transform:scale(1.06);box-shadow:0 6px 22px rgba(139,92,246,.6)}
 #lucky-btn.spinning{animation:luckySpin .6s ease}
 @keyframes luckySpin{0%{transform:rotate(0)scale(1)}50%{transform:rotate(180deg)scale(1.1)}100%{transform:rotate(360deg)scale(1)}}
@@ -459,7 +459,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .btn-lucky-add{padding:12px 24px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;border:none;border-radius:999px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(139,92,246,.4)}
 .btn-lucky-skip{padding:12px 20px;background:#f1f5f9;color:#64748b;border:none;border-radius:999px;font-size:.95rem;cursor:pointer}
 /* ── FEATURE: Staff Chat ── */
-#chat-btn{position:fixed;left:16px;bottom:90px;z-index:200;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;border-radius:999px;padding:10px 16px;font-size:.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(15,118,110,.4);display:flex;align-items:center;gap:6px;transition:transform .2s;white-space:nowrap}
+#chat-btn{position:fixed;left:16px;bottom:90px;z-index:400;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;border-radius:999px;padding:10px 16px;font-size:.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(15,118,110,.4);display:flex;align-items:center;gap:6px;transition:transform .2s;white-space:nowrap}
 #chat-btn:hover{transform:scale(1.06)}
 #chat-btn .chat-badge{background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;display:none;align-items:center;justify-content:center;font-weight:700}
 #chat-btn .chat-badge.show{display:flex}
