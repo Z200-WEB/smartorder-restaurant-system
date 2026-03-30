@@ -11,7 +11,7 @@ $action = $_GET['action'] ?? $_POST['action'] ?? 'get';
 
 // Auth check - returns JSON error instead of redirect
 function checkStaffAuth(): bool {
-    return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
+    return isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
 }
 
 // Ensure chat table exists
