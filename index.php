@@ -251,7 +251,8 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 #waifu-tool-switch-model,#waifu-tool-switch-texture,#waifu-tool-asteroids,#waifu-tool-hitokoto,#waifu-tool-photo,#waifu-tool-info{display:none!important}
 
 /* ── MASCOT RESPONSIVE ── */
-#waifu{bottom:0!important;left:10px!important;z-index:300!important;transition:width .3s,height .3s!important}
+#waifu{bottom:0!important;left:10px!important;z-index:300!important;pointer-events:none!important;transition:width .3s,height .3s!important}
+#waifu canvas,#waifu-tool{pointer-events:auto!important}
 /* Desktop: normal 300px */
 @media(min-width:901px){
   #waifu{width:280px!important;height:280px!important}
