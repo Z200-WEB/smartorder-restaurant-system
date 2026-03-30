@@ -7,7 +7,13 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 require_once 'pdo.php';
 
-$action = $_GET['action'] ?? $_POST['action'] ?? 'get';
+// Parse JSON body if POST with JSON content
+$_jsonBody = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $rawInput = file_get_contents('php://input');
+    if ($rawInput) $_jsonBody = json_decode($rawInput, true);
+}
+$action = $_GET['action'] ?? $_POST['action'] ?? ($_jsonBody['action'] ?? 'get');
 
 // Auth check - returns JSON error instead of redirect
 function checkStaffAuth(): bool {
@@ -64,8 +70,7 @@ if ($action === 'get') {
         exit;
     }
     
-    $input = json_decode(file_get_contents('php://input'), true) ?: [];
-    if(empty($input)) $input = $_POST;
+    $input = $_jsonBody ?: ($_POST ?: []);
     
     $tableNo = intval($input['tableNo'] ?? 0);
     $message = trim($input['message'] ?? '');
