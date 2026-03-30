@@ -103,7 +103,7 @@ foreach ($history as $msg) {
 $contents[] = ['role' => 'user', 'parts' => [['text' => $userMessage]]];
 
 // Call Gemini API
-$url     = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}";
+$url     = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}";
 $payload = json_encode([
     'contents'         => $contents,
     'generationConfig' => [
