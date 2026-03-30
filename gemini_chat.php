@@ -14,6 +14,7 @@ $input       = json_decode(file_get_contents('php://input'), true);
 $userMessage = trim($input['message'] ?? '');
 $tableNo     = intval($input['tableNo'] ?? 1);
 $history     = $input['history'] ?? [];
+$lang        = $input['lang'] ?? 'ja'; // ja / en / zh
 
 if (!$userMessage) {
     http_response_code(400);
@@ -21,11 +22,13 @@ if (!$userMessage) {
     exit;
 }
 
+// Save user message to DB
 try {
     $stmt = $pdo->prepare("INSERT INTO sChatMessages (tableNo, role, message, created_at) VALUES (?, 'user', ?, NOW())");
     $stmt->execute([$tableNo, $userMessage]);
 } catch (Exception $e) {}
 
+// Build menu context using CORRECT column names
 $menuContext = '';
 $items = [];
 try {
@@ -49,48 +52,56 @@ try {
         }
         $lines = [];
         foreach ($byCategory as $cat => $catItems) {
-            $lines[] = "【{$cat}】";
+            $lines[] = "[{$cat}]";
             foreach ($catItems as $it) {
-                $line = "  - {$it['itemName']}（{$it['price']}円）";
-                if (!empty($it['description'])) {
-                    $line .= " : {$it['description']}";
-                }
+                $line = "  - {$it['itemName']} ({$it['price']}yen)";
+                if (!empty($it['description'])) $line .= ": {$it['description']}";
                 $badges = [];
-                if ($it['is_popular']) $badges[] = 'おすすめ';
-                if ($it['is_new'])     $badges[] = '新着';
-                if ($it['is_spicy'])   $badges[] = '辛口';
+                if ($it['is_popular']) $badges[] = 'popular';
+                if ($it['is_new'])     $badges[] = 'new';
+                if ($it['is_spicy'])   $badges[] = 'spicy';
                 if ($badges) $line .= ' [' . implode('/', $badges) . ']';
                 $lines[] = $line;
             }
         }
         $menuContext = implode("\n", $lines);
     } else {
-        $menuContext = '（現在メニューデータがありません）';
+        $menuContext = '(No menu data available)';
     }
 } catch (Exception $e) {
-    $menuContext = '（メニュー取得エラー: ' . $e->getMessage() . '）';
+    $menuContext = '(Menu error: ' . $e->getMessage() . ')';
 }
 
-$systemPrompt = <<<PROMPT
-あなたは日本のレストラン「SmartOrder」のAIアシスタントです。テーブル{$tableNo}番のお客様を担当しています。
+// Language-specific instructions
+$langInstructions = [
+    'ja' => 'Detect the language the customer is using and reply in the SAME language. If they write in Japanese, reply in Japanese. If English, reply in English. If Chinese, reply in Chinese.',
+    'en' => 'The customer prefers English. Reply in English. But if the customer writes in another language, match their language.',
+    'zh' => 'The customer prefers Chinese (Simplified). Reply in Chinese. But if the customer writes in another language, match their language.',
+];
+$langInstruction = $langInstructions[$lang] ?? $langInstructions['ja'];
 
-【現在のメニュー一覧】
+$systemPrompt = <<<PROMPT
+You are an AI assistant for restaurant "SmartOrder", serving table {$tableNo}.
+
+[LANGUAGE RULE]
+{$langInstruction}
+
+[TODAY'S MENU]
 {$menuContext}
 
-【返答ルール】
-- 必ず日本語で丁寧に答えてください。
-- お客様がおすすめを聞いた場合は、上のメニューから具体的に2〜3品の名前と価格を挙げてください。
-- 料理の説明を求められたら、メニュー情報を元に答えてください。
-- ご注文はカートに追加ボタンを使うようお伝えください。
-- アレルギーについては「スタッフにお伝えします」と答えてください。
-- お水などのリクエストは「スタッフにお伝えします」と答えてください。
-- 返答は2〜3文で簡潔に、でも具体的にお答えください。
-- メニューにない料理は「こちらではご提供しておりません」と答えてください。
+[RESPONSE RULES]
+- When asked for recommendations, name 2-3 specific items with prices from the menu above.
+- For item descriptions, use the menu info provided.
+- For ordering, tell customers to use the "Add to Cart" button.
+- For allergies, say you will inform the staff.
+- For water or service requests, say you will inform the staff.
+- Keep responses concise: 2-3 sentences.
+- Never recommend items not on the menu above.
 PROMPT;
 
 $contents = [
     ['role' => 'user',  'parts' => [['text' => $systemPrompt]]],
-    ['role' => 'model', 'parts' => [['text' => 'かしこまりました。テーブル' . $tableNo . '番を担当いたします。メニューを確認しました。何でもお気軽にどうぞ。']]],
+    ['role' => 'model', 'parts' => [['text' => 'Understood. I am ready to assist at table ' . $tableNo . '. I have reviewed the menu and will respond in the customer\'s language.']]],
 ];
 
 foreach ($history as $msg) {
@@ -130,12 +141,12 @@ if ($resp && $code2 === 200) {
     $data  = json_decode($resp, true);
     $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
     if (!$reply) {
-        $reply  = buildFallback($userMessage, $items);
+        $reply  = buildFallback($userMessage, $items, $lang);
         $source = 'fallback';
     }
 } else {
     error_log("Gemini API error: code={$code2}, curlErr={$err}, resp=" . substr((string)$resp, 0, 500));
-    $reply  = buildFallback($userMessage, $items);
+    $reply  = buildFallback($userMessage, $items, $lang);
     $source = 'fallback';
 }
 
@@ -155,26 +166,31 @@ file_put_contents($sseFile, json_encode([
 
 echo json_encode(['reply' => $reply, 'source' => $source]);
 
-function buildFallback(string $text, array $items): string
+function buildFallback(string $text, array $items, string $lang): string
 {
     $l = mb_strtolower($text);
-    if (mb_strpos($l, 'おすすめ') !== false) {
+    $isRec = mb_strpos($l, 'recommend') !== false || mb_strpos($l, 'suggest') !== false
+          || mb_strpos($l, 'おすすめ') !== false || mb_strpos($l, '推荐') !== false;
+
+    if ($isRec) {
         if (!empty($items)) {
             $popular = array_values(array_filter($items, fn($i) => $i['is_popular']));
             $pool    = !empty($popular) ? $popular : $items;
             shuffle($pool);
             $picks = array_slice($pool, 0, 3);
-            $names = array_map(fn($i) => "{$i['itemName']}（{$i['price']}円）", $picks);
-            return 'おすすめは ' . implode('、', $names) . ' などがございます。ぜひお試しください！';
+            $names = array_map(fn($i) => "{$i['itemName']} ({$i['price']} yen)", $picks);
+            $list  = implode(', ', $names);
+            return match($lang) {
+                'en' => "We recommend: {$list}. Please enjoy!",
+                'zh' => "我们推荐：{$list}。请享用！",
+                default => "おすすめは {$list} などがございます。ぜひお試しください！",
+            };
         }
-        return 'メニューをご覧の上、お好きな一品をどうぞ！';
     }
-    if (mb_strpos($l, 'アレルギ') !== false) {
-        return 'アレルギー情報はスタッフへお伝えします。このまま内容を送ってください。';
-    }
-    if (mb_strpos($l, '水') !== false) {
-        return 'お水をスタッフにお伝えします。少々お待ちください。';
-    }
-    return 'ありがとうございます。スタッフが確認してすぐ対応いたします。';
+    return match($lang) {
+        'en' => 'Thank you. Our staff will assist you shortly.',
+        'zh' => '谢谢您。工作人员将很快为您服务。',
+        default => 'ありがとうございます。スタッフが確認してすぐ対応いたします。',
+    };
 }
 ?>
