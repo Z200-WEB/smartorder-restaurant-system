@@ -8,7 +8,7 @@ require_once 'auth.php';
 require_once 'pdo.php';
 
 // Require staff auth - return JSON error instead of redirect
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     http_response_code(403);
     echo json_encode(['ok' => false, 'error' => '認証が必要です', 'orders' => []]);
     exit;
