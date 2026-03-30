@@ -21,21 +21,22 @@ if (!$userMessage) {
     exit;
 }
 
-// Save user message to DB
 try {
     $stmt = $pdo->prepare("INSERT INTO sChatMessages (tableNo, role, message, created_at) VALUES (?, 'user', ?, NOW())");
     $stmt->execute([$tableNo, $userMessage]);
 } catch (Exception $e) {}
 
-// Build detailed menu context from DB
 $menuContext = '';
+$items = [];
 try {
-    $stmt  = $pdo->query("
-        SELECT i.itemName, i.price, i.description, i.tags, c.categoryName
+    $stmt = $pdo->query("
+        SELECT i.name AS itemName, i.price, i.description,
+               i.is_popular, i.is_new, i.is_spicy,
+               c.categoryName
         FROM sItem i
         LEFT JOIN sCategory c ON i.category = c.id
-        WHERE i.available = 1
-        ORDER BY c.id, i.id
+        WHERE i.state = 1
+        ORDER BY c.sort_order, i.sort_order
         LIMIT 80
     ");
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -50,13 +51,15 @@ try {
         foreach ($byCategory as $cat => $catItems) {
             $lines[] = "【{$cat}】";
             foreach ($catItems as $it) {
-                $line = "  - {$it['itemName']}（¥{$it['price']}）";
+                $line = "  - {$it['itemName']}（{$it['price']}円）";
                 if (!empty($it['description'])) {
                     $line .= " : {$it['description']}";
                 }
-                if (!empty($it['tags'])) {
-                    $line .= " [タグ: {$it['tags']}]";
-                }
+                $badges = [];
+                if ($it['is_popular']) $badges[] = 'おすすめ';
+                if ($it['is_new'])     $badges[] = '新着';
+                if ($it['is_spicy'])   $badges[] = '辛口';
+                if ($badges) $line .= ' [' . implode('/', $badges) . ']';
                 $lines[] = $line;
             }
         }
@@ -68,7 +71,6 @@ try {
     $menuContext = '（メニュー取得エラー: ' . $e->getMessage() . '）';
 }
 
-// System prompt with full menu
 $systemPrompt = <<<PROMPT
 あなたは日本のレストラン「SmartOrder」のAIアシスタントです。テーブル{$tableNo}番のお客様を担当しています。
 
@@ -83,15 +85,14 @@ $systemPrompt = <<<PROMPT
 - アレルギーについては「スタッフにお伝えします」と答えてください。
 - お水などのリクエストは「スタッフにお伝えします」と答えてください。
 - 返答は2〜3文で簡潔に、でも具体的にお答えください。
+- メニューにない料理は「こちらではご提供しておりません」と答えてください。
 PROMPT;
 
-// Build Gemini contents array
 $contents = [
     ['role' => 'user',  'parts' => [['text' => $systemPrompt]]],
     ['role' => 'model', 'parts' => [['text' => 'かしこまりました。テーブル' . $tableNo . '番を担当いたします。メニューを確認しました。何でもお気軽にどうぞ。']]],
 ];
 
-// Add conversation history
 foreach ($history as $msg) {
     if (isset($msg['role'], $msg['text'])) {
         $r          = ($msg['role'] === 'sent') ? 'user' : 'model';
@@ -99,17 +100,15 @@ foreach ($history as $msg) {
     }
 }
 
-// Add current user message
 $contents[] = ['role' => 'user', 'parts' => [['text' => $userMessage]]];
 
-// Call Gemini API
 $url     = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}";
 $payload = json_encode([
     'contents'         => $contents,
     'generationConfig' => [
-        'temperature'     => 0.7,
-        'maxOutputTokens' => 500,
-        'thinkingConfig'  => ['thinkingBudget' => 0],
+        'temperature'    => 0.7,
+        'maxOutputTokens'=> 500,
+        'thinkingConfig' => ['thinkingBudget' => 0],
     ],
 ]);
 
@@ -118,7 +117,7 @@ curl_setopt_array($ch, [
     CURLOPT_POST          => true,
     CURLOPT_POSTFIELDS    => $payload,
     CURLOPT_HTTPHEADER    => ['Content-Type: application/json'],
-    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_RETURNTRANSFER=> true,
     CURLOPT_TIMEOUT       => 15,
 ]);
 $resp  = curl_exec($ch);
@@ -131,24 +130,20 @@ if ($resp && $code2 === 200) {
     $data  = json_decode($resp, true);
     $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
     if (!$reply) {
-        $reply  = buildFallback($userMessage, $items ?? []);
+        $reply  = buildFallback($userMessage, $items);
         $source = 'fallback';
     }
 } else {
-    // Log error for debugging
-    $debugInfo = "code={$code2}, curlErr={$err}, resp=" . substr((string)$resp, 0, 500);
-    error_log("Gemini API error: " . $debugInfo);
-    $reply  = buildFallback($userMessage, $items ?? []);
-    $source = 'fallback_debug:' . $debugInfo;
+    error_log("Gemini API error: code={$code2}, curlErr={$err}, resp=" . substr((string)$resp, 0, 500));
+    $reply  = buildFallback($userMessage, $items);
+    $source = 'fallback';
 }
 
-// Save AI reply
 try {
     $stmt = $pdo->prepare("INSERT INTO sChatMessages (tableNo, role, message, created_at) VALUES (?, 'ai', ?, NOW())");
     $stmt->execute([$tableNo, $reply]);
 } catch (Exception $e) {}
 
-// Notify SSE listeners
 $sseFile = sys_get_temp_dir() . '/smartorder_sse.json';
 file_put_contents($sseFile, json_encode([
     'type'    => 'chat',
@@ -160,30 +155,26 @@ file_put_contents($sseFile, json_encode([
 
 echo json_encode(['reply' => $reply, 'source' => $source]);
 
-// Fallback uses actual menu data
 function buildFallback(string $text, array $items): string
 {
     $l = mb_strtolower($text);
-
-    if (mb_strpos($l, 'おすすめ') !== false || mb_strpos($l, 'おすすめ') !== false) {
+    if (mb_strpos($l, 'おすすめ') !== false) {
         if (!empty($items)) {
-            // Pick up to 3 random items
-            shuffle($items);
-            $picks = array_slice($items, 0, 3);
-            $names = array_map(fn($i) => "{$i['itemName']}（¥{$i['price']}）", $picks);
+            $popular = array_values(array_filter($items, fn($i) => $i['is_popular']));
+            $pool    = !empty($popular) ? $popular : $items;
+            shuffle($pool);
+            $picks = array_slice($pool, 0, 3);
+            $names = array_map(fn($i) => "{$i['itemName']}（{$i['price']}円）", $picks);
             return 'おすすめは ' . implode('、', $names) . ' などがございます。ぜひお試しください！';
         }
         return 'メニューをご覧の上、お好きな一品をどうぞ！';
     }
-
     if (mb_strpos($l, 'アレルギ') !== false) {
         return 'アレルギー情報はスタッフへお伝えします。このまま内容を送ってください。';
     }
-
     if (mb_strpos($l, '水') !== false) {
         return 'お水をスタッフにお伝えします。少々お待ちください。';
     }
-
     return 'ありがとうございます。スタッフが確認してすぐ対応いたします。';
 }
 ?>
