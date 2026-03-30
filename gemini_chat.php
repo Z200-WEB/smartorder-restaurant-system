@@ -4,80 +4,184 @@ header('Cache-Control: no-cache');
 require_once 'pdo.php';
 
 $apiKey = getenv('GEMINI_API_KEY');
-if (!$apiKey) { http_response_code(500); echo json_encode(['error'=>'no key']); exit; }
+if (!$apiKey) {
+    http_response_code(500);
+    echo json_encode(['error' => 'no key']);
+    exit;
+}
 
-$input = json_decode(file_get_contents('php://input'), true);
+$input       = json_decode(file_get_contents('php://input'), true);
 $userMessage = trim($input['message'] ?? '');
-$tableNo = intval($input['tableNo'] ?? 1);
-$history = $input['history'] ?? [];
+$tableNo     = intval($input['tableNo'] ?? 1);
+$history     = $input['history'] ?? [];
 
-if (!$userMessage) { http_response_code(400); echo json_encode(['error'=>'no msg']); exit; }
+if (!$userMessage) {
+    http_response_code(400);
+    echo json_encode(['error' => 'no msg']);
+    exit;
+}
 
 // Save user message to DB
 try {
     $stmt = $pdo->prepare("INSERT INTO sChatMessages (tableNo, role, message, created_at) VALUES (?, 'user', ?, NOW())");
     $stmt->execute([$tableNo, $userMessage]);
-} catch(Exception $e) {}
+} catch (Exception $e) {}
 
-// Build menu context
+// Build detailed menu context from DB
 $menuContext = '';
 try {
-    $stmt = $pdo->query("SELECT i.itemName, i.price, c.categoryName, i.tags FROM sItem i LEFT JOIN sCategory c ON i.category = c.id WHERE i.available = 1 ORDER BY i.id LIMIT 50");
+    $stmt  = $pdo->query("
+        SELECT i.itemName, i.price, i.description, i.tags, c.categoryName
+        FROM sItem i
+        LEFT JOIN sCategory c ON i.category = c.id
+        WHERE i.available = 1
+        ORDER BY c.id, i.id
+        LIMIT 80
+    ");
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $lines = array_map(fn($it) => "- {$it['itemName']}(¥{$it['price']})[{$it['categoryName']}]", $items);
-    $menuContext = implode("\n", $lines);
-} catch(Exception $e) { $menuContext = '(error)'; }
 
-// Build Gemini request
-$systemPrompt = "あなたは日本のレストランSmartOrderのAIアシスタントです。テーブル{$tableNo}のお客様担当。\n現在のメニュー:\n{$menuContext}\n\n必ず日本語で。丁寧に。メニューの質問は具体的に案内。アレルギーは「スタッフに伝えます」。注文は「カートに追加ボタンを使ってください」。2-3文で簡潔に。";
+    if ($items) {
+        $byCategory = [];
+        foreach ($items as $it) {
+            $cat = $it['categoryName'] ?: 'その他';
+            $byCategory[$cat][] = $it;
+        }
+        $lines = [];
+        foreach ($byCategory as $cat => $catItems) {
+            $lines[] = "【{$cat}】";
+            foreach ($catItems as $it) {
+                $line = "  - {$it['itemName']}（¥{$it['price']}）";
+                if (!empty($it['description'])) {
+                    $line .= " : {$it['description']}";
+                }
+                if (!empty($it['tags'])) {
+                    $line .= " [タグ: {$it['tags']}]";
+                }
+                $lines[] = $line;
+            }
+        }
+        $menuContext = implode("\n", $lines);
+    } else {
+        $menuContext = '（現在メニューデータがありません）';
+    }
+} catch (Exception $e) {
+    $menuContext = '（メニュー取得エラー: ' . $e->getMessage() . '）';
+}
 
+// System prompt with full menu
+$systemPrompt = <<<PROMPT
+あなたは日本のレストラン「SmartOrder」のAIアシスタントです。テーブル{$tableNo}番のお客様を担当しています。
+
+【現在のメニュー一覧】
+{$menuContext}
+
+【返答ルール】
+- 必ず日本語で丁寧に答えてください。
+- お客様がおすすめを聞いた場合は、上のメニューから具体的に2〜3品の名前と価格を挙げてください。
+- 料理の説明を求められたら、メニュー情報を元に答えてください。
+- ご注文はカートに追加ボタンを使うようお伝えください。
+- アレルギーについては「スタッフにお伝えします」と答えてください。
+- お水などのリクエストは「スタッフにお伝えします」と答えてください。
+- 返答は2〜3文で簡潔に、でも具体的にお答えください。
+PROMPT;
+
+// Build Gemini contents array
 $contents = [
-    ['role'=>'user','parts'=>[['text'=>$systemPrompt]]],
-    ['role'=>'model','parts'=>[['text'=>'かしこまりました。テーブル'.$tableNo.'担当します。']]]
+    ['role' => 'user',  'parts' => [['text' => $systemPrompt]]],
+    ['role' => 'model', 'parts' => [['text' => 'かしこまりました。テーブル' . $tableNo . '番を担当いたします。メニューを確認しました。何でもお気軽にどうぞ。']]],
 ];
 
+// Add conversation history
 foreach ($history as $msg) {
     if (isset($msg['role'], $msg['text'])) {
-        $r = ($msg['role']==='sent') ? 'user' : 'model';
-        $contents[] = ['role'=>$r,'parts'=>[['text'=>$msg['text']]]];
+        $r          = ($msg['role'] === 'sent') ? 'user' : 'model';
+        $contents[] = ['role' => $r, 'parts' => [['text' => $msg['text']]]];
     }
 }
-$contents[] = ['role'=>'user','parts'=>[['text'=>$userMessage]]];
 
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}";
-$payload = json_encode(['contents'=>$contents,'generationConfig'=>['temperature'=>0.7,'maxOutputTokens'=>200]]);
+// Add current user message
+$contents[] = ['role' => 'user', 'parts' => [['text' => $userMessage]]];
+
+// Call Gemini API
+$url     = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}";
+$payload = json_encode([
+    'contents'         => $contents,
+    'generationConfig' => [
+        'temperature'     => 0.7,
+        'maxOutputTokens' => 300,
+    ],
+]);
 
 $ch = curl_init($url);
-curl_setopt_array($ch, [CURLOPT_POST=>true, CURLOPT_POSTFIELDS=>$payload, CURLOPT_HTTPHEADER=>['Content-Type: application/json'], CURLOPT_RETURNTRANSFER=>true, CURLOPT_TIMEOUT=>15]);
-$resp = curl_exec($ch);
+curl_setopt_array($ch, [
+    CURLOPT_POST          => true,
+    CURLOPT_POSTFIELDS    => $payload,
+    CURLOPT_HTTPHEADER    => ['Content-Type: application/json'],
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT       => 15,
+]);
+$resp  = curl_exec($ch);
 $code2 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$err   = curl_error($ch);
 curl_close($ch);
 
+$source = 'gemini';
 if ($resp && $code2 === 200) {
-    $data = json_decode($resp, true);
-    $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? fallback($userMessage);
+    $data  = json_decode($resp, true);
+    $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
+    if (!$reply) {
+        $reply  = buildFallback($userMessage, $items ?? []);
+        $source = 'fallback';
+    }
 } else {
-    $reply = fallback($userMessage);
+    // Log error for debugging
+    error_log("Gemini API error: code={$code2}, err={$err}, resp=" . substr((string)$resp, 0, 300));
+    $reply  = buildFallback($userMessage, $items ?? []);
+    $source = 'fallback';
 }
 
 // Save AI reply
 try {
     $stmt = $pdo->prepare("INSERT INTO sChatMessages (tableNo, role, message, created_at) VALUES (?, 'ai', ?, NOW())");
     $stmt->execute([$tableNo, $reply]);
-} catch(Exception $e) {}
+} catch (Exception $e) {}
 
-// Notify SSE listeners (write to tmp file)
-$sseFile = sys_get_temp_dir().'/smartorder_sse.json';
-$sseData = ['type'=>'chat','tableNo'=>$tableNo,'message'=>$userMessage,'reply'=>$reply,'ts'=>time()];
-file_put_contents($sseFile, json_encode($sseData));
+// Notify SSE listeners
+$sseFile = sys_get_temp_dir() . '/smartorder_sse.json';
+file_put_contents($sseFile, json_encode([
+    'type'    => 'chat',
+    'tableNo' => $tableNo,
+    'message' => $userMessage,
+    'reply'   => $reply,
+    'ts'      => time(),
+]));
 
-echo json_encode(['reply'=>$reply,'source'=>'gemini']);
+echo json_encode(['reply' => $reply, 'source' => $source]);
 
-function fallback($t) {
-    $l = mb_strtolower($t);
-    if (mb_strpos($l,'おすすめ')!==false) return 'メニューからお好きな一品をどうぞ。おすすめの欄も参考にしてみてください！';
-    if (mb_strpos($l,'アレルギ')!==false) return 'アレルギー情報はスタッフへお伝えします。このまま内容を送ってください。';
-    if (mb_strpos($l,'水')!==false) return 'お水をすぐにお持ちします。少々お待ちください。';
+// Fallback uses actual menu data
+function buildFallback(string $text, array $items): string
+{
+    $l = mb_strtolower($text);
+
+    if (mb_strpos($l, 'おすすめ') !== false || mb_strpos($l, 'おすすめ') !== false) {
+        if (!empty($items)) {
+            // Pick up to 3 random items
+            shuffle($items);
+            $picks = array_slice($items, 0, 3);
+            $names = array_map(fn($i) => "{$i['itemName']}（¥{$i['price']}）", $picks);
+            return 'おすすめは ' . implode('、', $names) . ' などがございます。ぜひお試しください！';
+        }
+        return 'メニューをご覧の上、お好きな一品をどうぞ！';
+    }
+
+    if (mb_strpos($l, 'アレルギ') !== false) {
+        return 'アレルギー情報はスタッフへお伝えします。このまま内容を送ってください。';
+    }
+
+    if (mb_strpos($l, '水') !== false) {
+        return 'お水をスタッフにお伝えします。少々お待ちください。';
+    }
+
     return 'ありがとうございます。スタッフが確認してすぐ対応いたします。';
 }
 ?>
