@@ -152,7 +152,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .float-cart{display:none;position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#134e4a,var(--primary));color:#fff;border:none;border-radius:999px;padding:14px 22px;font-size:.9rem;font-weight:700;cursor:pointer;box-shadow:0 6px 24px var(--primary-glow);z-index:200;align-items:center;gap:8px;transition:all var(--transition)}
 .float-cart:hover{transform:translateY(-2px);box-shadow:0 8px 32px var(--primary-glow)}
 @media(max-width:900px){.float-cart{display:flex}}
-@media(max-width:480px){.float-cart{bottom:100px!important;right:12px!important;padding:10px 16px!important;font-size:.82rem!important}}
+@media(max-width:480px){.float-cart{bottom:16px!important;right:12px!important;padding:10px 16px!important;font-size:.82rem!important}}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.show{display:flex}
 .modal-box{background:var(--surface);border-radius:var(--radius-xl);width:100%;max-width:440px;overflow:hidden;animation:slideUp .25s ease;box-shadow:var(--shadow-lg)}
@@ -487,9 +487,9 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 #mascot-speech.show{opacity:1}
 #mascot-speech::after{content:'';position:absolute;bottom:-8px;left:20px;border-width:4px;border-style:solid;border-color:#fff transparent transparent}
 @media(max-width:480px){
-  #lucky-btn{right:12px;bottom:160px;padding:9px 14px;font-size:.76rem}
-  #chat-btn{left:auto;right:130px;bottom:160px;padding:9px 12px;font-size:.74rem}
-  #mascot-speech{bottom:310px;max-width:170px;font-size:.76rem}
+  #lucky-btn{right:12px;bottom:72px;padding:8px 13px;font-size:.74rem}
+  #chat-btn{left:auto!important;right:12px!important;bottom:126px!important;padding:8px 12px;font-size:.74rem}
+  #mascot-speech{bottom:250px;max-width:170px;font-size:.76rem}
 }
 </style>
 </head>
