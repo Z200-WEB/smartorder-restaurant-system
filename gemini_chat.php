@@ -135,9 +135,10 @@ if ($resp && $code2 === 200) {
     }
 } else {
     // Log error for debugging
-    error_log("Gemini API error: code={$code2}, err={$err}, resp=" . substr((string)$resp, 0, 300));
+    $debugInfo = "code={$code2}, curlErr={$err}, resp=" . substr((string)$resp, 0, 500);
+    error_log("Gemini API error: " . $debugInfo);
     $reply  = buildFallback($userMessage, $items ?? []);
-    $source = 'fallback';
+    $source = 'fallback_debug:' . $debugInfo;
 }
 
 // Save AI reply
