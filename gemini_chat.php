@@ -108,7 +108,8 @@ $payload = json_encode([
     'contents'         => $contents,
     'generationConfig' => [
         'temperature'     => 0.7,
-        'maxOutputTokens' => 300,
+        'maxOutputTokens' => 500,
+        'thinkingConfig'  => ['thinkingBudget' => 0],
     ],
 ]);
 
