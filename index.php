@@ -74,6 +74,16 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .header-table{font-size:.78rem;opacity:.75;margin-top:1px}
 .btn-cart-header{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:8px 16px;border-radius:999px;font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background var(--transition)}
 .btn-cart-header:hover{background:rgba(255,255,255,.25)}
+/* ── FEATURE: Language Switcher ── */
+.lang-switcher{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px;margin-right:6px}
+.lang-btn{background:transparent;border:none;color:rgba(255,255,255,.7);font-size:.72rem;font-weight:600;padding:4px 8px;border-radius:999px;cursor:pointer;transition:all .18s;white-space:nowrap;line-height:1}
+.lang-btn.active{background:rgba(255,255,255,.25);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.lang-btn:hover:not(.active){background:rgba(255,255,255,.1);color:#fff}
+@media(max-width:480px){
+  .lang-switcher{padding:2px;gap:2px;margin-right:4px}
+  .lang-btn{font-size:.65rem;padding:3px 6px}
+}
+
 .cart-badge{background:var(--accent);color:#1a1a1a;border-radius:50%;width:20px;height:20px;font-size:.7rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
 .search-bar-wrap{background:var(--surface);border-bottom:2px solid var(--border);padding:10px 20px;position:sticky;top:60px;z-index:91}
 .search-bar-inner{max-width:1280px;margin:0 auto;position:relative}
@@ -421,9 +431,8 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 }
 /* ── FEATURE: Mobile mascot fix ── */
 @media(max-width:480px){
-  #waifu{width:150px!important;height:150px!important;left:4px!important;bottom:0px!important;z-index:300!important}
-  #waifu canvas{width:150px!important;height:150px!important}
-  #waifu-tips{font-size:.75rem!important;max-width:170px!important;top:-65px!important;padding:8px 11px!important}
+  #waifu{display:none!important}
+  #waifu-toggle{display:none!important}
 }
 @media(min-width:481px) and (max-width:900px){
   #waifu{width:220px!important;height:220px!important;left:6px!important;bottom:0px!important}
@@ -666,7 +675,12 @@ window.showMessage = function(){};
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <button onclick="openCallStaff()" style="padding:8px 14px;font-size:.78rem;border-radius:999px;background:rgba(245,158,11,.85);border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:5px;transition:background .2s">🔔 スタッフ</button>
-      <button class="btn-cart-header" onclick="showCart()">🛒 カート <span class="cart-badge" id="cartCountBadge"><?php echo $itemCount; ?></span></button>
+      <div class="lang-switcher" id="langSwitcher">
+    <button class="lang-btn active" onclick="setLang('ja')" id="langJa">JP</button>
+    <button class="lang-btn" onclick="setLang('en')" id="langEn">EN</button>
+    <button class="lang-btn" onclick="setLang('zh')" id="langZh">中</button>
+  </div>
+  <button class="btn-cart-header" onclick="showCart()">🛒 カート <span class="cart-badge" id="cartCountBadge"><?php echo $itemCount; ?></span></button>
     </div>
   </div>
 </header>
@@ -1413,6 +1427,67 @@ function addStaffSystemMessage(text, unread){
   renderStaffChat();
   updateChatBadge();
 }
+
+/* Language Switcher Logic */
+let currentLang = localStorage.getItem('smartorder_lang') || 'ja';
+const menuTranslCache = {};
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('smartorder_lang', lang);
+  ['ja','en','zh'].forEach(l => {
+    const id = 'lang' + l.charAt(0).toUpperCase() + l.slice(1);
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.toggle('active', l === lang);
+  });
+  applyMenuTranslation(lang);
+  updateChatLangHint(lang);
+}
+function updateChatLangHint(lang) {
+  const title = document.getElementById('chat-title');
+  const subtitle = document.getElementById('chat-subtitle');
+  const hints = {
+    ja: {title:'スタッフチャット', sub:'注文前の相談やおすすめ確認にどうぞ'},
+    en: {title:'Staff Chat', sub:'Ask about menu, recommendations & more'},
+    zh: {title:'服务员聊天', sub:'询问菜单推荐，随时为您服务'}
+  };
+  if (title && hints[lang]) title.textContent = hints[lang].title;
+  if (subtitle && hints[lang]) subtitle.textContent = hints[lang].sub;
+}
+async function applyMenuTranslation(lang) {
+  if (lang === 'ja') {
+    document.querySelectorAll('.menu-card').forEach(card => {
+      const nameEl = card.querySelector('.item-name');
+      const origName = card.dataset.name || card.dataset.itemName;
+      if (nameEl && origName) nameEl.textContent = origName;
+    });
+    return;
+  }
+  if (menuTranslCache[lang]) { applyTranslToDOM(menuTranslCache[lang]); return; }
+  const items = Array.from(document.querySelectorAll('.menu-card')).map(c => ({
+    id: c.dataset.itemId, name: c.dataset.name || c.dataset.itemName
+  })).filter(i => i.id && i.name);
+  if (!items.length) return;
+  try {
+    const resp = await fetch('/translate_menu.php', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({items, lang})
+    });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (data.translations) { menuTranslCache[lang] = data.translations; applyTranslToDOM(data.translations); }
+  } catch(e) { console.error('Translation error:', e); }
+}
+function applyTranslToDOM(translations) {
+  document.querySelectorAll('.menu-card').forEach(card => {
+    const id = card.dataset.itemId;
+    const nameEl = card.querySelector('.item-name');
+    if (nameEl && translations[id]) nameEl.textContent = translations[id].name || nameEl.textContent;
+  });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('smartorder_lang') || 'ja';
+  if (saved !== 'ja') setTimeout(() => setLang(saved), 800);
+});
 function toggleStaffChat(show){
   const overlay=document.getElementById('chat-overlay');
   if(!overlay) return;
@@ -1450,7 +1525,7 @@ function sendStaffChat(){
   fetch('gemini_chat.php', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({message:text, tableNo:parseInt(tableNo), history:history})
+    body:JSON.stringify({message:text, tableNo:parseInt(tableNo), history:history, lang:currentLang})
   })
   .then(r=>r.json())
   .then(data=>{
