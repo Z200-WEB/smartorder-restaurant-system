@@ -23,34 +23,46 @@ It's a QR-based ordering system — but the interesting part is the AI. Customer
 - Auto language detection: responds in the same language the customer used (JA / EN / ZH)
 - Staff can also use the chat to answer customer questions
 
-### 🌐 Multilingual Support
+> お客様はAIにメニューについて何でも質問できます。AIはデータベースから直接メニューを読み込むため、架空の料理を答えることはありません。自動言語検出により、お客様が使った言語（日本語・英語・中国語）で返答します。スタッフ側のチャットにも対応しています。
+
+### 🌐 Multilingual Support / 多言語対応
 - Language switcher in the header (JP / EN / 中)
 - Menu display translates dynamically via Gemini API
 - AI chat responds automatically in the customer's language
 
-### 📱 Customer Ordering (QR Code)
+> ヘッダーの言語ボタン（JP / EN / 中）でメニュー表示を切り替えられます。AIチャットはお客様の言語に自動で合わせて返答します。
+
+### 📱 Customer Ordering (QR Code) / QRコード注文
 - Each table has a unique QR code
 - Mobile-first responsive design
 - Browse menu by category with search
 - Add items to cart, adjust quantities, and place orders
 - Real-time wait time estimate based on current orders
 
-### 🎯 Smart UX Features
+> テーブルごとに専用QRコードを設置。スマホからカテゴリ別にメニューを閲覧・検索し、カートに追加して注文できます。現在の注文状況に基づいたリアルタイム待ち時間も表示されます。
+
+### 🎯 Smart UX Features / スマートUX
 - **Stamp Card** — customers earn stamps with each order
 - **Lucky Roulette** — AI randomly picks a recommended dish
 - **Mascot (Live2D)** — animated character on desktop/tablet (hidden on mobile for usability)
 - **Floating buttons** — Staff chat and Lucky Roulette accessible at all times
 - **Last order alert** — banner appears when closing time approaches
 
-### 🖥️ Staff Management Dashboard
+> 注文ごとにスタンプが貯まるスタンプカード、AIがランダムにおすすめ料理を選ぶルーレット、デスクトップ・タブレットで表示されるLive2Dマスコットなど、使いやすさを重視したUXを実装しています。
+
+### 🖥️ Staff Management Dashboard / スタッフ管理
 - Real-time order view with auto-refresh every 10 seconds
 - Mark orders as paid
 - View order details per table
 
-### ⚙️ Admin Panel
+> 10秒ごとに自動更新されるリアルタイム注文管理画面。テーブルごとの注文内容確認や会計処理が可能です。
+
+### ⚙️ Admin Panel / 管理者パネル
 - Add, edit, delete menu items and categories
 - Set items as popular / new / spicy
 - Manage table QR codes
+
+> メニュー商品・カテゴリのCRUD操作、人気・新着・辛さフラグの設定、テーブルQRコードの管理ができます。
 
 ---
 
