@@ -1,95 +1,108 @@
-# SmartOrder - Restaurant Self-Ordering System
+# SmartOrder — AI-Powered Restaurant Ordering System
 
-A QR code-based self-ordering system for restaurants, built with PHP and MySQL.
+A QR code-based self-ordering system for restaurants, built with PHP, MySQL, and Gemini AI.
 
-**Live Demo:** https://restaurant-project-production-a27b.up.railway.app
-
----
-
-## Why I Built This
-
-As a frequent izakaya customer, I observed that many restaurants still rely on inefficient ordering processes such as paper menus or poorly designed tablet systems.
-
-These systems often create friction in the customer experience and increase operational workload for staff.
-
-This project was built to redesign the ordering experience from both the customer and business perspectives. The goal was to create a simple, intuitive, and scalable digital ordering system that improves usability while supporting restaurant efficiency.
-
-## なぜ作ったのか
-
-居酒屋によく行く中で、多くの飲食店がまだ紙のメニューや使いにくいタブレットに頼っていることに気づきました。
-
-これらのシステムはお客様の体験に摩擦を生み、スタッフの業務負担を増やしています。
-
-このプロジェクトは、お客様と店舗の両方の視点から注文体験を再設計するために作りました。シンプルで直感的、そしてスケーラブルなデジタル注文システムを目指しています。
+🔗 **Live Demo:** https://smartorder-restaurant-system.onrender.com/index.php?tableNo=1
+🔗 **Management Dashboard:** https://smartorder-restaurant-system.onrender.com/management.php
 
 ---
 
-## How It Works / システムの仕組み
+## What Makes This Different
 
-### Customer Flow / お客様の流れ
+It's a QR-based ordering system — but the interesting part is the AI. Customers can ask about the menu in English, Japanese, or Chinese, and the AI responds using real menu data from the database, not hallucinated answers.
 
-1. **Scan QR Code** - Each table has a unique QR code placed on it
-2. **Browse Menu** - Customers view the menu with categories, images, and prices on their smartphone
-3. **Add to Cart** - Select items and adjust quantities
-4. **Place Order** - Submit the order directly to the kitchen/staff
+このシステムはQRコードで注文できるだけでなく、AIが実際のデータベースのメニューを元に日本語・英語・中国語で質問に答えます。架空のメニューを答えるのではなく、実データに基づいた回答を返します。
 
-### Staff Flow / スタッフの流れ
+---
 
-1. **Management Page** - View all active orders in real-time (auto-refreshes every 10 seconds)
-2. **Order Details** - Check individual order contents and total amounts
-3. **Process Payment** - Mark orders as paid when customers settle the bill
-4. **Admin Panel** - Add, edit, or delete menu items and categories
+## Features / 機能一覧
+
+### 🤖 AI Chat (Gemini 2.5 Flash)
+- Customers can ask the AI anything about the menu in any language
+- AI reads directly from the database — no hallucinated menu items
+- Auto language detection: responds in the same language the customer used (JA / EN / ZH)
+- Staff can also use the chat to answer customer questions
+
+### 🌐 Multilingual Support
+- Language switcher in the header (JP / EN / 中)
+- Menu display translates dynamically via Gemini API
+- AI chat responds automatically in the customer's language
+
+### 📱 Customer Ordering (QR Code)
+- Each table has a unique QR code
+- Mobile-first responsive design
+- Browse menu by category with search
+- Add items to cart, adjust quantities, and place orders
+- Real-time wait time estimate based on current orders
+
+### 🎯 Smart UX Features
+- **Stamp Card** — customers earn stamps with each order
+- **Lucky Roulette** — AI randomly picks a recommended dish
+- **Mascot (Live2D)** — animated character on desktop/tablet (hidden on mobile for usability)
+- **Floating buttons** — Staff chat and Lucky Roulette accessible at all times
+- **Last order alert** — banner appears when closing time approaches
+
+### 🖥️ Staff Management Dashboard
+- Real-time order view with auto-refresh every 10 seconds
+- Mark orders as paid
+- View order details per table
+
+### ⚙️ Admin Panel
+- Add, edit, delete menu items and categories
+- Set items as popular / new / spicy
+- Manage table QR codes
 
 ---
 
 ## Tech Stack / 技術スタック
 
 | Category | Technology |
-|----------|-----------|
-| **Frontend** | HTML, CSS, JavaScript |
-| **Backend** | PHP 8.2 |
-| **Database** | MySQL 9.4 (Railway) / MariaDB 10.4 (Local) |
-| **Deployment** | Railway (PaaS) + Docker |
-| **Version Control** | Git / GitHub |
-| **QR Code API** | goqr.me API |
+|---|---|
+| Frontend | HTML, CSS, JavaScript |
+| Backend | PHP 8.2 |
+| Database | MySQL / MariaDB |
+| AI | Google Gemini 2.5 Flash (via Gemini API) |
+| Deployment | Render (Free tier) |
+| Mascot | Live2D (desktop/tablet only) |
+| Version Control | Git / GitHub |
+| QR Code | goqr.me API |
 
 ---
 
-## Architecture / アーキテクチャ
+## How It Works / システムの仕組み
+
+**Customer Flow**
+1. Scan QR code at the table → opens ordering page on smartphone
+2. Browse menu by category or use search
+3. Ask the AI anything: "What's popular?" / "Do you have vegetarian options?" (in any language)
+4. Add items to cart → place order
+5. Earn stamps, spin the Lucky Roulette for suggestions
+
+**Staff Flow**
+1. Management page shows all active orders in real-time
+2. Respond to customer AI chat messages
+3. Mark orders as paid when customers check out
+
+---
+
+## System Architecture / アーキテクチャ
 
 ```
 [Customer Smartphone]
         |
-    QR Code Scan
+   QR Code Scan
         |
         v
-[Railway Cloud Server]
-   PHP 8.2 (Docker)
+[Render Cloud Server]
+   PHP 8.2
         |
         v
-  [MySQL Database]
-   (Railway MySQL)
-        |
-        v
-[Management Dashboard]
-   (Staff Browser)
+[MySQL Database]  ←──→  [Gemini AI API]
+        |                      |
+        v                      v
+[Management Dashboard]   [AI Chat Response]
+   (Staff Browser)       (Real menu data)
 ```
-
-### Deployment on Railway / Railwayでのデプロイ
-
-The application is deployed on **Railway**, a cloud platform that supports automatic deployments from GitHub.
-
-- **Web Service**: PHP 8.2 running in a Docker container with PDO MySQL extension
-- **Database**: MySQL 9.4 hosted on Railway with persistent volume storage
-- **Auto-Deploy**: Every push to the `main` branch triggers an automatic deployment
-- **Environment Variables**: Database credentials are managed through Railway's environment variables (`MYSQLHOST`, `MYSQLDATABASE`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLPORT`)
-
-アプリケーションは **Railway** にデプロイされています。GitHubからの自動デプロイに対応したクラウドプラットフォームです。
-
-- **Webサービス**: PDO MySQL拡張を含むDockerコンテナ上のPHP 8.2
-- **データベース**: Railway上のMySQL 9.4（永続ボリュームストレージ付き）
-- **自動デプロイ**: `main`ブランチへのpushで自動的にデプロイが実行されます
-- **環境変数**: データベース接続情報はRailwayの環境変数で管理
 
 ---
 
@@ -97,28 +110,19 @@ The application is deployed on **Railway**, a cloud platform that supports autom
 
 ```
 smartorder/
-├── index.php              # Customer ordering page (お客様注文ページ)
-├── logic.php              # Menu data API (メニューデータAPI)
-├── cart_update.php        # Cart update handler (カート更新)
-├── cart_remove.php        # Cart remove handler (カート削除)
-├── checkout.php           # Order submission (注文送信)
-├── admin.php              # Admin dashboard (管理画面)
-├── admin_item_save.php    # Save menu item (商品保存)
-├── admin_item_delete.php  # Delete menu item (商品削除)
-├── admin_category_save.php    # Save category (カテゴリ保存)
-├── admin_category_delete.php  # Delete category (カテゴリ削除)
-├── management.php         # Order management (注文管理)
-├── process_payment.php    # Payment processing (会計処理)
-├── order.php              # Order detail view (注文詳細)
-├── qrcode.php             # QR code generator (QRコード生成)
-├── login.php              # Admin login (ログイン)
-├── logout.php             # Admin logout (ログアウト)
-├── auth.php               # Authentication logic (認証ロジック)
-├── pdo.php                # Database connection (DB接続)
-├── import_db.php          # Database import tool (DBインポート)
-├── Dockerfile             # Docker configuration (Docker設定)
-├── database_utf8.sql      # Database schema & seed data (DBスキーマ)
-└── itemImages/            # Menu item images (商品画像)
+├── index.php              # Customer ordering page
+├── gemini_chat.php        # AI chat API (Gemini 2.5 Flash)
+├── translate_menu.php     # Menu translation API (EN/ZH)
+├── logic.php              # Menu data API
+├── checkout.php           # Order submission
+├── management.php         # Staff order management
+├── process_payment.php    # Payment processing
+├── admin.php              # Admin dashboard
+├── qr.php                 # QR code generator
+├── login.php / logout.php # Authentication
+├── pdo.php                # Database connection
+├── waifu-tips.json        # Live2D mascot config
+└── database_utf8.sql      # Database schema & seed data
 ```
 
 ---
@@ -126,63 +130,34 @@ smartorder/
 ## Database Schema / データベース構成
 
 | Table | Description |
-|-------|------------|
-| `sCategory` | Menu categories (メニューカテゴリ) |
-| `sItem` | Menu items with name, price, category (商品情報) |
-| `sManagement` | Order sessions per table (注文セッション) |
-| `sOrder` | Individual order items and quantities (注文明細) |
+|---|---|
+| sCategory | Menu categories |
+| sItem | Menu items (name, price, description, state, is_popular, is_new, is_spicy) |
+| sManagement | Order sessions per table |
+| sOrder | Individual order items and quantities |
 
 ---
 
 ## Local Development / ローカル開発
 
-### Requirements / 必要なもの
+**Requirements:** XAMPP (PHP 8.x + MariaDB)
 
-- XAMPP (PHP 8.x + MariaDB)
-- Git
+```bash
+git clone https://github.com/Z200-WEB/smartorder-restaurant-system.git
+```
 
-### Setup / セットアップ
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Z200-WEB/restaurant-project.git
-   ```
-
-2. Place in XAMPP htdocs:
-   ```
-   C:\xampp\htdocs\smartorder\
-   ```
-
-3. Import the database:
-   - Start XAMPP (Apache + MySQL)
-   - Open phpMyAdmin: http://localhost/phpmyadmin
-   - Create database `practice`
-   - Import `database_utf8.sql`
-
-4. Access the app:
-   - Customer page: http://localhost/smartorder/index.php?tableNo=1
-   - Admin panel: http://localhost/smartorder/admin.php
-
----
-
-## Features / 機能一覧
-
-- QR code-based table ordering (QRコードによるテーブル注文)
-- Real-time order management with auto-refresh (リアルタイム注文管理・自動更新)
-- Category-based menu display (カテゴリ別メニュー表示)
-- Shopping cart with quantity control (数量調整付きカート)
-- Admin CRUD for items and categories (商品・カテゴリの管理機能)
-- Payment processing (会計処理)
-- Printable QR codes for each table (テーブル別QRコード印刷)
-- Responsive design for mobile (モバイル対応レスポンシブデザイン)
-- Japanese language support (日本語対応)
+1. Place in XAMPP htdocs: `C:\xampp\htdocs\smartorder\`
+2. Import `database_utf8.sql` via phpMyAdmin
+3. Set your Gemini API key in `gemini_chat.php` and `translate_menu.php`
+4. Access: `http://localhost/smartorder/index.php?tableNo=1`
 
 ---
 
 ## Tools Used / 使用ツール
 
-- **ChatGPT** - AI coding assistant
-- **Claude AI** - AI coding assistant
-- **GitHub** - Version control & repository hosting
-- **Railway** - Cloud deployment platform
-- **VSCode** - Code editor
+- **Google Gemini API** — AI chat and menu translation
+- **Live2D** — Animated mascot character (desktop/tablet)
+- **GitHub** — Version control
+- **Render** — Cloud deployment (free tier)
+- **VSCode** — Code editor
+- **Claude AI** — AI coding assistant
