@@ -265,11 +265,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
   #waifu-tips{font-size:.75rem!important;max-width:160px!important;top:-70px!important}
 }
 /* Phone: small, corner only */
-@media(max-width:480px){
-  #waifu{width:200px!important;height:200px!important;left:4px!important}
-  #waifu canvas{width:200px!important;height:200px!important}
-  #waifu-tips{font-size:.7rem!important;max-width:150px!important;top:-60px!important;padding:7px 10px!important}
-}
+/* mascot hidden on phone via JS */
 
 
 /* ═══════════════════════════════════════
@@ -338,11 +334,11 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 
   /* Cards - compact */
   .menu-card{border-radius:12px}
-  .item-img-wrap{aspect-ratio:1}
-  .item-info{padding:8px}
-  .item-name{font-size:.78rem;margin-bottom:3px}
-  .item-price{font-size:.85rem}
-  .item-add-btn{font-size:.75rem;padding:7px}
+  .item-img-wrap{aspect-ratio:4/3}
+  .item-info{padding:6px}
+  .item-name{font-size:.74rem;margin-bottom:2px}
+  .item-price{font-size:.80rem}
+  .item-add-btn{font-size:.72rem;padding:5px}
   .item-badge{font-size:.62rem;padding:2px 7px;top:6px;left:6px}
 
   /* Float cart - always show on phone */
@@ -1489,6 +1485,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const saved = localStorage.getItem('smartorder_lang') || 'ja';
   if (saved !== 'ja') setTimeout(() => setLang(saved), 800);
 });
+// ── Hide mascot on phone ──
+function hideMascotOnPhone(){
+  if(window.innerWidth<=480){
+    const w=document.getElementById('waifu');
+    const t=document.getElementById('waifu-toggle');
+    if(w){w.style.setProperty('display','none','important');}
+    if(t){t.style.setProperty('display','none','important');}
+  }
+}
+hideMascotOnPhone();
+window.addEventListener('resize',hideMascotOnPhone);
+setTimeout(hideMascotOnPhone,500);
+setTimeout(hideMascotOnPhone,1500);
+setTimeout(hideMascotOnPhone,3000);
+
 function toggleStaffChat(show){
   const overlay=document.getElementById('chat-overlay');
   if(!overlay) return;
