@@ -498,7 +498,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 #mascot-speech::after{content:'';position:absolute;bottom:-8px;left:20px;border-width:4px;border-style:solid;border-color:#fff transparent transparent}
 @media(max-width:480px){
   #lucky-btn{right:12px;bottom:72px;padding:8px 13px;font-size:.74rem}
-  #chat-btn{left:auto!important;right:12px!important;bottom:126px!important;padding:8px 12px;font-size:.74rem}
+  #chat-btn{left:auto!important;right:12px!important;bottom:126px!important;padding:8px 12px;font-size:.74rem;z-index:450!important}
   #mascot-speech{bottom:250px;max-width:170px;font-size:.76rem}
 }
 </style>
