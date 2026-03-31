@@ -578,8 +578,9 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 })();
 </script>
 <script>
-// Custom Live2D loader - works on ALL screen sizes (no mobile block) - v2
+// Custom Live2D loader - desktop/tablet only (blocked on phone <=480px)
 (function() {
+  if(window.innerWidth<=480){return;}
   const base = "https://fastly.jsdelivr.net/npm/live2d-widgets@0/";
   function loadRes(url, type) {
     return new Promise((resolve, reject) => {
