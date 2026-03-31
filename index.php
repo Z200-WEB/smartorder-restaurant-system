@@ -497,6 +497,40 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
   #chat-btn{left:auto!important;right:12px!important;bottom:126px!important;padding:8px 12px;font-size:.74rem;z-index:450!important}
   #mascot-speech{bottom:250px;max-width:170px;font-size:.76rem}
 }
+
+/* ── Receipt / Order History Button ── */
+#receipt-btn{position:fixed;right:24px;bottom:230px;z-index:450;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-size:.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(15,118,110,.4);display:flex;align-items:center;gap:6px;transition:transform .2s,box-shadow .2s;white-space:nowrap}
+#receipt-btn:hover{transform:scale(1.06);box-shadow:0 6px 22px rgba(15,118,110,.55)}
+@media(max-width:480px){
+  #receipt-btn{right:12px;bottom:210px;padding:8px 13px;font-size:.74rem;z-index:450!important}
+}
+/* ── Receipt Modal ── */
+#receipt-overlay{display:none;position:fixed;inset:0;z-index:3100;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}
+#receipt-overlay.open{display:flex}
+#receipt-modal{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:520px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 40px rgba(0,0,0,.25)}
+.receipt-header{padding:20px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.receipt-header h3{font-size:1.1rem;font-weight:700;color:var(--text)}
+.receipt-close-btn{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text3);padding:4px}
+.receipt-body{flex:1;overflow-y:auto;padding:16px 20px}
+.receipt-item-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.receipt-item-row:last-child{border-bottom:none}
+.receipt-item-img{width:48px;height:48px;border-radius:10px;object-fit:cover;background:var(--surface2);flex-shrink:0}
+.receipt-item-img-placeholder{width:48px;height:48px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.receipt-item-info{flex:1}
+.receipt-item-name{font-size:.88rem;font-weight:600;color:var(--text)}
+.receipt-item-qty{font-size:.78rem;color:var(--text3);margin-top:2px}
+.receipt-item-price{font-size:.9rem;font-weight:700;color:var(--primary);white-space:nowrap}
+.receipt-total-section{padding:16px 20px;border-top:2px solid var(--border);flex-shrink:0;background:var(--surface)}
+.receipt-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.receipt-total-label{font-size:.9rem;color:var(--text3)}
+.receipt-total-amount{font-size:1.2rem;font-weight:800;color:var(--text)}
+.receipt-split-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.receipt-split-label{font-size:.82rem;color:var(--text3);margin-bottom:8px}
+.receipt-split-row{display:flex;align-items:center;gap:10px}
+.receipt-split-input{width:70px;padding:6px 10px;border:2px solid var(--border);border-radius:999px;font-size:.9rem;font-weight:700;text-align:center;background:var(--surface2);color:var(--text);outline:none}
+.receipt-split-input:focus{border-color:var(--primary)}
+.receipt-per-person{font-size:1rem;font-weight:700;color:var(--primary)}
+.receipt-empty{text-align:center;padding:32px 0;color:var(--text3);font-size:.9rem}
 </style>
 </head>
 <body>
@@ -539,6 +573,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 
 <button id="chat-btn" type="button" onclick="toggleStaffChat(true)">💬 スタッフ相談 <span class="chat-badge" id="chatBadge">1</span></button>
 <button id="lucky-btn" type="button" onclick="spinLuckyRoulette()">🎲 おまかせ</button>
+<button id="receipt-btn" type="button" onclick="showReceiptModal()">🧾 注文履歴</button>
 <div id="mascot-speech"></div>
 <div id="chat-overlay" onclick="if(event.target===this)toggleStaffChat(false)">
   <div id="chat-box">
@@ -1501,6 +1536,55 @@ setTimeout(hideMascotOnPhone,500);
 setTimeout(hideMascotOnPhone,1500);
 setTimeout(hideMascotOnPhone,3000);
 
+// ── Order History / Receipt ──
+let receiptTotal = 0;
+async function showReceiptModal(){
+  document.getElementById('receipt-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  const body = document.getElementById('receipt-body');
+  body.innerHTML='<div class="receipt-empty">読み込み中...</div>';
+  receiptTotal = 0;
+  document.getElementById('receipt-total').textContent='¥0';
+  document.getElementById('receipt-per-person').textContent='¥0 / 人';
+  document.getElementById('receipt-people').value=1;
+  try{
+    const fd=new FormData();
+    fd.append('tableNo',TABLE_NO);
+    const res=await fetch('order_history.php',{method:'POST',body:fd});
+    const data=await res.json();
+    if(!data.success||data.items.length===0){
+      body.innerHTML='<div class="receipt-empty">まだ注文がありません</div>';
+      return;
+    }
+    receiptTotal=data.total;
+    document.getElementById('receipt-total').textContent='¥'+receiptTotal.toLocaleString();
+    calcSplit();
+    body.innerHTML=data.items.map(item=>`
+      <div class="receipt-item-row">
+        ${item.image_url
+          ? `<img class="receipt-item-img" src="${item.image_url}" alt="${item.name}" onerror="this.style.display='none'">`
+          : `<div class="receipt-item-img-placeholder">🍽️</div>`}
+        <div class="receipt-item-info">
+          <div class="receipt-item-name">${item.name}</div>
+          <div class="receipt-item-qty">×${item.amount} &nbsp;¥${Number(item.price).toLocaleString()}</div>
+        </div>
+        <div class="receipt-item-price">¥${Number(item.subtotal).toLocaleString()}</div>
+      </div>
+    `).join('');
+  }catch(e){
+    body.innerHTML='<div class="receipt-empty">データの取得に失敗しました</div>';
+  }
+}
+function closeReceiptModal(){
+  document.getElementById('receipt-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function calcSplit(){
+  const people=Math.max(1,parseInt(document.getElementById('receipt-people').value)||1);
+  const perPerson=Math.ceil(receiptTotal/people);
+  document.getElementById('receipt-per-person').textContent='¥'+perPerson.toLocaleString()+' / 人';
+}
+
 function toggleStaffChat(show){
   const overlay=document.getElementById('chat-overlay');
   if(!overlay) return;
@@ -1703,5 +1787,32 @@ document.getElementById('comboOverlay').addEventListener('click',function(e){if(
 })();
 
 </script>
+
+<!-- Receipt Modal -->
+<div id="receipt-overlay" onclick="if(event.target==this)closeReceiptModal()">
+  <div id="receipt-modal">
+    <div class="receipt-header">
+      <h3>🧾 注文履歴・会計</h3>
+      <button class="receipt-close-btn" onclick="closeReceiptModal()">✕</button>
+    </div>
+    <div class="receipt-body" id="receipt-body">
+      <div class="receipt-empty">読み込み中...</div>
+    </div>
+    <div class="receipt-total-section">
+      <div class="receipt-total-row">
+        <span class="receipt-total-label">合計金額</span>
+        <span class="receipt-total-amount" id="receipt-total">¥0</span>
+      </div>
+      <div class="receipt-split-section">
+        <div class="receipt-split-label">人数で割り勘</div>
+        <div class="receipt-split-row">
+          <input type="number" class="receipt-split-input" id="receipt-people" value="1" min="1" max="20" oninput="calcSplit()">
+          <span style="color:var(--text3);font-size:.82rem">人で</span>
+          <span class="receipt-per-person" id="receipt-per-person">¥0 / 人</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
