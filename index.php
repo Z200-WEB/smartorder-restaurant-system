@@ -459,7 +459,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .btn-lucky-add{padding:12px 24px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;border:none;border-radius:999px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(139,92,246,.4)}
 .btn-lucky-skip{padding:12px 20px;background:#f1f5f9;color:#64748b;border:none;border-radius:999px;font-size:.95rem;cursor:pointer}
 /* ── FEATURE: Staff Chat ── */
-#chat-btn{position:fixed;left:16px;bottom:90px;z-index:400;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;border-radius:999px;padding:10px 16px;font-size:.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(15,118,110,.4);display:flex;align-items:center;gap:6px;transition:transform .2s;white-space:nowrap}
+#chat-btn{position:fixed;left:16px;bottom:90px;z-index:450;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;border-radius:999px;padding:10px 16px;font-size:.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(15,118,110,.4);display:flex;align-items:center;gap:6px;transition:transform .2s;white-space:nowrap}
 #chat-btn:hover{transform:scale(1.06)}
 #chat-btn .chat-badge{background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;display:none;align-items:center;justify-content:center;font-weight:700}
 #chat-btn .chat-badge.show{display:flex}
