@@ -8,6 +8,16 @@ $sqlCategory = "SELECT * FROM sCategory WHERE state = 1 ORDER BY sort_order ASC,
 $stmtCategory = $pdo->prepare($sqlCategory);
 $stmtCategory->execute();
 $categories = $stmtCategory->fetchAll(PDO::FETCH_ASSOC);
+$catIcons = [];
+foreach ($categories as $c) { $catIcons[(int)$c['id']] = $c['icon'] ?: '🍽️'; }
+// Placeholder emoji for items without a photo: keyword match, then category icon
+function itemEmoji($name, $catId, $catIcons) {
+    $map = ['カレー'=>'🍛','おにく'=>'🍖','ご飯'=>'🍚','寿司'=>'🍣','巻き'=>'🍣','枝豆'=>'🫛','焼き鳥'=>'🍢','炭火焼'=>'🍖',
+            '唐揚げ'=>'🍗','チキン'=>'🍗','ポテト'=>'🍟','飲み放題'=>'🍻','ビール'=>'🍺','サワー'=>'🍋','ハイボール'=>'🥃',
+            'ワッフル'=>'🧇','パンケーキ'=>'🥞','アイス'=>'🍨','マカロン'=>'🍨','ケーキ'=>'🍰','デザート'=>'🍰'];
+    foreach ($map as $k => $emoji) { if (mb_strpos($name, $k) !== false) return $emoji; }
+    return $catIcons[(int)$catId] ?? '🍽️';
+}
 
 // Get items
 $sqlItem = "SELECT * FROM sItem WHERE state = 1 ORDER BY sort_order ASC, id ASC";
@@ -18,7 +28,7 @@ $items = $stmtItem->fetchAll(PDO::FETCH_ASSOC);
 // Get current cart
 $sqlCart = "
     SELECT o.id as orderId, o.itemNo, o.amount, o.item_notes,
-           i.id as itemId, i.name, i.price, (i.price * o.amount) as subtotal
+           i.id as itemId, i.name, i.price, i.category, (i.price * o.amount) as subtotal
     FROM sManagement m
     JOIN sOrder o ON m.orderNo = o.orderNo
     JOIN sItem i ON o.itemNo = i.id
@@ -76,12 +86,12 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .btn-cart-header:hover{background:rgba(255,255,255,.25)}
 /* ── FEATURE: Language Switcher ── */
 .lang-switcher{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px;margin-right:6px}
-.lang-btn{background:transparent;border:none;color:rgba(255,255,255,.7);font-size:.72rem;font-weight:600;padding:4px 8px;border-radius:999px;cursor:pointer;transition:all .18s;white-space:nowrap;line-height:1}
+.lang-btn{background:transparent;border:none;color:rgba(255,255,255,.75);font-size:.8rem;font-weight:700;padding:7px 12px;min-width:36px;min-height:30px;position:relative;z-index:1;border-radius:999px;cursor:pointer;transition:all .18s;white-space:nowrap;line-height:1}
 .lang-btn.active{background:rgba(255,255,255,.25);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
 .lang-btn:hover:not(.active){background:rgba(255,255,255,.1);color:#fff}
 @media(max-width:480px){
   .lang-switcher{padding:2px;gap:2px;margin-right:4px}
-  .lang-btn{font-size:.65rem;padding:3px 6px}
+  .lang-btn{font-size:.72rem;padding:6px 9px;min-width:32px;min-height:28px}
 }
 
 .cart-badge{background:var(--accent);color:#1a1a1a;border-radius:50%;width:20px;height:20px;font-size:.7rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
@@ -109,7 +119,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .item-img-wrap{width:100%;aspect-ratio:1;background:linear-gradient(135deg,#e0fdfa 0%,#ccfbf1 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 .item-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
 .menu-card:hover .item-img-wrap img{transform:scale(1.06)}
-.item-img-wrap .placeholder-icon{font-size:3rem;color:#99f6e4}
+.item-img-wrap .placeholder-icon{font-size:4rem;line-height:1;filter:drop-shadow(0 4px 8px rgba(15,118,110,.18))}
 .item-info{padding:12px}
 .item-name{font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:5px;line-height:1.3}
 .item-price{font-size:.95rem;font-weight:700;color:var(--primary)}
@@ -245,27 +255,6 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .loading-overlay.show{display:flex}
 .spinner{width:42px;height:42px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .75s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-#waifu-tips{position:absolute;top:-80px;left:50%;transform:translateX(-50%);background:#fff;border:2px solid var(--border);border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:.82rem;max-width:220px;line-height:1.45;color:var(--text);box-shadow:var(--shadow-md);white-space:normal;pointer-events:none;text-align:center;animation:bubblePop .3s ease;z-index:10000}
-#waifu-tips::after{content:'';position:absolute;bottom:-8px;left:20px;border:4px solid transparent;border-top-color:#fff}
-/* Hide unwanted Live2D toolbar buttons */
-#waifu-tool-switch-model,#waifu-tool-switch-texture,#waifu-tool-asteroids,#waifu-tool-hitokoto,#waifu-tool-photo,#waifu-tool-info{display:none!important}
-
-/* ── MASCOT RESPONSIVE ── */
-#waifu,#waifu *,#waifu canvas{pointer-events:none!important}
-#waifu{bottom:0!important;left:10px!important;z-index:50!important;transition:width .3s,height .3s!important}
-/* Desktop: normal 300px */
-@media(min-width:901px){
-  #waifu{width:280px!important;height:280px!important}
-  #waifu canvas{width:280px!important;height:280px!important}
-}
-/* Tablet (iPad): smaller */
-@media(min-width:481px) and (max-width:900px){
-  #waifu{width:180px!important;height:180px!important;left:6px!important}
-  #waifu canvas{width:180px!important;height:180px!important}
-  #waifu-tips{font-size:.75rem!important;max-width:160px!important;top:-70px!important}
-}
-/* Phone: small, corner only */
-/* mascot hidden on phone via JS */
 
 
 /* ═══════════════════════════════════════
@@ -426,15 +415,6 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
   .stamp-card-bar{bottom:74px;padding:4px 10px;font-size:.72rem;gap:5px}
   .stamp-dot{width:14px;height:14px}
 }
-/* ── FEATURE: Mobile mascot fix ── */
-@media(max-width:480px){
-  #waifu{display:none!important}
-  #waifu-toggle{display:none!important}
-}
-@media(min-width:481px) and (max-width:900px){
-  #waifu{width:220px!important;height:220px!important;left:6px!important;bottom:0px!important}
-  #waifu canvas{width:220px!important;height:220px!important}
-}
 /* ── FEATURE: Popular / History badges ── */
 .badge-hot{background:linear-gradient(135deg,#ef4444,#f97316)!important;color:#fff!important;animation:hotPulse 2s infinite}
 @keyframes hotPulse{0%,100%{box-shadow:0 2px 6px rgba(239,68,68,.3)}50%{box-shadow:0 4px 14px rgba(239,68,68,.7)}}
@@ -476,7 +456,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 #chat-close{display:block;margin-top:10px;text-align:center;color:#94a3b8;font-size:.8rem;cursor:pointer;background:none;border:none;width:100%;padding:4px}
 .chat-empty{color:#cbd5e1;text-align:center;font-size:.82rem;padding:20px 0}
 /* ── FEATURE: Last-Call Banner ── */
-#last-call-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:2500;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;text-align:center;padding:10px 16px;font-size:.88rem;font-weight:700;animation:lastCallPulse 1.5s infinite;cursor:pointer;box-shadow:0 4px 16px rgba(239,68,68,.5)}
+#last-call-banner{display:none;position:fixed;top:60px;left:0;right:0;z-index:99;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;text-align:center;padding:10px 16px;font-size:.88rem;font-weight:700;animation:lastCallPulse 1.5s infinite;cursor:pointer;box-shadow:0 4px 16px rgba(239,68,68,.5)}
 @keyframes lastCallPulse{0%,100%{background:linear-gradient(135deg,#ef4444,#dc2626)}50%{background:linear-gradient(135deg,#f97316,#ef4444)}}
 #last-call-banner .lc-close{float:right;background:rgba(255,255,255,.25);border:none;color:#fff;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;line-height:22px}
 #last-call-banner.show{display:block}
@@ -484,18 +464,9 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 #wait-time-indicator{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:12px;padding:10px 14px;margin:12px 0;font-size:.85rem;color:#166534;font-weight:600}
 #wait-time-indicator .wt-icon{font-size:1.3rem}
 #wait-time-indicator .wt-detail{font-size:.72rem;color:#4ade80;font-weight:400}
-/* ── FEATURE: Mascot Speech bubble ── */
-@keyframes mascotJump{0%{transform:translateY(0)}30%{transform:translateY(-18px)rotate(-5deg)}60%{transform:translateY(-8px)rotate(3deg)}100%{transform:translateY(0)rotate(0)}}
-@keyframes mascotWave{0%{transform:rotate(0)}25%{transform:rotate(15deg)}75%{transform:rotate(-15deg)}100%{transform:rotate(0)}}
-.mascot-jumping{animation:mascotJump .7s ease!important}
-.mascot-waving{animation:mascotWave .5s ease 3!important}
-#mascot-speech{position:fixed;bottom:290px;left:10px;background:#fff;border:2px solid var(--primary-light,#5eead4);border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:.82rem;max-width:220px;line-height:1.45;color:#1e293b;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:250;opacity:0;transition:opacity .3s;pointer-events:none}
-#mascot-speech.show{opacity:1}
-#mascot-speech::after{content:'';position:absolute;bottom:-8px;left:20px;border-width:4px;border-style:solid;border-color:#fff transparent transparent}
 @media(max-width:480px){
   #lucky-btn{right:12px;bottom:72px;padding:8px 13px;font-size:.74rem}
   #chat-btn{left:auto!important;right:12px!important;bottom:126px!important;padding:8px 12px;font-size:.74rem;z-index:450!important}
-  #mascot-speech{bottom:250px;max-width:170px;font-size:.76rem}
 }
 
 /* ── Receipt / Order History Button ── */
@@ -574,7 +545,6 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 <button id="chat-btn" type="button" onclick="toggleStaffChat(true)">💬 スタッフ相談 <span class="chat-badge" id="chatBadge">1</span></button>
 <button id="lucky-btn" type="button" onclick="spinLuckyRoulette()">🎲 おまかせ</button>
 <button id="receipt-btn" type="button" onclick="showReceiptModal()">🧾 注文履歴</button>
-<div id="mascot-speech"></div>
 <div id="chat-overlay" onclick="if(event.target===this)toggleStaffChat(false)">
   <div id="chat-box">
     <div id="chat-title">スタッフチャット</div>
@@ -599,70 +569,6 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
     </div>
   </div>
 </div>
-<!-- Live2D Widget - Japanese mascot with fetch interceptor -->
-<script>
-// Intercept fetch to serve Japanese tips instead of CDN default
-(function() {
-  const origFetch = window.fetch;
-  window.fetch = function(url, opts) {
-    if (typeof url === 'string' && url.includes('waifu-tips.json')) {
-      return origFetch('/waifu-tips.json', opts);
-    }
-    return origFetch(url, opts);
-  };
-})();
-</script>
-<script>
-// Custom Live2D loader - desktop/tablet only (blocked on phone <=480px)
-(function() {
-  if(window.innerWidth<=480){return;}
-  const base = "https://fastly.jsdelivr.net/npm/live2d-widgets@0/";
-  function loadRes(url, type) {
-    return new Promise((resolve, reject) => {
-      let tag;
-      if (type === "css") {
-        tag = document.createElement("link");
-        tag.rel = "stylesheet";
-        tag.href = url;
-      } else {
-        tag = document.createElement("script");
-        tag.src = url;
-      }
-      tag.onload = () => resolve(url);
-      tag.onerror = () => reject(url);
-      document.head.appendChild(tag);
-    });
-  }
-  Promise.all([
-    loadRes(base + "waifu.css", "css"),
-    loadRes(base + "live2d.min.js", "js"),
-    loadRes(base + "waifu-tips.js", "js")
-  ]).then(() => {
-    localStorage.setItem('modelId', '2');
-    localStorage.setItem('modelTexturesId', '0');
-    initWidget({
-      waifuPath: '/waifu-tips.json',
-      cdnPath: "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/",
-      tools: ["switch-model","switch-texture","quit"]
-    });
-    setTimeout(function() {
-      if (typeof loadlive2d === 'function') {
-        loadlive2d('live2d', 'https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/bilibili-live/22/index.json');
-      }
-      localStorage.setItem('modelId', '2');
-    }, 800);
-    setTimeout(function() {
-      if (typeof loadlive2d === 'function') {
-        loadlive2d('live2d', 'https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/bilibili-live/22/index.json');
-      }
-    }, 2500);
-  }).catch(e => console.warn("Live2D load error:", e));
-})();
-</script>
-<script>
-// Block widget's own showMessage to prevent unexpected greetings
-window.showMessage = function(){};
-</script>
 
 <div class="call-staff-overlay" id="callStaffOverlay">
   <div class="call-staff-box">
@@ -756,11 +662,11 @@ window.showMessage = function(){};
         <?php if($badge): ?><div class="item-badge <?php echo $badgeClass; ?>"><?php echo $badge; ?></div><?php endif; ?>
         <div class="item-img-wrap">
           <?php if($imgUrl): ?><img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="<?php echo htmlspecialchars($iname); ?>" loading="lazy">
-          <?php else: ?><span class="placeholder-icon">🍽️</span><?php endif; ?>
+          <?php else: ?><span class="placeholder-icon"><?php echo htmlspecialchars(itemEmoji($iname, $item['category'], $catIcons)); ?></span><?php endif; ?>
         </div>
         <div class="item-info">
           <div class="item-name"><?php echo htmlspecialchars($iname); ?></div>
-          <div class="item-price">¥<?php echo number_format($item['price']); ?></div>
+          <div class="item-price"><?php echo $item['price']==0 ? '無料' : '¥'.number_format($item['price']); ?></div>
         </div>
         <button class="item-add-btn">＋ カートに追加</button>
       </div>
@@ -776,10 +682,10 @@ window.showMessage = function(){};
         <div class="cart-empty"><div class="cart-empty-icon">🛒</div>まだ何も入っていません<br><small>メニューをタップして注文しましょう！</small></div>
         <?php else: foreach($cartItems as $ci): $ciImg=getItemImage($ci['itemId']); ?>
         <div class="cart-item" id="cartItem_<?php echo (int)$ci['orderId']; ?>">
-          <div class="cart-item-thumb"><?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?>🍽️<?php endif; ?></div>
+          <div class="cart-item-thumb"><?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?><?php echo htmlspecialchars(itemEmoji($ci['name'], $ci['category'] ?? 0, $catIcons)); ?><?php endif; ?></div>
           <div class="cart-item-info">
             <div class="cart-item-name"><?php echo htmlspecialchars($ci['name']); ?></div>
-            <div class="cart-item-price">¥<?php echo number_format($ci['price']); ?> × <?php echo (int)$ci['amount']; ?></div>
+            <div class="cart-item-price"><?php echo $ci['price']==0 ? '無料' : '¥'.number_format($ci['price']); ?> × <?php echo (int)$ci['amount']; ?></div>
           </div>
           <div class="cart-item-qty">
             <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,-1)">−</button>
@@ -825,10 +731,10 @@ window.showMessage = function(){};
       <div class="cart-empty"><div class="cart-empty-icon">🛒</div>まだ何も入っていません</div>
       <?php else: foreach($cartItems as $ci): $ciImg=getItemImage($ci['itemId']); ?>
       <div class="cart-item">
-        <div class="cart-item-thumb"><?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?>🍽️<?php endif; ?></div>
+        <div class="cart-item-thumb"><?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?><?php echo htmlspecialchars(itemEmoji($ci['name'], $ci['category'] ?? 0, $catIcons)); ?><?php endif; ?></div>
         <div class="cart-item-info">
           <div class="cart-item-name"><?php echo htmlspecialchars($ci['name']); ?></div>
-          <div class="cart-item-price">¥<?php echo number_format($ci['price']); ?></div>
+          <div class="cart-item-price"><?php echo $ci['price']==0 ? '無料' : '¥'.number_format($ci['price']); ?></div>
         </div>
         <div class="cart-item-qty">
           <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,-1)">−</button>
@@ -866,20 +772,17 @@ const ALL_ITEMS = <?php
   $jsItems=[];
   foreach($items as $it){
     $img=getItemImage($it['id']);
-    $jsItems[]=['id'=>(int)$it['id'],'name'=>$it['name'],'price'=>(int)$it['price'],'category'=>(int)$it['category'],'img'=>$img??''];
+    $jsItems[]=['id'=>(int)$it['id'],'name'=>$it['name'],'price'=>(int)$it['price'],'category'=>(int)$it['category'],'img'=>$img??'','icon'=>itemEmoji($it['name'],$it['category'],$catIcons)];
   }
   echo json_encode($jsItems,JSON_UNESCAPED_UNICODE);
 ?>;
-
-/* ── MASCOT (Live2D widget auto-initialises via CDN) ── */
-// Override Live2D widget tips to react to our app events
-function mascotReact(type){
-  const msgs={
-    add:["ご選択ありがとうございます！","こちら人気メニューでございます！","素晴らしいお選びですね！","ぜひお楽しみください！","おすすめでございます！"], checkout:["ご注文ありがとうございます！ごゆっくりどうぞ♪","ありがとうございます！すぐにお持ちします！","ご注文確かに承りました！"], search:["何かお探しでしょうか？","お好みのものは見つかりましたか？","他にもおすすめがございます！"], staff:["スタッフがすぐに参ります！","少々お待ちください！","ただいまお呼びしております！"] }; const arr=msgs[type]||msgs.add;
-  const msg=arr[Math.floor(Math.random()*arr.length)];
-  // Try to use Live2D widget tip system if available, fallback to toast
-  showToast('🌸 '+msg,'success');
+const CAT_ICONS = <?php echo json_encode($catIcons, JSON_UNESCAPED_UNICODE); ?>;
+function itemIcon(key){
+  const it = ALL_ITEMS.find(i => i.id === Number(key)) || ALL_ITEMS.find(i => i.name === key);
+  return (it && (it.icon || CAT_ICONS[it.category])) || '🍽️';
 }
+function fmtPrice(n){ return n===0 ? (typeof I18N_T==='function' ? I18N_T('無料') : '無料') : '¥'+n.toLocaleString(); }
+
 /* ── SEARCH ── */
 function handleSearch(val){
   const q=val.trim().toLowerCase();
@@ -891,7 +794,7 @@ function handleSearch(val){
     if(show)vis++;
   });
   document.getElementById('searchNoResults').classList.toggle('show',q.length>0&&vis===0);
-  if(q.length>1)mascotReact('search');
+  if(q.length>1)feedbackToast('search');
 }
 function clearSearch(){document.getElementById('searchInput').value='';handleSearch('');}
 
@@ -910,7 +813,7 @@ function sendCallRequest(){
   const req=selectedCallOption||'Assistance';
   closeCallStaff();
   showToast('🔔 ' + req + ' のご依頼を承りました！', 'success');
-  mascotReact('staff');
+  feedbackToast('staff');
   showStaffArrival();
 }
 
@@ -931,16 +834,16 @@ function getSuggestions(item){
 }
 function showCombo(addedItem,suggestions){
   const imgW=document.getElementById('comboAddedImg');
-  imgW.innerHTML=addedItem.img?'<img src="'+addedItem.img+'" style="width:100%;height:100%;object-fit:cover">':'<span style="font-size:1.5rem">🍽️</span>';
+  imgW.innerHTML=addedItem.img?'<img src="'+addedItem.img+'" style="width:100%;height:100%;object-fit:cover">':'<span style="font-size:1.5rem">'+itemIcon(addedItem.id)+'</span>';
   document.getElementById('comboAddedName').textContent=addedItem.name;
-  document.getElementById('comboAddedPrice').textContent='¥'+addedItem.price.toLocaleString();
+  document.getElementById('comboAddedPrice').textContent=fmtPrice(addedItem.price);
   const grid=document.getElementById('comboSuggestions');
   grid.innerHTML='';selectedComboId=null;
   document.getElementById('btnComboAdd').disabled=true;
   suggestions.forEach(s=>{
     const d=document.createElement('div');
     d.className='combo-suggest-item';
-    d.innerHTML='<div class="combo-suggest-img">'+(s.img?'<img src="'+s.img+'" style="width:100%;height:100%;object-fit:cover">':'<span style="font-size:1.3rem">🍽️</span>')+'</div><div class="combo-suggest-name">'+s.name+'</div><div class="combo-suggest-price">¥'+s.price.toLocaleString()+'</div>';
+    d.innerHTML='<div class="combo-suggest-img">'+(s.img?'<img src="'+s.img+'" style="width:100%;height:100%;object-fit:cover">':'<span style="font-size:1.3rem">'+itemIcon(s.id)+'</span>')+'</div><div class="combo-suggest-name">'+s.name+'</div><div class="combo-suggest-price">¥'+s.price.toLocaleString()+'</div>';
     d.onclick=()=>{
       grid.querySelectorAll('.combo-suggest-item').forEach(el=>el.classList.remove('selected'));
       d.classList.add('selected');
@@ -979,7 +882,7 @@ function showCelebration(name,isCombo){
   document.getElementById('celebrateText').textContent=isCombo?'セット追加完了！🎊':name+'を追加しました！🎉';
   document.getElementById('celebrateSub').textContent=isCombo?'素敵な組み合わせですね♪':['美味しそうでございます！','素晴らしいお選びです！','ありがとうございます！','ぜひお楽しみください！'][Math.floor(Math.random()*4)];
   cel.classList.add('show');
-  launchConfetti();mascotReact('add');
+  launchConfetti();feedbackToast('add');
   setTimeout(()=>cel.classList.remove('show'),1800);
 }
 function launchConfetti(){
@@ -1003,16 +906,16 @@ function filterCategory(catId,btn){
 function openOrderModal(itemId,itemName,itemPrice,imgUrl){
   selectedItemId=itemId;selectedItemName=itemName;selectedItemPrice=itemPrice;selectedItemImg=imgUrl;modalQty=1;
   document.getElementById('modalTitle').textContent=itemName;
-  document.getElementById('modalPrice').textContent='¥'+itemPrice.toLocaleString();
+  document.getElementById('modalPrice').textContent=fmtPrice(itemPrice);
   document.getElementById('modalQty').textContent='1';
   document.getElementById('modalNotes').value='';
-  document.getElementById('modalImgWrap').innerHTML=imgUrl?'<img src="'+imgUrl+'" alt="'+itemName+'" style="width:100%;height:100%;object-fit:cover">':'<span style="font-size:3.5rem">🍽️</span>';
+  document.getElementById('modalImgWrap').innerHTML=imgUrl?'<img src="'+imgUrl+'" alt="'+itemName+'" style="width:100%;height:100%;object-fit:cover">':'<span style="font-size:4.5rem">'+itemIcon(itemId)+'</span>';
   document.getElementById('orderModal').classList.add('show');
 }
 function changeModalQty(delta){
   modalQty=Math.max(1,Math.min(99,modalQty+delta));
   document.getElementById('modalQty').textContent=modalQty;
-  document.getElementById('modalPrice').textContent='¥'+(selectedItemPrice*modalQty).toLocaleString();
+  document.getElementById('modalPrice').textContent=fmtPrice(selectedItemPrice*modalQty);
 }
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 async function executeOrder(){
@@ -1054,7 +957,7 @@ async function executeCheckout(){
   try{
     const fd=new FormData();fd.append('tableNo',TABLE_NO);
     const res=await fetch('checkout.php',{method:'POST',body:fd});
-    if(res.ok){mascotReact('checkout');launchConfetti();showToast('ご注文ありがとうございます！少々お待ちください🎉','success');refreshCart();}
+    if(res.ok){feedbackToast('checkout');launchConfetti();showToast('ご注文ありがとうございます！少々お待ちください🎉','success');refreshCart();}
     else throw new Error('failed');
   }catch(e){showToast('申し訳ございません。もう一度お試しください。','error');}
   finally{showLoading(false);}
@@ -1115,12 +1018,12 @@ async function refreshCart(){
 }
 
 function buildCartItemHTML(ci){
-  const img = ci.img ? '<img src="'+ci.img+'" alt="" style="width:100%;height:100%;object-fit:cover">' : '🍽️';
+  const img = ci.img ? '<img src="'+ci.img+'" alt="" style="width:100%;height:100%;object-fit:cover">' : itemIcon(ci.name);
   return '<div class="cart-item" id="cartItem_'+ci.orderId+'">'
     +'<div class="cart-item-thumb">'+img+'</div>'
     +'<div class="cart-item-info">'
     +'<div class="cart-item-name">'+ci.name+'</div>'
-    +'<div class="cart-item-price">¥'+Number(ci.price).toLocaleString()+' × '+ci.amount+'</div>'
+    +'<div class="cart-item-price">'+fmtPrice(Number(ci.price))+' × '+ci.amount+'</div>'
     +'</div>'
     +'<div class="cart-item-qty">'
     +'<button class="qty-btn" onclick="event.stopPropagation();updateQuantity('+ci.orderId+',-1)">−</button>'
@@ -1145,26 +1048,6 @@ function buildMobileFooter(total, count){
     +'</div>';
 }
 
-/* ── MASCOT RESPONSIVE RESIZE ── */
-function resizeMascot(){
-  const waifu=document.getElementById('waifu');
-  if(!waifu)return;
-  const w=window.innerWidth;
-  let size;
-  if(w<=480)size=200;
-  else if(w<=900)size=220;
-  else size=280;
-  waifu.style.setProperty('width',size+'px','important');
-  waifu.style.setProperty('height',size+'px','important');
-  waifu.style.setProperty('bottom','0px','important');
-  waifu.style.setProperty('display','block','important');
-  const canvas=waifu.querySelector('canvas');
-  if(canvas){canvas.style.setProperty('width',size+'px','important');canvas.style.setProperty('height',size+'px','important');}
-}
-// Apply on load and resize
-window.addEventListener('resize', resizeMascot);
-// Apply after widget loads - more retries for slow mobile networks
-[500, 1000, 2000, 3000, 5000, 8000].forEach(t => setTimeout(resizeMascot, t));
 
 
 /* ── FAVORITES ── */
@@ -1266,12 +1149,12 @@ function showStaffArrival(){
   }, 1000);
 }
 
-/* ── FEATURE BLOCK: Lucky / Chat / Last-Call / History / WaitTime / MascotReact ── */
+/* ── FEATURE BLOCK: Lucky / Chat / Last-Call / History / WaitTime / FeedbackToast ── */
 window.luckyPick = null;
 window.staffChatMessages = [];
 window.staffChatUnread = 1;
 
-function mascotReact(type){
+function feedbackToast(type){
   const msgs={
     add:["ご注文ありがとうございます。できあがりをお楽しみに。","人気の一品ですね。良いお選びです。","こちら、相性の良いセットもございます。"],
     checkout:["ご注文を承りました。少々お待ちください。","ありがとうございます。順番にご用意いたします。","ただいま厨房へ共有しました。"],
@@ -1281,24 +1164,7 @@ function mascotReact(type){
   };
   const arr=msgs[type]||msgs.add;
   const msg=arr[Math.floor(Math.random()*arr.length)];
-  showMascotSpeech(msg, type==='staff' ? 'wave' : 'jump');
-  showToast('🌸 '+msg,'success');
-}
-function showMascotSpeech(message, motion){
-  const bubble=document.getElementById('mascot-speech');
-  if(bubble){
-    bubble.textContent=message;
-    bubble.classList.add('show');
-    clearTimeout(window._mascotSpeechTimer);
-    window._mascotSpeechTimer=setTimeout(()=>bubble.classList.remove('show'),3200);
-  }
-  const waifu=document.getElementById('waifu');
-  if(waifu){
-    waifu.classList.remove('mascot-jumping','mascot-waving');
-    void waifu.offsetWidth;
-    waifu.classList.add(motion==='wave'?'mascot-waving':'mascot-jumping');
-    setTimeout(()=>waifu.classList.remove('mascot-jumping','mascot-waving'),1800);
-  }
+  showToast(msg,'success');
 }
 
 function getItemStats(){
@@ -1376,6 +1242,9 @@ function maybeShowLastCallBanner(force){
   const hour=(new Date()).getHours();
   if(force || hour>=21 || ((parseInt((document.getElementById('cartCountBadge')||{}).textContent||'0',10)||0)>=3)){
     if(localStorage.getItem('smartorder_last_call_closed')!=='1'){
+      // sit just below the header so it never covers the language / cart buttons
+      const header=document.querySelector('.app-header');
+      if(header) banner.style.top=header.getBoundingClientRect().height+'px';
       banner.classList.add('show');
     }
   }
@@ -1403,10 +1272,10 @@ function spinLuckyRoulette(){
   setTimeout(()=>{
     btn.classList.remove('spinning');
     document.getElementById('lucky-reveal-name').textContent=window.luckyPick.name;
-    document.getElementById('lucky-reveal-price').textContent='¥'+Number(window.luckyPick.price||0).toLocaleString();
+    document.getElementById('lucky-reveal-price').textContent=fmtPrice(Number(window.luckyPick.price||0));
     document.getElementById('lucky-reveal-emoji').textContent=['🎯','🎲','✨','🍀'][Math.floor(Math.random()*4)];
     document.getElementById('lucky-reveal').classList.add('show');
-    mascotReact('lucky');
+    feedbackToast('lucky');
   },600);
 }
 function closeLuckyReveal(){
@@ -1474,6 +1343,7 @@ function setLang(lang) {
   });
   applyMenuTranslation(lang);
   updateChatLangHint(lang);
+  applyUITranslation();
 }
 function updateChatLangHint(lang) {
   const title = document.getElementById('chat-title');
@@ -1490,7 +1360,7 @@ async function applyMenuTranslation(lang) {
   if (lang === 'ja') {
     document.querySelectorAll('.menu-card').forEach(card => {
       const nameEl = card.querySelector('.item-name');
-      const origName = card.dataset.name || card.dataset.itemName;
+      const origName = card.dataset.itemName || card.dataset.name;
       if (nameEl && origName) nameEl.textContent = origName;
     });
     return;
@@ -1516,25 +1386,12 @@ function applyTranslToDOM(translations) {
     const nameEl = card.querySelector('.item-name');
     if (nameEl && translations[id]) nameEl.textContent = translations[id].name || nameEl.textContent;
   });
+  if (typeof applyUITranslation === 'function') applyUITranslation();
 }
 document.addEventListener('DOMContentLoaded', () => {
   const saved = localStorage.getItem('smartorder_lang') || 'ja';
   if (saved !== 'ja') setTimeout(() => setLang(saved), 800);
 });
-// ── Hide mascot on phone ──
-function hideMascotOnPhone(){
-  if(window.innerWidth<=480){
-    const w=document.getElementById('waifu');
-    const t=document.getElementById('waifu-toggle');
-    if(w){w.style.setProperty('display','none','important');}
-    if(t){t.style.setProperty('display','none','important');}
-  }
-}
-hideMascotOnPhone();
-window.addEventListener('resize',hideMascotOnPhone);
-setTimeout(hideMascotOnPhone,500);
-setTimeout(hideMascotOnPhone,1500);
-setTimeout(hideMascotOnPhone,3000);
 
 // ── Order History / Receipt ──
 let receiptTotal = 0;
@@ -1563,7 +1420,7 @@ async function showReceiptModal(){
       <div class="receipt-item-row">
         ${item.image_url
           ? `<img class="receipt-item-img" src="${item.image_url}" alt="${item.name}" onerror="this.style.display='none'">`
-          : `<div class="receipt-item-img-placeholder">🍽️</div>`}
+          : `<div class="receipt-item-img-placeholder">${itemIcon(item.name)}</div>`}
         <div class="receipt-item-info">
           <div class="receipt-item-name">${item.name}</div>
           <div class="receipt-item-qty">×${item.amount} &nbsp;¥${Number(item.price).toLocaleString()}</div>
@@ -1814,5 +1671,217 @@ document.getElementById('comboOverlay').addEventListener('click',function(e){if(
     </div>
   </div>
 </div>
+<script>
+/* ── UI TRANSLATION (JP / EN / 中文) ──
+   Translates every static and dynamically inserted UI string.
+   Menu item names come from translate_menu.php (menuTranslCache). */
+const I18N_DICT = {
+  // header / navigation
+  'スタッフ': ['Staff','服务员'],
+  'カート': ['Cart','购物车'],
+  'ショッピングカート': ['Shopping Cart','购物车'],
+  'メニューを検索... (例：寿司、ビール、デザート)': ['Search menu... (e.g. sushi, beer, dessert)','搜索菜单...（例：寿司、啤酒、甜点）'],
+  '全メニュー': ['All Menu','全部菜单'],
+  ' メニュー': [' Menu',' 菜单'],
+  'とりあえず注文': ['Starters','先点这些'],
+  'お寿司': ['Sushi','寿司'],
+  '焼き物': ['Grilled','烧烤'],
+  '揚げ物': ['Fried','炸物'],
+  'ドリンク': ['Drinks','饮品'],
+  'デザート': ['Desserts','甜点'],
+  // badges
+  '人気': ['Popular','人气'],
+  'おすすめ': ['Recommended','推荐'],
+  '期間限定': ['Limited','限时'],
+  '無料': ['Free','免费'],
+  '以前に注文': ['Ordered before','之前点过'],
+  'お気に入り': ['Favorite','收藏'],
+  // wait time
+  'ご注文数に応じて更新されます': ['Updated based on current orders','根据订单量更新'],
+  '少なめのご注文なら比較的スムーズです': ['Smaller orders are usually quicker','少量点餐通常更快'],
+  // menu / cart
+  '＋ カートに追加': ['+ Add to cart','＋ 加入购物车'],
+  'カートに追加': ['Add to cart','加入购物车'],
+  'カートに追加しました！': ['Added to cart!','已加入购物车！'],
+  'ぜひお楽しみください！': ['Enjoy!','请慢慢享用！'],
+  'を追加しました！🎉': [' added! 🎉',' 已添加！🎉'],
+  'セット追加完了！🎊': ['Set added! 🎊','套餐已添加！🎊'],
+  'まだ何も入っていません': ['Your cart is empty','购物车是空的'],
+  'メニューをタップして注文しましょう！': ['Tap a menu item to order!','点击菜单开始点餐吧！'],
+  '合計金額': ['Total','合计金额'],
+  '合計': ['Total','合计'],
+  '✓ 注文を確定する': ['✓ Place order','✓ 确认下单'],
+  'スタッフを呼ぶ': ['Call staff','呼叫服务员'],
+  '見つかりませんでした。': ['No results found.','未找到结果。'],
+  '別のキーワードで試してみてください！': ['Try a different keyword!','请尝试其他关键词！'],
+  '特別なリクエスト、アレルギーなど...': ['Special requests, allergies...','特殊要求、过敏等...'],
+  'キャンセル': ['Cancel','取消'],
+  '確認': ['Confirm','确认'],
+  'ご注文の確認': ['Confirm order','确认订单'],
+  'ご注文を確定しますか？': ['Place this order?','确定下单吗？'],
+  '読み込み中...': ['Loading...','加载中...'],
+  // floating buttons
+  'スタッフ相談': ['Ask staff','咨询服务员'],
+  'おまかせ': ['Surprise me','随机推荐'],
+  '注文履歴・会計': ['Order history & bill','订单记录・结账'],
+  '注文履歴': ['Order history','订单记录'],
+  // call staff
+  '何が必要ですか？すぐにスタッフが参ります！': ['What do you need? Staff will be right there!','需要什么？服务员马上就来！'],
+  'お水': ['Water','水'],
+  'お皿': ['Plates','盘子'],
+  'おしぼり': ['Towel','湿毛巾'],
+  'お手伝い': ['Help','帮助'],
+  ' のご依頼を承りました！': [' request received!',' 请求已收到！'],
+  'スタッフが向かっています...': ['Staff is on the way...','服务员正在赶来...'],
+  'もうすぐスタッフが参ります！': ['Staff will arrive shortly!','服务员马上就到！'],
+  'スタッフが到着しました！🙋': ['Staff has arrived! 🙋','服务员已到达！🙋'],
+  // combo
+  '🍱 セットメニューはいかが？': ['🍱 How about a set?','🍱 来个套餐吗？'],
+  '一緒に注文してお得にしよう！': ['Order together and enjoy more!','一起点更划算！'],
+  '✨ こちらも一緒にどうぞ...': ['✨ Goes well with...','✨ 也推荐搭配...'],
+  'おすすめの組み合わせ': ['Recommended pairings','推荐搭配'],
+  'いいえ、結構です': ['No, thanks','不用了，谢谢'],
+  '＋ 注文に追加': ['+ Add to order','＋ 加入订单'],
+  '素敵な組み合わせですね♪': ['Great combination!','很棒的搭配！'],
+  // stamp card
+  'スタンプ': ['Stamps','印章'],
+  'スタンプ達成！': ['Stamp card complete!','集章完成！'],
+  '5回ご注文ありがとうございます！': ['Thanks for ordering 5 times!','感谢您5次点餐！'],
+  'スタッフにこの画面をお見せください✨': ['Please show this screen to staff ✨','请向服务员出示此画面✨'],
+  '✓ 閉じる': ['✓ Close','✓ 关闭'],
+  '閉じる': ['Close','关闭'],
+  // last order
+  '⏰ ラストオーダーが近づいています。気になる一品は今のうちにどうぞ': ['⏰ Last order is coming up. Order anything you\'d like now!','⏰ 即将最后点餐，想吃的请尽快点！'],
+  // chat
+  'まだメッセージはありません': ['No messages yet','暂无消息'],
+  '例: おすすめのドリンクはありますか？': ['e.g. Any drink recommendations?','例：有推荐的饮品吗？'],
+  '送信': ['Send','发送'],
+  'スタッフからメッセージ': ['Message from staff','来自服务员的消息'],
+  'ご相談があればこちらからどうぞ。おすすめやアレルギー確認も承ります。': ['Ask us anything here — recommendations, allergy checks and more.','有任何问题请在这里咨询，推荐或过敏确认都可以。'],
+  'ありがとうございます。スタッフが対応いたします。': ['Thank you. A staff member will help you.','谢谢，服务员会为您处理。'],
+  'スタッフをお呼びしました。内容を確認して向かいます。': ['We\'ve called staff. They\'ll be right with you.','已呼叫服务员，马上为您服务。'],
+  '申し訳ございません。ただいま接続中です。スタッフを呼んでください。': ['Sorry, we\'re reconnecting. Please call staff.','抱歉，正在连接中，请呼叫服务员。'],
+  // lucky
+  '今日のラッキーセレクト': ['Today\'s lucky pick','今日幸运推荐'],
+  'おすすめメニュー': ['Recommended dish','推荐菜品'],
+  'これにする': ['I\'ll take it','就要这个'],
+  'また今度': ['Maybe later','下次吧'],
+  // receipt
+  'まだ注文がありません': ['No orders yet','暂无订单'],
+  '人数で割り勘': ['Split the bill','分摊账单'],
+  '人で': ['people','人分摊'],
+  '/ 人': ['/ person','/ 人'],
+  'データの取得に失敗しました': ['Failed to load data','数据加载失败'],
+  // toasts & feedback
+  'ご注文ありがとうございます！少々お待ちください🎉': ['Thank you for your order! Please wait a moment 🎉','感谢您的点餐！请稍候🎉'],
+  '申し訳ございません。追加できませんでした。': ['Sorry, could not add the item.','抱歉，无法添加。'],
+  '申し訳ございません。もう一度お試しください。': ['Sorry, please try again.','抱歉，请重试。'],
+  '申し訳ございません。更新できませんでした。': ['Sorry, could not update.','抱歉，无法更新。'],
+  'お気に入りから外しました': ['Removed from favorites','已取消收藏'],
+  '❤️ お気に入りに追加しました！': ['❤️ Added to favorites!','❤️ 已加入收藏！'],
+  '表示中のメニューがありません。検索をクリアしてお試しください。': ['No items shown. Clear the search and try again.','没有显示的菜单，请清除搜索后重试。'],
+  'ご注文ありがとうございます。できあがりをお楽しみに。': ['Thank you! Your food is on its way.','谢谢！请期待您的美食。'],
+  '人気の一品ですね。良いお選びです。': ['A popular choice — great pick!','人气菜品，好眼光！'],
+  'こちら、相性の良いセットもございます。': ['We also have sets that go well with this.','还有很搭配的套餐哦。'],
+  'ご注文を承りました。少々お待ちください。': ['Order received. Please wait a moment.','已收到订单，请稍候。'],
+  'ありがとうございます。順番にご用意いたします。': ['Thank you. We\'ll prepare it in order.','谢谢，我们会按顺序准备。'],
+  'ただいま厨房へ共有しました。': ['Sent to the kitchen.','已通知厨房。'],
+  '気になるメニューは見つかりましたか。': ['Found something you like?','找到想吃的了吗？'],
+  'お好みがあればおすすめもご案内できます。': ['Ask us for recommendations anytime.','可以为您推荐哦。'],
+  '迷ったらおまかせボタンもどうぞ。': ['Can\'t decide? Try "Surprise me".','拿不定主意？试试随机推荐。'],
+  'スタッフへお声がけしました。': ['We\'ve notified staff.','已通知服务员。'],
+  'まもなくスタッフが参ります。': ['Staff will be with you shortly.','服务员马上就来。'],
+  'ご用件をしっかりお伝えしますね。': ['We\'ll pass on your request.','会转达您的需求。'],
+  '今日の運試しメニューです。': ['Here\'s today\'s lucky dish.','这是今天的幸运菜品。'],
+  '新しいお気に入りに出会えるかもしれません。': ['You might find a new favorite.','也许能遇到新的最爱。'],
+  '直感で選ぶのも楽しいですよ。': ['Going with your gut is fun too.','凭直觉选也很有趣。'],
+  'ありがとうございます！': ['Thank you!','谢谢！'],
+  '美味しそうでございます！': ['Looks delicious!','看起来很好吃！'],
+  '素晴らしいお選びです！': ['Excellent choice!','好眼光！'],
+  'こちらはお気に入りに追加されましたね！素敵なお選びです！': ['Added to your favorites — lovely choice!','已加入收藏，好选择！']
+};
+const I18N_RULES = [
+  [/ただいまの目安:\s*(\d+)〜(\d+)分/, ['Estimated wait: $1–$2 min','预计等待：$1–$2 分钟']],
+  [/カート\s*(\d+)点。混雑状況を反映しています/, ['$1 item(s) in cart · reflects current traffic','购物车 $1 件 · 已反映拥挤情况']],
+  [/あと\s*(\d+)\s*秒/, ['$1s left','还剩 $1 秒']],
+  [/👔 スタッフ:/, ['👔 Staff:','👔 服务员：']]
+];
+const I18N_KEYS = Object.keys(I18N_DICT).sort((a,b) => b.length - a.length);
+const I18N_NAME_SEL = '.item-name,.cart-item-name,.receipt-item-name,#modalTitle,#comboAddedName,.combo-suggest-name,#lucky-reveal-name';
+const I18N_SKIP_SEL = 'script,style,textarea,#langSwitcher';
+const i18nOrig = new WeakMap(); // node -> {src, out}
+let i18nBusy = false;
+
+function I18N_T(ja){
+  const idx = currentLang === 'en' ? 0 : currentLang === 'zh' ? 1 : -1;
+  if (idx < 0 || !I18N_DICT[ja]) return ja;
+  return I18N_DICT[ja][idx];
+}
+function i18nNameMap(){
+  const tr = menuTranslCache[currentLang];
+  const map = {};
+  if (tr) ALL_ITEMS.forEach(it => { if (tr[it.id] && tr[it.id].name) map[it.name] = tr[it.id].name; });
+  return map;
+}
+function i18nPhrase(text, exactOnly){
+  if (currentLang === 'ja') return text;
+  const idx = currentLang === 'en' ? 0 : 1;
+  const trimmed = text.trim();
+  if (I18N_DICT[trimmed]) return text.replace(trimmed, I18N_DICT[trimmed][idx]);
+  if (exactOnly) return text;
+  let out = text;
+  for (const [re, rep] of I18N_RULES) out = out.replace(re, rep[idx]);
+  for (const k of I18N_KEYS) {
+    if (k.length < 2) continue;
+    if (out.includes(k)) out = out.split(k).join(I18N_DICT[k][idx]);
+  }
+  return out;
+}
+function i18nNode(node, names){
+  const el = node.parentElement;
+  if (!el || el.closest(I18N_SKIP_SEL)) return;
+  let rec = i18nOrig.get(node);
+  // the app changed the text since we last touched it -> new source
+  if (!rec || node.nodeValue !== rec.out) rec = { src: node.nodeValue };
+  let out;
+  if (currentLang === 'ja') out = rec.src;
+  else if (el.closest(I18N_NAME_SEL)) out = names[rec.src.trim()] ? rec.src.replace(rec.src.trim(), names[rec.src.trim()]) : rec.src;
+  else out = i18nPhrase(rec.src, !!el.closest('#chat-messages'));
+  rec.out = out;
+  i18nOrig.set(node, rec);
+  if (node.nodeValue !== out) node.nodeValue = out;
+}
+function i18nAttr(el, attr){
+  const key = 'i18n' + attr;
+  if (el.dataset[key] === undefined || el.getAttribute(attr) !== el.dataset[key + 'Out']) el.dataset[key] = el.getAttribute(attr);
+  const out = currentLang === 'ja' ? el.dataset[key] : i18nPhrase(el.dataset[key], false);
+  el.dataset[key + 'Out'] = out;
+  el.setAttribute(attr, out);
+}
+function applyUITranslation(root){
+  if (i18nBusy) return;
+  i18nBusy = true;
+  try {
+    root = root || document.body;
+    const names = i18nNameMap();
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let n; while ((n = walker.nextNode())) { if (n.nodeValue.trim()) i18nNode(n, names); }
+    if (root.querySelectorAll) {
+      root.querySelectorAll('[placeholder]').forEach(el => i18nAttr(el, 'placeholder'));
+      root.querySelectorAll('[title]').forEach(el => i18nAttr(el, 'title'));
+    }
+    document.documentElement.lang = currentLang === 'zh' ? 'zh-Hans' : currentLang;
+  } finally { i18nBusy = false; }
+}
+new MutationObserver(muts => {
+  if (i18nBusy || currentLang === 'ja') return;
+  const roots = new Set();
+  muts.forEach(m => {
+    if (m.type === 'characterData') roots.add(m.target.parentElement);
+    else m.addedNodes.forEach(a => roots.add(a.nodeType === 3 ? a.parentElement : a));
+  });
+  roots.forEach(r => { if (r && r.isConnected) applyUITranslation(r); });
+}).observe(document.body, { childList: true, characterData: true, subtree: true });
+</script>
 </body>
 </html>

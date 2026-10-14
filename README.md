@@ -44,11 +44,10 @@ It's a QR-based ordering system — but the interesting part is the AI. Customer
 ### 🎯 Smart UX Features / スマートUX
 - **Stamp Card** — customers earn stamps with each order
 - **Lucky Roulette** — AI randomly picks a recommended dish
-- **Mascot (Live2D)** — animated character on desktop/tablet (hidden on mobile for usability)
 - **Floating buttons** — Staff chat and Lucky Roulette accessible at all times
 - **Last order alert** — banner appears when closing time approaches
 
-> 注文ごとにスタンプが貯まるスタンプカード、AIがランダムにおすすめ料理を選ぶルーレット、デスクトップ・タブレットで表示されるLive2Dマスコットなど、使いやすさを重視したUXを実装しています。
+> 注文ごとにスタンプが貯まるスタンプカード、AIがランダムにおすすめ料理を選ぶルーレットなど、使いやすさを重視したUXを実装しています。
 
 ### 🖥️ Staff Management Dashboard / スタッフ管理
 - Real-time order view with auto-refresh every 10 seconds
@@ -75,7 +74,6 @@ It's a QR-based ordering system — but the interesting part is the AI. Customer
 | Database | MySQL / MariaDB |
 | AI | Google Gemini 2.5 Flash (via Gemini API) |
 | Deployment | Render (Free tier) |
-| Mascot | Live2D (desktop/tablet only) |
 | Version Control | Git / GitHub |
 | QR Code | goqr.me API |
 
@@ -133,7 +131,6 @@ smartorder/
 ├── qr.php                 # QR code generator
 ├── login.php / logout.php # Authentication
 ├── pdo.php                # Database connection
-├── waifu-tips.json        # Live2D mascot config
 └── database_utf8.sql      # Database schema & seed data
 ```
 
@@ -168,7 +165,6 @@ git clone https://github.com/Z200-WEB/smartorder-restaurant-system.git
 ## Tools Used / 使用ツール
 
 - **Google Gemini API** — AI chat and menu translation
-- **Live2D** — Animated mascot character (desktop/tablet)
 - **GitHub** — Version control
 - **Render** — Cloud deployment (free tier)
 - **VSCode** — Code editor
