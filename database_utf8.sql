@@ -80,6 +80,7 @@ CREATE TABLE `sManagement` (
     `kitchen_state` int(11) DEFAULT 0 COMMENT '0=new,1=cooking,2=ready,3=served',
     `estimated_minutes` int(11) DEFAULT 15,
     `notes` varchar(500) DEFAULT NULL,
+    `ordered_at` datetime DEFAULT NULL COMMENT 'When the customer confirmed the order',
     PRIMARY KEY (`id`)
   ) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

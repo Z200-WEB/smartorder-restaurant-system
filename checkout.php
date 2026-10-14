@@ -25,7 +25,7 @@ try {
     
     // 注文を確定: state を 0(下書き) から 1(確定済み) に変更
     // これにより管理画面(management.php)に表示されるようになる
-    $sql = "UPDATE sManagement SET state = 1 WHERE orderNo = :orderNo";
+    $sql = "UPDATE sManagement SET state = 1, ordered_at = NOW(), kitchen_state = 0 WHERE orderNo = :orderNo";
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':orderNo', $orderNo, PDO::PARAM_STR);
     $stmt->execute();

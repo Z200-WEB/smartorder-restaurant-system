@@ -56,6 +56,15 @@ It's a QR-based ordering system — but the interesting part is the AI. Customer
 
 > 10秒ごとに自動更新されるリアルタイム注文管理画面。テーブルごとの注文内容確認や会計処理が可能です。
 
+### 👨‍🍳 Kitchen Display / キッチンモニター
+- **Live tickets** — new orders appear on the kitchen screen within ~3 seconds (`kitchen.php`)
+- **3-step flow** — 新規 → 調理中 → 完成・提供待ち → 提供済み, with one-tap buttons and undo
+- **Timers** — each ticket shows elapsed time; turns orange after 10 min and red after 20 min
+- **Customer notes** — allergy / preference notes (e.g. 「わさび抜き」) are highlighted on the ticket
+- **Alerts & TV mode** — optional chime for new orders and a fullscreen mode for a kitchen monitor
+
+> 注文が入ると数秒でキッチン画面に表示され、ワンタップで「調理開始→完成→提供済み」と進められます。経過時間の色分け、お客様のメモ表示、通知音、全画面モードに対応しています。
+
 ### ⚙️ Admin Panel / 管理者パネル
 - Add, edit, delete menu items and categories
 - Set items as popular / new / spicy

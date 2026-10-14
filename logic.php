@@ -11,6 +11,9 @@ try {
     $itemId = (int)$_POST['itemId'];
     $tableNo = (int)$_POST['tableNo'];
     $amount = (int)$_POST['amount'];
+    // Customer note for the kitchen (allergies, "no wasabi", etc.)
+    $notes = trim((string)($_POST['item_notes'] ?? ''));
+    $notes = mb_substr(preg_replace('/\s+/u', ' ', $notes), 0, 200);
 
     if ($itemId <= 0 || $tableNo <= 0 || $amount <= 0) {
         throw new Exception('Invalid parameters');
@@ -38,7 +41,7 @@ try {
     }
 
     // Check if this item already exists in the order
-    $sql = "SELECT id, amount FROM sOrder WHERE orderNo = :orderNo AND itemNo = :itemNo";
+    $sql = "SELECT id, amount, item_notes FROM sOrder WHERE orderNo = :orderNo AND itemNo = :itemNo";
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':orderNo', $orderNo, PDO::PARAM_STR);
     $stmt->bindValue(':itemNo', $itemId, PDO::PARAM_INT);
@@ -48,15 +51,18 @@ try {
     if ($existingItem) {
         // Update quantity of existing item
         $newAmount = $existingItem['amount'] + $amount;
-        $sql = "UPDATE sOrder SET amount = :amount WHERE id = :id";
+        $mergedNotes = trim(implode(' / ', array_filter([(string)$existingItem['item_notes'], $notes], 'strlen')));
+        $sql = "UPDATE sOrder SET amount = :amount, item_notes = :notes WHERE id = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':amount', $newAmount, PDO::PARAM_INT);
+        $stmt->bindValue(':notes', $mergedNotes !== '' ? mb_substr($mergedNotes, 0, 255) : null, $mergedNotes !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
         $stmt->bindValue(':id', $existingItem['id'], PDO::PARAM_INT);
         $stmt->execute();
     } else {
         // Add new item to order
-        $sql = "INSERT INTO sOrder (state, orderNo, itemNo, amount) VALUES (1, :orderNo, :itemNo, :amount)";
+        $sql = "INSERT INTO sOrder (state, orderNo, itemNo, amount, item_notes) VALUES (1, :orderNo, :itemNo, :amount, :notes)";
         $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':notes', $notes !== '' ? $notes : null, $notes !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
         $stmt->bindValue(':orderNo', $orderNo, PDO::PARAM_STR);
         $stmt->bindValue(':itemNo', $itemId, PDO::PARAM_INT);
         $stmt->bindValue(':amount', $amount, PDO::PARAM_INT);

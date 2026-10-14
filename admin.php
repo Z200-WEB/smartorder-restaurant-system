@@ -151,7 +151,7 @@ $csrfToken = generateCsrfToken();
 
 <header class="m-topbar"><div class="m-topbar-inner">
   <a class="m-brand" href="management.php"><span class="m-logo">S</span><span><div class="m-brand-name">SmartOrder</div><div class="m-brand-sub">管理画面</div></span></a>
-  <nav class="m-nav"><a href="management.php">注文管理</a><a href="admin.php" class="active">メニュー管理</a></nav>
+  <nav class="m-nav"><a href="management.php">注文管理</a><a href="kitchen.php">キッチン</a><a href="admin.php" class="active">メニュー管理</a></nav>
   <div class="m-actions"><a class="m-btn-ghost" href="index.php?tableNo=1" target="_blank">お客様画面 ↗</a><a class="m-btn-ghost" href="logout.php">ログアウト</a></div>
 </div></header>
 <div class="m-page-title"><div><h1>メニュー管理</h1><p>商品とカテゴリを管理できます</p></div></div>

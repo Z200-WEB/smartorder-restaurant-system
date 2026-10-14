@@ -71,7 +71,8 @@ if [ ! -d /var/lib/mysql/mysql ]; then
                                                                                                   ALTER TABLE sManagement
                                                                                                         ADD COLUMN IF NOT EXISTS kitchen_state int(11) DEFAULT 0,
                                                                                                               ADD COLUMN IF NOT EXISTS estimated_minutes int(11) DEFAULT 15,
-                                                                                                                    ADD COLUMN IF NOT EXISTS notes varchar(500) DEFAULT NULL;
+                                                                                                                    ADD COLUMN IF NOT EXISTS notes varchar(500) DEFAULT NULL,
+      ADD COLUMN IF NOT EXISTS ordered_at datetime DEFAULT NULL;
                                                                                                                         ALTER TABLE sOrder
                                                                                                                               ADD COLUMN IF NOT EXISTS item_notes varchar(255) DEFAULT NULL;
                                                                                                                                 "
