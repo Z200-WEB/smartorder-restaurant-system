@@ -502,6 +502,218 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 .receipt-split-input:focus{border-color:var(--primary)}
 .receipt-per-person{font-size:1rem;font-weight:700;color:var(--primary)}
 .receipt-empty{text-align:center;padding:32px 0;color:var(--text3);font-size:.9rem}
+
+/* ═══════════════════════════════════════════════════════
+   MODERN THEME — clean & minimal
+   Neutral surfaces, one ink colour for actions, one warm
+   accent. Overrides the legacy styles above.
+═══════════════════════════════════════════════════════ */
+:root{
+  --primary:#16181d;--primary-dark:#000;--primary-light:#ff5a36;--primary-glow:rgba(22,24,29,.12);
+  --accent:#ff5a36;--accent-dark:#e94a28;--accent-soft:#fff1ec;
+  --bg:#f6f6f4;--surface:#fff;--surface2:#f6f6f4;--muted:#efefec;--border:#ececea;
+  --text:#16181d;--text2:#5b5f68;--text3:#9a9ea6;--green:#13a05f;
+  --radius-sm:10px;--radius:14px;--radius-lg:18px;--radius-xl:24px;
+  --shadow-sm:0 1px 2px rgba(16,24,40,.04);
+  --shadow:0 2px 8px rgba(16,24,40,.06);
+  --shadow-md:0 8px 24px rgba(16,24,40,.08);
+  --shadow-lg:0 20px 48px rgba(16,24,40,.14);
+  --transition:.18s ease;
+}
+body{background:var(--bg);-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+button{font-family:inherit}
+
+/* Header */
+.app-header{background:rgba(255,255,255,.88);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);color:var(--text);box-shadow:none;border-bottom:1px solid var(--border)}
+.header-logo{background:var(--text);color:#fff;font-weight:800;font-size:1rem;border-radius:10px}
+.header-title{letter-spacing:-.03em}
+.header-table{opacity:1;color:var(--text3);font-weight:500}
+.app-header button[onclick="openCallStaff()"]{background:var(--surface)!important;border:1px solid var(--border)!important;color:var(--text)!important;font-weight:600!important;box-shadow:none}
+.app-header button[onclick="openCallStaff()"]:hover{background:var(--muted)!important}
+.lang-switcher{background:var(--muted);border:none;padding:3px}
+.lang-btn{color:var(--text2);font-weight:600}
+.lang-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+.lang-btn:hover:not(.active){background:transparent;color:var(--text)}
+.btn-cart-header{background:var(--text);border:none;color:#fff;font-weight:600}
+.btn-cart-header:hover{background:#000}
+.cart-badge{background:var(--accent);color:#fff;font-weight:700}
+
+/* Search + categories */
+.search-bar-wrap,.category-nav{background:rgba(255,255,255,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.search-input{border:1px solid transparent;background:var(--muted);border-radius:12px;padding-top:11px;padding-bottom:11px}
+.search-input:focus{background:var(--surface);border-color:var(--text);box-shadow:0 0 0 4px var(--primary-glow)}
+.cat-btn{border:1px solid var(--border);background:var(--surface);color:var(--text2);font-weight:600;padding:8px 16px}
+.cat-btn:hover{border-color:var(--text);color:var(--text)}
+.cat-btn.active{background:var(--text);border-color:var(--text);color:#fff;box-shadow:none}
+
+/* Section title + wait time */
+.menu-section-title{font-size:1.35rem;font-weight:800;color:var(--text);text-transform:none;letter-spacing:-.03em;margin-bottom:10px}
+#wait-time-indicator{background:var(--surface);border:1px solid var(--border);color:var(--text);font-weight:600;border-radius:var(--radius);margin:0 0 18px;padding:12px 14px}
+#wait-time-indicator .wt-icon{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:1.05rem}
+#wait-time-indicator .wt-detail{color:var(--text3);font-weight:500}
+
+/* Menu cards */
+.menu-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px}
+.menu-card{border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:none;background:var(--surface)}
+.menu-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--border)}
+.item-img-wrap{background:var(--muted);aspect-ratio:4/3;margin:8px 8px 0;width:auto;border-radius:12px}
+.item-img-wrap .placeholder-icon{font-size:3.6rem;filter:none;transition:transform .3s ease}
+.menu-card:hover .placeholder-icon{transform:scale(1.08) rotate(-4deg)}
+.item-info{padding:12px 56px 14px 14px;flex:1}
+.item-name{font-size:.9rem;font-weight:600;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item-price{font-size:1rem;font-weight:700;color:var(--text);letter-spacing:-.01em}
+.item-add-btn{position:absolute;right:12px;bottom:12px;width:38px;height:38px;padding:0;border-radius:50%;background:var(--text);font-size:0;display:flex;align-items:center;justify-content:center;margin:0;box-shadow:0 4px 12px rgba(22,24,29,.18);transition:transform var(--transition),background var(--transition)}
+.item-add-btn::after{content:'+';font-size:1.45rem;font-weight:400;line-height:1;color:#fff;margin-top:-2px}
+.item-add-btn:hover{background:var(--accent);transform:scale(1.08)}
+.item-badge{top:16px;left:16px;padding:4px 9px;border-radius:8px;font-size:.68rem;font-weight:700;box-shadow:none;letter-spacing:0;background:var(--surface)!important;color:var(--text)!important;animation:none!important}
+.badge-hot{color:var(--accent)!important}
+.badge-recommended{color:#b7791f!important}
+.badge-limited{color:#6d4fd6!important}
+.badge-free{color:var(--green)!important}
+.fav-btn{top:16px;right:16px;width:32px;height:32px;background:var(--surface);box-shadow:none;font-size:.9rem}
+.badge-before-corner{bottom:auto;top:46px;left:16px;background:var(--text);border-radius:8px;font-size:.62rem;padding:3px 8px}
+
+.item-price.is-free{color:var(--green)}
+
+/* Cart sidebar */
+.cart-sidebar{top:150px}
+.cart-box{border:1px solid var(--border);box-shadow:none;border-radius:var(--radius-xl)}
+.cart-header-bar{background:var(--surface);color:var(--text);font-size:1.1rem;font-weight:800;letter-spacing:-.02em;padding:20px 20px 8px}
+.cart-items{padding:8px 14px}
+.cart-empty{padding:28px 16px}
+.cart-empty-icon{opacity:.35}
+.cart-item{background:transparent;border:none;border-bottom:1px solid var(--border);border-radius:0;margin:0;padding:12px 4px}
+.cart-item:last-child{border-bottom:none}
+.cart-item-thumb{background:var(--muted);border-radius:10px;color:inherit}
+.cart-item-name{font-size:.86rem}
+.qty-btn{border:1px solid var(--border);width:28px;height:28px;color:var(--text)}
+.qty-btn:hover{background:var(--text);border-color:var(--text);color:#fff}
+.cart-footer{background:var(--surface);border-top:1px solid var(--border);padding:16px 20px 20px}
+.cart-total-price{color:var(--text);font-size:1.25rem;font-weight:800}
+.btn-checkout{background:var(--text);border-radius:var(--radius);box-shadow:none;padding:14px;font-weight:700}
+.btn-checkout:hover{background:#000;box-shadow:var(--shadow-md)}
+.btn-checkout:disabled{background:var(--muted);color:var(--text3)}
+.btn-call-staff{background:var(--surface);color:var(--text);border:1px solid var(--border);box-shadow:none;font-weight:600}
+.btn-call-staff:hover{background:var(--muted);box-shadow:none}
+
+/* Floating action buttons (desktop) */
+#receipt-btn,#chat-btn,#lucky-btn{background:var(--surface);color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow-md);font-weight:600;padding:10px 16px;right:24px}
+#receipt-btn:hover,#chat-btn:hover,#lucky-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+#lucky-btn{bottom:24px;background:var(--accent);color:#fff;border-color:var(--accent)}
+#chat-btn{bottom:76px}
+#receipt-btn{bottom:128px}
+#chat-btn .chat-badge{background:var(--accent)}
+
+/* Mobile cart bar */
+.float-cart{left:16px;right:16px;bottom:16px;justify-content:space-between;align-items:center;background:var(--text);border-radius:16px;padding:14px 18px;box-shadow:0 10px 30px rgba(22,24,29,.3)}
+.float-cart:hover{transform:none}
+.fc-left{display:flex;align-items:center;gap:10px}
+.fc-total{font-weight:800}
+
+/* Modals */
+.modal-overlay,.combo-overlay,.confirm-overlay,.call-staff-overlay,.cart-modal-overlay,#chat-overlay,#receipt-overlay,#lucky-reveal,.stamp-reward-overlay{background:rgba(16,18,22,.4)}
+.modal-box,.combo-box{border-radius:28px;box-shadow:var(--shadow-lg)}
+.modal-header-bar{background:var(--surface);color:var(--text);font-size:1.2rem;font-weight:800;letter-spacing:-.02em;padding:22px 22px 4px}
+.modal-item-img{background:var(--muted);border-radius:18px;aspect-ratio:16/10}
+.modal-item-price{color:var(--text);font-size:1.5rem}
+.modal-qty-control{background:var(--muted);border-radius:999px;padding:6px;width:max-content;margin:0 auto 16px;gap:10px}
+.modal-qty-btn{border:none;background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+.modal-qty-btn:hover{background:var(--text);color:#fff}
+.modal-notes{border:1px solid var(--border);border-radius:12px;background:var(--surface2)}
+.modal-notes:focus{border-color:var(--text);background:var(--surface)}
+.modal-footer-row,.combo-footer{border-top:none;padding-top:4px;padding-bottom:20px}
+.btn-cancel-modal,.btn-combo-skip,.btn-confirm-cancel,.btn-call-close{border:1px solid var(--border);border-radius:var(--radius);color:var(--text)}
+.btn-cancel-modal:hover,.btn-combo-skip:hover,.btn-confirm-cancel:hover,.btn-call-close:hover{border-color:var(--text);color:var(--text)}
+.btn-order-modal,.btn-confirm-ok,.btn-combo-add,.btn-call-confirm{background:var(--text);border-radius:var(--radius);padding:13px}
+.btn-order-modal:hover,.btn-confirm-ok:hover,.btn-combo-add:hover,.btn-call-confirm:hover{background:#000;opacity:1}
+.btn-combo-add:disabled{background:var(--muted);color:var(--text3)}
+.combo-header{background:var(--surface);color:var(--text);padding:22px 22px 4px}
+.combo-header-title{font-size:1.15rem;font-weight:800}
+.combo-header-sub{color:var(--text2);opacity:1}
+.combo-added-item{border:1px solid var(--border);background:var(--surface2)}
+.combo-added-img,.combo-suggest-img{background:var(--muted)}
+.combo-arrow{font-size:.9rem;color:var(--text2);font-weight:600}
+.combo-suggest-item{border:1px solid var(--border);background:var(--surface)}
+.combo-suggest-item:hover,.combo-suggest-item.selected{border-color:var(--text);background:var(--surface);box-shadow:0 0 0 1px var(--text)}
+.combo-suggest-price{color:var(--text)}
+.combo-suggest-img{aspect-ratio:16/10}
+.combo-suggest-img span{font-size:2.2rem!important}
+.combo-added-img span{font-size:1.8rem!important}
+.btn-combo-skip{white-space:nowrap}
+.call-option-btn{border:1px solid var(--border);background:var(--surface)}
+.call-option-btn:hover,.call-option-btn.selected{border-color:var(--text);background:var(--surface);color:var(--text);box-shadow:0 0 0 1px var(--text)}
+.call-staff-emoji,#lucky-reveal-emoji,.stamp-reward-emoji{animation:none}
+.cart-modal{border-radius:28px 28px 0 0}
+
+/* Lucky / stamp / chat */
+#lucky-reveal-box,.stamp-reward-box{background:var(--surface);border:none;box-shadow:var(--shadow-lg)}
+#lucky-reveal-label{color:var(--accent)}
+#lucky-reveal-name{color:var(--text)}
+#lucky-reveal-price{color:var(--text)}
+.btn-lucky-add,.stamp-reward-btn{background:var(--text);box-shadow:none}
+.btn-lucky-skip{background:var(--muted);color:var(--text2)}
+.stamp-reward-title{color:var(--text)}
+.stamp-reward-sub{color:var(--text2)}
+.stamp-card-bar{background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-md)}
+.stamp-dot{border-color:var(--border)}
+.stamp-dot.filled{background:var(--accent);border-color:var(--accent)}
+#chat-title{color:var(--text);font-size:1.15rem;font-weight:800}
+.chat-msg.sent{background:var(--text)}
+.chat-msg.system{background:var(--muted);color:var(--text);border:none}
+#chat-input{border:1px solid var(--border)}
+#chat-input:focus{border-color:var(--text)}
+#chat-send{background:var(--text)}
+
+/* Toasts, banners, celebrate */
+.toast-container{top:auto;bottom:24px;right:auto;left:50%;transform:translateX(-50%);align-items:center}
+.toast,.toast.success{background:var(--text);border-radius:999px;padding:11px 18px;min-width:0;box-shadow:var(--shadow-lg)}
+.toast.error{background:#d93025}
+@keyframes slideInToast{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.staff-arrival-toast{background:var(--text)}
+#last-call-banner{background:var(--accent-soft);color:var(--accent-dark);animation:none;box-shadow:none;border-bottom:1px solid #ffd9cc;font-weight:600}
+#last-call-banner .lc-close{background:rgba(233,74,40,.12);color:var(--accent-dark)}
+.celebrate-card{border:none;box-shadow:var(--shadow-lg);border-radius:24px}
+.spinner{border-color:var(--muted);border-top-color:var(--text)}
+.receipt-item-price,.receipt-per-person{color:var(--text)}
+.receipt-split-input:focus{border-color:var(--text)}
+
+/* Tablet & phone */
+@media(max-width:900px){
+  .float-cart{display:flex!important}
+  #receipt-btn,#chat-btn,#lucky-btn{right:16px!important;padding:9px 14px;font-size:.78rem}
+  #lucky-btn{bottom:88px!important}
+  #chat-btn{bottom:136px!important}
+  #receipt-btn{bottom:184px!important}
+  .toast-container{bottom:88px}
+  .app-layout{padding-bottom:110px}
+  .stamp-card-bar{bottom:88px;left:16px;transform:none}
+}
+@media(max-width:480px){
+  .float-cart{left:12px!important;right:12px!important;bottom:12px!important;padding:13px 16px!important;font-size:.88rem!important}
+  .menu-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .menu-section-title{font-size:1.1rem}
+  .item-img-wrap{margin:6px 6px 0;border-radius:10px}
+  .item-img-wrap .placeholder-icon{font-size:2.8rem}
+  .item-info{padding:9px 44px 11px 10px}
+  .item-name{font-size:.78rem}
+  .item-price{font-size:.88rem}
+  .item-add-btn{width:32px;height:32px;right:8px;bottom:8px;font-size:0;padding:0}
+  .item-badge{top:12px;left:12px;font-size:.6rem;padding:3px 7px}
+  .fav-btn{top:12px;right:12px;width:28px;height:28px}
+  .badge-before-corner{top:38px;left:12px}
+  /* quick actions become one row above the cart bar */
+  #receipt-btn,#chat-btn,#lucky-btn{bottom:76px!important;padding:8px 11px;font-size:.7rem;white-space:nowrap;box-shadow:var(--shadow)}
+  #receipt-btn{left:12px!important;right:auto!important}
+  #chat-btn{left:50%!important;right:auto!important;transform:translateX(-50%)}
+  #chat-btn:hover{transform:translateX(-50%)}
+  #lucky-btn{right:12px!important}
+  .app-layout{padding-bottom:140px}
+  .toast-container{left:12px;right:12px;transform:none;bottom:124px}
+  .toast,.toast.success{border-radius:14px}
+  .stamp-card-bar{bottom:124px}
+  .app-header button[onclick="openCallStaff()"]{white-space:nowrap;padding:7px 10px!important}
+}
+@media(max-width:900px){ .btn-cart-header{display:none} }
 </style>
 </head>
 <body>
@@ -609,7 +821,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
 <header class="app-header">
   <div class="header-inner">
     <div class="header-brand">
-      <div class="header-logo">🍽️</div>
+      <div class="header-logo">S</div>
       <div><div class="header-title">SmartOrder</div><div class="header-table">Table <?php echo (int)$tableNo; ?></div></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
@@ -666,7 +878,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
         </div>
         <div class="item-info">
           <div class="item-name"><?php echo htmlspecialchars($iname); ?></div>
-          <div class="item-price"><?php echo $item['price']==0 ? '無料' : '¥'.number_format($item['price']); ?></div>
+          <div class="item-price<?php echo $item['price']==0 ? ' is-free' : ''; ?>"><?php echo $item['price']==0 ? '無料' : '¥'.number_format($item['price']); ?></div>
         </div>
         <button class="item-add-btn">＋ カートに追加</button>
       </div>
@@ -703,7 +915,7 @@ body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:va
     </div>
   </aside>
 </div>
-<button class="float-cart" onclick="showCart()">🛒 カート <span class="cart-badge" id="floatCartCount"><?php echo $itemCount; ?></span></button>
+<button class="float-cart" onclick="showCart()"><span class="fc-left"><span class="cart-badge" id="floatCartCount"><?php echo $itemCount; ?></span> カートを見る</span><span class="fc-total" id="floatCartTotal">¥<?php echo number_format($currentTotal); ?></span></button>
 <div class="modal-overlay" id="orderModal">
   <div class="modal-box">
     <div class="modal-header-bar" id="modalTitle">Order Item</div>
@@ -983,6 +1195,8 @@ async function refreshCart(){
     // Update total price
     const totalEl = document.getElementById('totalPrice');
     if(totalEl) totalEl.textContent = '¥' + (data.total||0).toLocaleString();
+    const fcTotal = document.getElementById('floatCartTotal');
+    if(fcTotal) fcTotal.textContent = '¥' + (data.total||0).toLocaleString();
     
     // Update checkout button state
     const checkoutBtn = document.getElementById('checkoutBtn');
@@ -1703,6 +1917,7 @@ const I18N_DICT = {
   '＋ カートに追加': ['+ Add to cart','＋ 加入购物车'],
   'カートに追加': ['Add to cart','加入购物车'],
   'カートに追加しました！': ['Added to cart!','已加入购物车！'],
+  'カートを見る': ['View cart','查看购物车'],
   'ぜひお楽しみください！': ['Enjoy!','请慢慢享用！'],
   'を追加しました！🎉': [' added! 🎉',' 已添加！🎉'],
   'セット追加完了！🎊': ['Set added! 🎊','套餐已添加！🎊'],
