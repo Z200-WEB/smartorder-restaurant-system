@@ -10,14 +10,7 @@ $stmtCategory->execute();
 $categories = $stmtCategory->fetchAll(PDO::FETCH_ASSOC);
 $catIcons = [];
 foreach ($categories as $c) { $catIcons[(int)$c['id']] = $c['icon'] ?: '🍽️'; }
-// Placeholder emoji for items without a photo: keyword match, then category icon
-function itemEmoji($name, $catId, $catIcons) {
-    $map = ['カレー'=>'🍛','おにく'=>'🍖','ご飯'=>'🍚','寿司'=>'🍣','巻き'=>'🍣','枝豆'=>'🫛','焼き鳥'=>'🍢','炭火焼'=>'🍖',
-            '唐揚げ'=>'🍗','チキン'=>'🍗','ポテト'=>'🍟','飲み放題'=>'🍻','ビール'=>'🍺','サワー'=>'🍋','ハイボール'=>'🥃',
-            'ワッフル'=>'🧇','パンケーキ'=>'🥞','アイス'=>'🍨','マカロン'=>'🍨','ケーキ'=>'🍰','デザート'=>'🍰'];
-    foreach ($map as $k => $emoji) { if (mb_strpos($name, $k) !== false) return $emoji; }
-    return $catIcons[(int)$catId] ?? '🍽️';
-}
+require_once __DIR__ . '/item_emoji.php';
 
 // Get items
 $sqlItem = "SELECT * FROM sItem WHERE state = 1 ORDER BY sort_order ASC, id ASC";

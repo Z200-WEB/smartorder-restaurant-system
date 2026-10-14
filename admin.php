@@ -11,12 +11,15 @@ require_once 'auth.php';
 requireAuth();
 // Load database connection
 require_once 'pdo.php';
+require_once __DIR__ . '/item_emoji.php';
 
 // Get categories
 $sqlCategory = "SELECT * FROM sCategory ORDER BY id ASC";
 $stmtCategory = $pdo->prepare($sqlCategory);
 $stmtCategory->execute();
 $categories = $stmtCategory->fetchAll(PDO::FETCH_ASSOC);
+$catIcons = [];
+foreach ($categories as $c) { $catIcons[(int)$c['id']] = ($c['icon'] ?? '') ?: '🍽️'; }
 
 // Get items
 $sqlItem = "SELECT i.*, c.categoryName FROM sItem i LEFT JOIN sCategory c ON i.category = c.id ORDER BY i.id DESC";
@@ -131,6 +134,7 @@ $csrfToken = generateCsrfToken();
     }
     a.btn-delete { text-decoration: none; display: inline-flex; }
   </style>
+  <link rel="stylesheet" href="css/modern-admin.css">
 </head>
 <body class="admin-page">
 
@@ -145,6 +149,12 @@ $csrfToken = generateCsrfToken();
   </div>
 </div>
 
+<header class="m-topbar"><div class="m-topbar-inner">
+  <a class="m-brand" href="management.php"><span class="m-logo">S</span><span><div class="m-brand-name">SmartOrder</div><div class="m-brand-sub">管理画面</div></span></a>
+  <nav class="m-nav"><a href="management.php">注文管理</a><a href="admin.php" class="active">メニュー管理</a></nav>
+  <div class="m-actions"><a class="m-btn-ghost" href="index.php?tableNo=1" target="_blank">お客様画面 ↗</a><a class="m-btn-ghost" href="logout.php">ログアウト</a></div>
+</div></header>
+<div class="m-page-title"><div><h1>メニュー管理</h1><p>商品とカテゴリを管理できます</p></div></div>
 <div class="admin-container">
 
   <!-- ADMIN HEADER -->
@@ -199,10 +209,13 @@ $csrfToken = generateCsrfToken();
           $hasRecommend = strpos($item['name'], '[おすすめ]') !== false;
         ?>
         <div class="admin-item-card">
+          <?php if (file_exists($imagePath)): ?>
           <img src="<?php echo htmlspecialchars($imagePath); ?>"
                alt="<?php echo htmlspecialchars($displayName); ?>"
-               class="admin-item-image"
-               onerror="this.src='itemImages/default.jpg'">
+               class="admin-item-image">
+          <?php else: ?>
+          <div class="admin-item-image admin-item-emoji"><?php echo htmlspecialchars(itemEmoji($item['name'], $item['category'], $catIcons)); ?></div>
+          <?php endif; ?>
           <div class="admin-item-info">
             <div class="admin-item-name"><?php echo htmlspecialchars($displayName); ?></div>
             <?php if ($hasLimited || $hasRecommend): ?>

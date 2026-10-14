@@ -254,12 +254,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: 700;
         }
     </style>
+    <link rel="stylesheet" href="css/modern-admin.css">
 </head>
-<body>
+<body class="page-login">
 
 <div class="login-wrapper">
     <div class="login-brand">
-        <div class="brand-icon">🍽️</div>
+        <div class="brand-icon">S</div>
         <h2>SmartOrder</h2>
         <p>Restaurant Management System</p>
     </div>
