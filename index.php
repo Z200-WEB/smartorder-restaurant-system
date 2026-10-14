@@ -2,6 +2,9 @@
 header('Content-Type: text/html; charset=UTF-8');
 require_once 'pdo.php';
 $tableNo = isset($_GET['tableNo']) ? (int)$_GET['tableNo'] : 1;
+// Basic mode (basic.php): English only, no language switcher, no AI chat — used as System A in user tests
+$isBasic = defined('SMARTORDER_BASIC');
+$enNames = $isBasic ? (require __DIR__ . '/menu_en.php') : [];
 
 // Get categories
 $sqlCategory = "SELECT * FROM sCategory WHERE state = 1 ORDER BY sort_order ASC, id ASC";
@@ -50,7 +53,7 @@ function getItemImage($itemId) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="<?php echo $isBasic ? 'en' : 'ja'; ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -708,6 +711,12 @@ button{font-family:inherit}
 }
 @media(max-width:900px){ .btn-cart-header{display:none} }
 </style>
+<?php if ($isBasic): ?>
+<style>
+/* Basic mode: no language switcher, no AI chat */
+#langSwitcher,#chat-btn,#chat-overlay{display:none!important}
+</style>
+<?php endif; ?>
 </head>
 <body>
 <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
@@ -969,6 +978,8 @@ button{font-family:inherit}
 </div>
 <script>
 const TABLE_NO = <?php echo (int)$tableNo; ?>;
+const BASIC_MODE = <?php echo $isBasic ? 'true' : 'false'; ?>;
+const EN_NAMES = <?php echo json_encode((object)$enNames, JSON_UNESCAPED_UNICODE); ?>;
 let selectedItemId=null,selectedItemName='',selectedItemPrice=0,selectedItemImg='',modalQty=1,pendingAction=null;
 let selectedCallOption='',selectedComboId=null,selectedComboName='',selectedComboPrice=0,selectedComboImg='';
 let _pendingOrderAfterCombo=null;
@@ -994,7 +1005,8 @@ function handleSearch(val){
   document.getElementById('searchClear').classList.toggle('visible',q.length>0);
   let vis=0;
   document.querySelectorAll('.menu-card').forEach(c=>{
-    const show=!q||c.dataset.name.includes(q);
+    const shown=(c.querySelector('.item-name')||{}).textContent||'';
+    const show=!q||c.dataset.name.includes(q)||shown.toLowerCase().includes(q);
     c.style.display=show?'':'none';
     if(show)vis++;
   });
@@ -1109,6 +1121,7 @@ function filterCategory(catId,btn){
   document.getElementById('sectionTitle').textContent=catId==='all'?'全メニュー':btn.textContent+' メニュー';
 }
 function openOrderModal(itemId,itemName,itemPrice,imgUrl){
+  if(BASIC_MODE&&EN_NAMES[itemId])itemName=EN_NAMES[itemId];
   selectedItemId=itemId;selectedItemName=itemName;selectedItemPrice=itemPrice;selectedItemImg=imgUrl;modalQty=1;
   document.getElementById('modalTitle').textContent=itemName;
   document.getElementById('modalPrice').textContent=fmtPrice(itemPrice);
@@ -1538,11 +1551,12 @@ function addStaffSystemMessage(text, unread){
 }
 
 /* Language Switcher Logic */
-let currentLang = localStorage.getItem('smartorder_lang') || 'ja';
+let currentLang = BASIC_MODE ? 'en' : (localStorage.getItem('smartorder_lang') || 'ja');
 const menuTranslCache = {};
 function setLang(lang) {
   currentLang = lang;
-  localStorage.setItem('smartorder_lang', lang);
+  if (BASIC_MODE) lang = 'en'; else localStorage.setItem('smartorder_lang', lang);
+  currentLang = lang;
   ['ja','en','zh'].forEach(l => {
     const id = 'lang' + l.charAt(0).toUpperCase() + l.slice(1);
     const btn = document.getElementById(id);
@@ -1596,6 +1610,13 @@ function applyTranslToDOM(translations) {
   if (typeof applyUITranslation === 'function') applyUITranslation();
 }
 document.addEventListener('DOMContentLoaded', () => {
+  if (BASIC_MODE) {
+    // fixed English names, no AI translation
+    menuTranslCache.en = {};
+    Object.keys(EN_NAMES).forEach(id => { menuTranslCache.en[id] = { name: EN_NAMES[id] }; });
+    setLang('en');
+    return;
+  }
   const saved = localStorage.getItem('smartorder_lang') || 'ja';
   if (saved !== 'ja') setTimeout(() => setLang(saved), 800);
 });
