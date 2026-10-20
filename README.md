@@ -178,3 +178,7 @@ git clone https://github.com/Z200-WEB/smartorder-restaurant-system.git
 - **Render** — Cloud deployment (free tier)
 - **VSCode** — Code editor
 - **Claude AI** — AI coding assistant
+
+## Photo credits / ဓာတ်ပုံ ရင်းမြစ်
+
+Menu photos are from Wikimedia Commons under free licenses (CC0 / CC BY / CC BY-SA / public domain). See [itemImages/CREDITS.md](itemImages/CREDITS.md) for each photo's author and license.

@@ -63,7 +63,7 @@ INSERT INTO `sItem` VALUES
 (20,1,6,'ဖါလူဒါ [おすすめ]',3500,'Falooda: rose syrup and milk with vanilla ice cream, jelly, sago and basil seeds.',NULL,1,0,0,1,'milk, egg'),
 (21,1,6,'ရွှေကြည်',2000,'Shwe gyi mont: baked semolina cake made with coconut milk, eggs and butter, topped with poppy seeds.',NULL,0,0,0,2,'egg, milk, wheat, coconut'),
 (22,1,6,'မုန့်လုံးရေပေါ်',1500,'Mont lone yay paw: glutinous rice balls filled with palm sugar, topped with grated coconut. No egg, no milk.',NULL,0,0,0,3,'coconut'),
-(23,1,6,'ကျောက်ကျော',1500,'Kyauk kyaw: two-layer agar jelly made with coconut milk and sugar. No egg, no milk.',NULL,0,0,0,4,'coconut');
+(23,1,6,'ရွှေရင်အေး',1500,'Shwe yin aye: chilled coconut-milk dessert with agar jelly cubes, sago and green rice-flour noodles (cendol). No egg, no milk, no bread.',NULL,0,0,0,4,'coconut');
 
 DROP TABLE IF EXISTS `sManagement`;
 CREATE TABLE `sManagement` (
