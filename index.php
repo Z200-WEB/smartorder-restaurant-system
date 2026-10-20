@@ -784,7 +784,7 @@ button{font-family:inherit}
     <span id="lucky-reveal-emoji">🎉</span>
     <div id="lucky-reveal-label">今日のラッキーセレクト</div>
     <div id="lucky-reveal-name">おすすめメニュー</div>
-    <div id="lucky-reveal-price">¥0</div>
+    <div id="lucky-reveal-price">0 Ks</div>
     <div class="lucky-btn-row">
       <button class="btn-lucky-add" type="button" onclick="addLuckyPick()">これにする</button>
       <button class="btn-lucky-skip" type="button" onclick="closeLuckyReveal()">また今度</button>
@@ -816,7 +816,7 @@ button{font-family:inherit}
     <div class="combo-body">
       <div class="combo-added-item">
         <div class="combo-added-img" id="comboAddedImg"><span style="font-size:1.5rem">🍽️</span></div>
-        <div><div class="combo-added-name" id="comboAddedName">Item</div><div class="combo-added-price" id="comboAddedPrice">¥0</div></div>
+        <div><div class="combo-added-name" id="comboAddedName">Item</div><div class="combo-added-price" id="comboAddedPrice">0 Ks</div></div>
       </div>
       <div class="combo-arrow">✨ こちらも一緒にどうぞ...</div>
       <div class="combo-suggestion-label">おすすめの組み合わせ</div>
@@ -885,7 +885,7 @@ button{font-family:inherit}
         </div>
         <div class="item-info">
           <div class="item-name"><?php echo htmlspecialchars($dname); ?></div>
-          <div class="item-price<?php echo $item['price']==0 ? ' is-free' : ''; ?>"><?php echo $item['price']==0 ? '無料' : '¥'.number_format($item['price']); ?></div>
+          <div class="item-price<?php echo $item['price']==0 ? ' is-free' : ''; ?>"><?php echo $item['price']==0 ? '無料' : number_format($item['price']).' Ks'; ?></div>
         </div>
         <button class="item-add-btn">＋ カートに追加</button>
       </div>
@@ -904,7 +904,7 @@ button{font-family:inherit}
           <div class="cart-item-thumb"><?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?><?php echo htmlspecialchars(itemEmoji($ci['name'], $ci['category'] ?? 0, $catIcons)); ?><?php endif; ?></div>
           <div class="cart-item-info">
             <div class="cart-item-name"><?php echo htmlspecialchars(myItemName($ci['itemId'], $ci['name'])); ?></div>
-            <div class="cart-item-price"><?php echo $ci['price']==0 ? '無料' : '¥'.number_format($ci['price']); ?> × <?php echo (int)$ci['amount']; ?></div>
+            <div class="cart-item-price"><?php echo $ci['price']==0 ? '無料' : number_format($ci['price']).' Ks'; ?> × <?php echo (int)$ci['amount']; ?></div>
           </div>
           <div class="cart-item-qty">
             <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,-1)">−</button>
@@ -915,20 +915,20 @@ button{font-family:inherit}
         <?php endforeach; endif; ?>
       </div>
       <div class="cart-footer">
-        <div class="cart-total"><span>合計</span><span class="cart-total-price" id="totalPrice">¥<?php echo number_format($currentTotal); ?></span></div>
+        <div class="cart-total"><span>合計</span><span class="cart-total-price" id="totalPrice"><?php echo number_format($currentTotal); ?> Ks</span></div>
         <button class="btn-checkout" id="checkoutBtn" <?php echo empty($cartItems)?'disabled':''; ?> onclick="confirmCheckout()">✓ 注文を確定する</button>
         <button class="btn-call-staff" onclick="openCallStaff()">🔔 スタッフを呼ぶ</button>
       </div>
     </div>
   </aside>
 </div>
-<button class="float-cart" onclick="showCart()"><span class="fc-left"><span class="cart-badge" id="floatCartCount"><?php echo $itemCount; ?></span> カートを見る</span><span class="fc-total" id="floatCartTotal">¥<?php echo number_format($currentTotal); ?></span></button>
+<button class="float-cart" onclick="showCart()"><span class="fc-left"><span class="cart-badge" id="floatCartCount"><?php echo $itemCount; ?></span> カートを見る</span><span class="fc-total" id="floatCartTotal"><?php echo number_format($currentTotal); ?> Ks</span></button>
 <div class="modal-overlay" id="orderModal">
   <div class="modal-box">
     <div class="modal-header-bar" id="modalTitle">Order Item</div>
     <div class="modal-body-inner">
       <div class="modal-item-img" id="modalImgWrap"></div>
-      <div class="modal-item-price" id="modalPrice">¥0</div>
+      <div class="modal-item-price" id="modalPrice">0 Ks</div>
       <div class="modal-qty-control">
         <button class="modal-qty-btn" onclick="changeModalQty(-1)">−</button>
         <span class="modal-qty-num" id="modalQty">1</span>
@@ -953,7 +953,7 @@ button{font-family:inherit}
         <div class="cart-item-thumb"><?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?><?php echo htmlspecialchars(itemEmoji($ci['name'], $ci['category'] ?? 0, $catIcons)); ?><?php endif; ?></div>
         <div class="cart-item-info">
           <div class="cart-item-name"><?php echo htmlspecialchars(myItemName($ci['itemId'], $ci['name'])); ?></div>
-          <div class="cart-item-price"><?php echo $ci['price']==0 ? '無料' : '¥'.number_format($ci['price']); ?></div>
+          <div class="cart-item-price"><?php echo $ci['price']==0 ? '無料' : number_format($ci['price']).' Ks'; ?></div>
         </div>
         <div class="cart-item-qty">
           <button class="qty-btn" onclick="event.stopPropagation();updateQuantity(<?php echo (int)$ci['orderId']; ?>,-1)">−</button>
@@ -963,7 +963,7 @@ button{font-family:inherit}
       </div>
       <?php endforeach; endif; ?>
       <div style="margin-top:16px;border-top:2px solid var(--border);padding-top:14px">
-        <div class="cart-total"><span>合計</span><span class="cart-total-price">¥<?php echo number_format($currentTotal); ?></span></div>
+        <div class="cart-total"><span>合計</span><span class="cart-total-price"><?php echo number_format($currentTotal); ?> Ks</span></div>
         <button class="btn-checkout" <?php echo empty($cartItems)?'disabled':''; ?> onclick="closeCartModal();confirmCheckout()">✓ 注文を確定する</button>
         <button class="btn-call-staff" onclick="closeCartModal();openCallStaff()">🔔 スタッフを呼ぶ</button>
       </div>
@@ -1005,7 +1005,7 @@ function itemIcon(key){
   const it = ALL_ITEMS.find(i => i.id === Number(key)) || ALL_ITEMS.find(i => i.name === key);
   return (it && (it.icon || CAT_ICONS[it.category])) || '🍽️';
 }
-function fmtPrice(n){ return n===0 ? (typeof I18N_T==='function' ? I18N_T('無料') : '無料') : '¥'+n.toLocaleString(); }
+function fmtPrice(n){ return n===0 ? (typeof I18N_T==='function' ? I18N_T('無料') : '無料') : n.toLocaleString()+' Ks'; }
 
 /* ── SEARCH ── */
 function handleSearch(val){
@@ -1065,7 +1065,7 @@ function showCombo(addedItem,suggestions){
   suggestions.forEach(s=>{
     const d=document.createElement('div');
     d.className='combo-suggest-item';
-    d.innerHTML='<div class="combo-suggest-img">'+(s.img?'<img src="'+s.img+'" style="width:100%;height:100%;object-fit:cover">':'<span style="font-size:1.3rem">'+itemIcon(s.id)+'</span>')+'</div><div class="combo-suggest-name">'+s.name+'</div><div class="combo-suggest-price">¥'+s.price.toLocaleString()+'</div>';
+    d.innerHTML='<div class="combo-suggest-img">'+(s.img?'<img src="'+s.img+'" style="width:100%;height:100%;object-fit:cover">':'<span style="font-size:1.3rem">'+itemIcon(s.id)+'</span>')+'</div><div class="combo-suggest-name">'+s.name+'</div><div class="combo-suggest-price">'+s.price.toLocaleString()+' Ks</div>';
     d.onclick=()=>{
       grid.querySelectorAll('.combo-suggest-item').forEach(el=>el.classList.remove('selected'));
       d.classList.add('selected');
@@ -1205,9 +1205,9 @@ async function refreshCart(){
     
     // Update total price
     const totalEl = document.getElementById('totalPrice');
-    if(totalEl) totalEl.textContent = '¥' + (data.total||0).toLocaleString();
+    if(totalEl) totalEl.textContent = (data.total||0).toLocaleString()+' Ks';
     const fcTotal = document.getElementById('floatCartTotal');
-    if(fcTotal) fcTotal.textContent = '¥' + (data.total||0).toLocaleString();
+    if(fcTotal) fcTotal.textContent = (data.total||0).toLocaleString()+' Ks';
     
     // Update checkout button state
     const checkoutBtn = document.getElementById('checkoutBtn');
@@ -1235,7 +1235,7 @@ async function refreshCart(){
     
     // Update mobile cart footer total
     const mobileTotals = document.querySelectorAll('.cart-modal .cart-total-price');
-    mobileTotals.forEach(el => el.textContent = '¥' + (data.total||0).toLocaleString());
+    mobileTotals.forEach(el => el.textContent = (data.total||0).toLocaleString()+' Ks');
     const mobileCheckout = document.querySelector('.cart-modal .btn-checkout');
     if(mobileCheckout) mobileCheckout.disabled = count === 0;
     
@@ -1266,7 +1266,7 @@ function buildCartHTML(items, isMobile){
 
 function buildMobileFooter(total, count){
   return '<div style="margin-top:16px;border-top:2px solid var(--border);padding-top:14px">'
-    +'<div class="cart-total"><span>合計</span><span class="cart-total-price">¥'+(total||0).toLocaleString()+'</span></div>'
+    +'<div class="cart-total"><span>合計</span><span class="cart-total-price">'+(total||0).toLocaleString()+' Ks</span></div>'
     +'<button class="btn-checkout" '+(count===0?'disabled':'')
     +' onclick="closeCartModal();confirmCheckout()">✓ 注文を確定する</button>'
     +'<button class="btn-call-staff" onclick="closeCartModal();openCallStaff()">🔔 スタッフを呼ぶ</button>'
@@ -1653,8 +1653,8 @@ async function showReceiptModal(){
   const body = document.getElementById('receipt-body');
   body.innerHTML='<div class="receipt-empty">読み込み中...</div>';
   receiptTotal = 0;
-  document.getElementById('receipt-total').textContent='¥0';
-  document.getElementById('receipt-per-person').textContent='¥0 / 人';
+  document.getElementById('receipt-total').textContent='0 Ks';
+  document.getElementById('receipt-per-person').textContent='0 Ks / 人';
   document.getElementById('receipt-people').value=1;
   try{
     const fd=new FormData();
@@ -1666,7 +1666,7 @@ async function showReceiptModal(){
       return;
     }
     receiptTotal=data.total;
-    document.getElementById('receipt-total').textContent='¥'+receiptTotal.toLocaleString();
+    document.getElementById('receipt-total').textContent=receiptTotal.toLocaleString()+' Ks';
     calcSplit();
     body.innerHTML=data.items.map(item=>`
       <div class="receipt-item-row">
@@ -1675,9 +1675,9 @@ async function showReceiptModal(){
           : `<div class="receipt-item-img-placeholder">${itemIcon(item.name)}</div>`}
         <div class="receipt-item-info">
           <div class="receipt-item-name">${item.name}</div>
-          <div class="receipt-item-qty">×${item.amount} &nbsp;¥${Number(item.price).toLocaleString()}</div>
+          <div class="receipt-item-qty">×${item.amount} &nbsp;${Number(item.price).toLocaleString()} Ks</div>
         </div>
-        <div class="receipt-item-price">¥${Number(item.subtotal).toLocaleString()}</div>
+        <div class="receipt-item-price">${Number(item.subtotal).toLocaleString()} Ks</div>
       </div>
     `).join('');
   }catch(e){
@@ -1691,7 +1691,7 @@ function closeReceiptModal(){
 function calcSplit(){
   const people=Math.max(1,parseInt(document.getElementById('receipt-people').value)||1);
   const perPerson=Math.ceil(receiptTotal/people);
-  document.getElementById('receipt-per-person').textContent='¥'+perPerson.toLocaleString()+' / 人';
+  document.getElementById('receipt-per-person').textContent=perPerson.toLocaleString()+' Ks'+' / 人';
 }
 
 function toggleStaffChat(show){
@@ -1910,14 +1910,14 @@ document.getElementById('comboOverlay').addEventListener('click',function(e){if(
     <div class="receipt-total-section">
       <div class="receipt-total-row">
         <span class="receipt-total-label">合計金額</span>
-        <span class="receipt-total-amount" id="receipt-total">¥0</span>
+        <span class="receipt-total-amount" id="receipt-total">0 Ks</span>
       </div>
       <div class="receipt-split-section">
         <div class="receipt-split-label">人数で割り勘</div>
         <div class="receipt-split-row">
           <input type="number" class="receipt-split-input" id="receipt-people" value="1" min="1" max="20" oninput="calcSplit()">
           <span style="color:var(--text3);font-size:.82rem">人で</span>
-          <span class="receipt-per-person" id="receipt-per-person">¥0 / 人</span>
+          <span class="receipt-per-person" id="receipt-per-person">0 Ks / 人</span>
         </div>
       </div>
     </div>

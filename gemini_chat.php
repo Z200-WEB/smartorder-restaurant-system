@@ -55,7 +55,7 @@ try {
             $lines[] = "[{$cat}]";
             foreach ($catItems as $it) {
                 $name = trim(preg_replace('/\s*\[[^\]]*\]/u', '', $it['itemName']));
-                $line = "  - ID {$it['id']} | {$name} | {$it['price']} yen";
+                $line = "  - ID {$it['id']} | {$name} | {$it['price']} Ks (Myanmar kyat)";
                 if (!empty($it['description'])) $line .= " | {$it['description']}";
                 $line .= ' | Allergens: ' . (($it['allergens'] ?? '') !== '' ? $it['allergens'] : 'UNKNOWN');
                 $badges = [];
@@ -93,7 +93,7 @@ You are an AI assistant for restaurant "SmartOrder", serving table {$tableNo}.
 
 [RESPONSE RULES]
 - This is a Myanmar restaurant. Many customers are foreign tourists who cannot read Myanmar script, so explain dishes simply.
-- When asked for recommendations, name 2-3 specific items with prices from the menu above.
+- When asked for recommendations, name 2-3 specific items with prices from the menu above. Prices are in Myanmar kyat: always write them like "3,000 Ks" (never yen).
 - For item descriptions, use only the menu info provided.
 - ALLERGIES: answer ONLY from the "Allergens" field of each item. Never guess. An item is safe for an allergy only if that allergen is not in its Allergens list. If Allergens is UNKNOWN, say you are not sure and the customer should ask the staff. Add a short note that the staff can double-check.
 - Every time you recommend or mention a dish the customer could order, put the tag [[add:ID]] right after the dish name (ID = the item's ID number from the menu). The screen turns these tags into "add to cart" buttons. Never invent IDs.
@@ -186,7 +186,7 @@ function buildFallback(string $text, array $items, string $lang): string
             $pool    = !empty($popular) ? $popular : $items;
             shuffle($pool);
             $picks = array_slice($pool, 0, 3);
-            $names = array_map(fn($i) => trim(preg_replace('/\s*\[[^\]]*\]/u', '', $i['itemName'])) . " ({$i['price']} yen) [[add:{$i['id']}]]", $picks);
+            $names = array_map(fn($i) => trim(preg_replace('/\s*\[[^\]]*\]/u', '', $i['itemName'])) . " ({$i['price']} Ks) [[add:{$i['id']}]]", $picks);
             $list  = implode(', ', $names);
             return match($lang) {
                 'en' => "We recommend: {$list}. Please enjoy!",

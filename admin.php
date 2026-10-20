@@ -233,7 +233,7 @@ $csrfToken = generateCsrfToken();
             <?php endif; ?>
             <div class="admin-item-details">
               📂 <?php echo htmlspecialchars(myCategoryName((string)$item['categoryName'])); ?><br>
-              💴 ¥<?php echo number_format($item['price']); ?>
+              💵 <?php echo number_format($item['price']); ?> Ks
             </div>
             <div class="admin-item-actions">
               <button class="btn-edit" onclick='editItem(<?php echo json_encode($item); ?>)'>
@@ -301,8 +301,8 @@ $csrfToken = generateCsrfToken();
         </select>
       </div>
       <div class="form-group">
-        <label>ဈေးနှုန်း (ယန်း) *</label>
-        <input type="number" name="price" id="itemPrice" required min="0" placeholder="ဥပမာ - 680">
+        <label>ဈေးနှုန်း (ကျပ်) *</label>
+        <input type="number" name="price" id="itemPrice" required min="0" placeholder="ဥပမာ - 3000">
       </div>
       <div class="form-group">
         <label>တံဆိပ် (badge ပြရန်)</label>

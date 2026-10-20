@@ -165,7 +165,7 @@ foreach ($items as $item) { if (getItemImageUrl($item['id'])) $withImg++; }
                 <?php endif; ?>
     <?= htmlspecialchars($item['name']) ?>
             </div>div>
-            <div class="item-price">&yen;<?= number_format($item['price']) ?></div>div>
+            <div class="item-price"><?= number_format($item['price']) ?> Ks</div>div>
             <div class="upload-area" id="upload_<?= $item['id'] ?>"
                      ondragover="event.preventDefault();this.classList.add('dragover')"
                      ondragleave="this.classList.remove('dragover')"

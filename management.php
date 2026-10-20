@@ -395,7 +395,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
       $tableNos     = array_unique(array_column($orders, 'tableNo'));
     ?>
     <div class="stat-card">
-      <div class="stat-number">¥<?php echo number_format($totalRevenue); ?></div>
+      <div class="stat-number"><?php echo number_format($totalRevenue); ?> Ks</div>
       <div class="stat-label">စုစုပေါင်း ငွေပမာဏ</div>
     </div>
     <div class="stat-card">
@@ -440,8 +440,8 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </div>
       <div class="order-total">
         <div class="order-total-row">
-          <span>💴 စုစုပေါင်း</span>
-          <span>¥<?php echo number_format($order['totalAmount']); ?></span>
+          <span>💵 စုစုပေါင်း</span>
+          <span><?php echo number_format($order['totalAmount']); ?> Ks</span>
         </div>
       </div>
       <div class="order-actions">
@@ -476,7 +476,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </div>
       <div class="detail-row total-row">
         <span class="detail-label">စုစုပေါင်း:</span>
-        <span class="detail-value" id="modalAmount">¥0</span>
+        <span class="detail-value" id="modalAmount">0 Ks</span>
       </div>
     </div>
     <p class="payment-modal-warning">⚠️ ငွေရှင်းပြီးရင် ဒီအော်ဒါကို စာရင်းထဲက ဖယ်ပါမယ်</p>
@@ -508,7 +508,7 @@ function confirmPayment(orderNo, tableNo, totalAmount) {
   currentAmount = totalAmount;
   document.getElementById('modalTableNo').textContent = 'Table ' + tableNo;
   document.getElementById('modalOrderNo').textContent = orderNo;
-  document.getElementById('modalAmount').textContent = '¥' + Number(totalAmount).toLocaleString();
+  document.getElementById('modalAmount').textContent = Number(totalAmount).toLocaleString()+' Ks';
   document.getElementById('paymentModal').style.display = 'flex';
 }
 function closePaymentModal() { document.getElementById('paymentModal').style.display = 'none'; }
@@ -598,7 +598,7 @@ function renderOrders(orders){
         <div class="order-info-row"><span class="order-label">အော်ဒါ နံပါတ်:</span><span class="order-value">${shortOrderNo}</span></div>
         <div class="order-info-row"><span class="order-label">ဟင်းလျာ အရေအတွက်:</span><span class="order-value">${order.itemCount} ခု</span></div>
       </div>
-      <div class="order-total"><div class="order-total-row"><span>💴 စုစုပေါင်း</span><span>¥${Number(order.totalAmount).toLocaleString()}</span></div></div>
+      <div class="order-total"><div class="order-total-row"><span>💵 စုစုပေါင်း</span><span>${Number(order.totalAmount).toLocaleString()} Ks</span></div></div>
       <div class="order-actions">
         <a href="order.php?orderNo=${encodeURIComponent(order.orderNo)}" class="btn-details">📋 အသေးစိတ် ကြည့်ရန်</a>
         <button onclick="confirmPayment('${order.orderNo}', ${order.tableNo}, ${order.totalAmount})" class="btn-payment">✅ ငွေရှင်းပြီး</button>
@@ -618,7 +618,7 @@ function updateStats(orders){
   if(allNums.length >= 4){
     allNums[0].textContent = orders.length;
     const rev = orders.reduce((s,o)=>s+parseFloat(o.totalAmount||0),0);
-    allNums[1].textContent = '¥' + Math.round(rev).toLocaleString();
+    allNums[1].textContent = Math.round(rev).toLocaleString()+' Ks';
     const items = orders.reduce((s,o)=>s+parseInt(o.itemCount||0),0);
     allNums[2].textContent = items;
     const tables = new Set(orders.map(o=>o.tableNo)).size;

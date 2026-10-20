@@ -369,9 +369,9 @@ foreach ($details as $d) {
                     <?php foreach ($details as $detail): ?>
                     <tr>
                         <td class="item-name"><?php echo htmlspecialchars(myItemName($detail['itemId'], $detail['name'])); ?></td>
-                        <td class="item-price">&yen;<?php echo number_format($detail['price']); ?></td>
+                        <td class="item-price"><?php echo number_format($detail['price']); ?> Ks</td>
                         <td class="item-qty">&times; <?php echo htmlspecialchars($detail['amount']); ?></td>
-                        <td class="item-subtotal">&yen;<?php echo number_format($detail['price'] * $detail['amount']); ?></td>
+                        <td class="item-subtotal"><?php echo number_format($detail['price'] * $detail['amount']); ?> Ks</td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -385,7 +385,7 @@ foreach ($details as $d) {
             </div>
             <div class="total-row grand-total">
                 <span>💰 စုစုပေါင်း ငွေပမာဏ</span>
-                <span>&yen;<?php echo number_format($total); ?></span>
+                <span><?php echo number_format($total); ?> Ks</span>
             </div>
         </div>
 
