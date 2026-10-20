@@ -1544,7 +1544,7 @@ function chatHTML(text, allowButtons){
     if(!allowButtons||!it) return '';
     if(!btns.includes(it.id)) btns.push(it.id);
     return '';
-  }).replace(/\n/g,'<br>');
+  }).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^\s*[*-]\s+/gm,'• ').replace(/\n{2,}/g,'\n').trim().replace(/\n/g,'<br>');
   if(btns.length){
     out+='<div class="chat-add-row">'+btns.map(id=>{
       const it=ALL_ITEMS.find(i=>i.id===id);
