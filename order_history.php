@@ -29,6 +29,8 @@ try {
   ");
   $stmtO->execute($orders);
   $items = $stmtO->fetchAll(PDO::FETCH_ASSOC);
+  foreach ($items as &$it) { $it['name'] = trim(preg_replace('/\s*\[[^\]]*\]/u', '', $it['name'])); }
+  unset($it);
 
   $total = array_sum(array_column($items, 'subtotal'));
 

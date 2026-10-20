@@ -15,6 +15,7 @@ $categories = $stmtCategory->fetchAll(PDO::FETCH_ASSOC);
 $catIcons = [];
 foreach ($categories as $c) { $catIcons[(int)$c['id']] = $c['icon'] ?: '🍽️'; }
 require_once __DIR__ . '/item_emoji.php';
+require_once __DIR__ . '/item_my.php';
 
 // Get items
 $sqlItem = "SELECT * FROM sItem WHERE state = 1 ORDER BY sort_order ASC, id ASC";
@@ -452,6 +453,12 @@ body{font-family:'Inter','Noto Sans Myanmar','Noto Sans JP',sans-serif;backgroun
 #chat-send{padding:10px 16px;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;border-radius:12px;font-size:.85rem;font-weight:700;cursor:pointer;white-space:nowrap}
 #chat-close{display:block;margin-top:10px;text-align:center;color:#94a3b8;font-size:.8rem;cursor:pointer;background:none;border:none;width:100%;padding:4px}
 .chat-empty{color:#cbd5e1;text-align:center;font-size:.82rem;padding:20px 0}
+.chat-add-row{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.chat-add-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border:1px solid #e5e5e2;border-radius:12px;background:#fff;cursor:pointer;font:inherit;font-size:.82rem;font-weight:700;color:#16181d;text-align:left}
+.chat-add-btn:hover{border-color:#16181d}
+.chat-add-ic{font-size:1.2rem}
+.chat-add-name{flex:1}
+.chat-add-plus{background:#16181d;color:#fff;border-radius:999px;padding:3px 9px;font-size:.75rem;white-space:nowrap}
 /* ── FEATURE: Last-Call Banner ── */
 #last-call-banner{display:none;position:fixed;top:60px;left:0;right:0;z-index:99;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;text-align:center;padding:10px 16px;font-size:.88rem;font-weight:700;animation:lastCallPulse 1.5s infinite;cursor:pointer;box-shadow:0 4px 16px rgba(239,68,68,.5)}
 @keyframes lastCallPulse{0%,100%{background:linear-gradient(135deg,#ef4444,#dc2626)}50%{background:linear-gradient(135deg,#f97316,#ef4444)}}
@@ -861,22 +868,23 @@ button{font-family:inherit}
     <div class="menu-grid" id="menuGrid">
       <?php foreach($items as $item):
         $imgUrl = getItemImage($item['id']);
-        $iname  = $item['name'];
+        $iname  = $item['name'];                       // stored name (may contain [おすすめ]/[期間限定] tags)
+        $dname  = myItemName($item['id'], $iname);     // display name (tags removed)
         $badge=''; $badgeClass='';
         if(strpos($iname,'おすすめ')!==false){$badge='⭐ おすすめ';$badgeClass='badge-recommended';}
         elseif(strpos($iname,'期間限定')!==false){$badge='⏳ 期間限定';$badgeClass='badge-limited';}
         elseif($item['price']==0){$badge='🎁 無料';$badgeClass='badge-free';}
       ?>
-      <div class="menu-card" data-item-id="<?php echo (int)$item['id']; ?>" data-item-name="<?php echo htmlspecialchars($iname); ?>" data-item-price="<?php echo (int)$item['price']; ?>" data-item-img="<?php echo $imgUrl?htmlspecialchars($imgUrl):''; ?>" data-category="<?php echo (int)$item['category']; ?>" data-name="<?php echo htmlspecialchars(mb_strtolower($iname,'UTF-8')); ?>"
-           onclick="openOrderModal(<?php echo (int)$item['id']; ?>,'<?php echo addslashes(htmlspecialchars($iname)); ?>',<?php echo (int)$item['price']; ?>,'<?php echo $imgUrl?htmlspecialchars($imgUrl):''; ?>')">
+      <div class="menu-card" data-item-id="<?php echo (int)$item['id']; ?>" data-item-name="<?php echo htmlspecialchars($dname); ?>" data-item-price="<?php echo (int)$item['price']; ?>" data-item-img="<?php echo $imgUrl?htmlspecialchars($imgUrl):''; ?>" data-category="<?php echo (int)$item['category']; ?>" data-name="<?php echo htmlspecialchars(mb_strtolower($dname,'UTF-8')); ?>"
+           onclick="openOrderModal(<?php echo (int)$item['id']; ?>,'<?php echo addslashes(htmlspecialchars($dname)); ?>',<?php echo (int)$item['price']; ?>,'<?php echo $imgUrl?htmlspecialchars($imgUrl):''; ?>')">
         <button class="fav-btn" id="fav_<?php echo (int)$item['id']; ?>" onclick="event.stopPropagation();toggleFav(<?php echo (int)$item['id']; ?>,this)" title="お気に入り">🤍</button>
         <?php if($badge): ?><div class="item-badge <?php echo $badgeClass; ?>"><?php echo $badge; ?></div><?php endif; ?>
         <div class="item-img-wrap">
-          <?php if($imgUrl): ?><img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="<?php echo htmlspecialchars($iname); ?>" loading="lazy">
+          <?php if($imgUrl): ?><img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="<?php echo htmlspecialchars($dname); ?>" loading="lazy">
           <?php else: ?><span class="placeholder-icon"><?php echo htmlspecialchars(itemEmoji($iname, $item['category'], $catIcons)); ?></span><?php endif; ?>
         </div>
         <div class="item-info">
-          <div class="item-name"><?php echo htmlspecialchars($iname); ?></div>
+          <div class="item-name"><?php echo htmlspecialchars($dname); ?></div>
           <div class="item-price<?php echo $item['price']==0 ? ' is-free' : ''; ?>"><?php echo $item['price']==0 ? '無料' : '¥'.number_format($item['price']); ?></div>
         </div>
         <button class="item-add-btn">＋ カートに追加</button>
@@ -895,7 +903,7 @@ button{font-family:inherit}
         <div class="cart-item" id="cartItem_<?php echo (int)$ci['orderId']; ?>">
           <div class="cart-item-thumb"><?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?><?php echo htmlspecialchars(itemEmoji($ci['name'], $ci['category'] ?? 0, $catIcons)); ?><?php endif; ?></div>
           <div class="cart-item-info">
-            <div class="cart-item-name"><?php echo htmlspecialchars($ci['name']); ?></div>
+            <div class="cart-item-name"><?php echo htmlspecialchars(myItemName($ci['itemId'], $ci['name'])); ?></div>
             <div class="cart-item-price"><?php echo $ci['price']==0 ? '無料' : '¥'.number_format($ci['price']); ?> × <?php echo (int)$ci['amount']; ?></div>
           </div>
           <div class="cart-item-qty">
@@ -944,7 +952,7 @@ button{font-family:inherit}
       <div class="cart-item">
         <div class="cart-item-thumb"><?php if($ciImg): ?><img src="<?php echo htmlspecialchars($ciImg); ?>" alt=""><?php else: ?><?php echo htmlspecialchars(itemEmoji($ci['name'], $ci['category'] ?? 0, $catIcons)); ?><?php endif; ?></div>
         <div class="cart-item-info">
-          <div class="cart-item-name"><?php echo htmlspecialchars($ci['name']); ?></div>
+          <div class="cart-item-name"><?php echo htmlspecialchars(myItemName($ci['itemId'], $ci['name'])); ?></div>
           <div class="cart-item-price"><?php echo $ci['price']==0 ? '無料' : '¥'.number_format($ci['price']); ?></div>
         </div>
         <div class="cart-item-qty">
@@ -986,10 +994,12 @@ const ALL_ITEMS = <?php
   $jsItems=[];
   foreach($items as $it){
     $img=getItemImage($it['id']);
-    $jsItems[]=['id'=>(int)$it['id'],'name'=>$it['name'],'price'=>(int)$it['price'],'category'=>(int)$it['category'],'img'=>$img??'','icon'=>itemEmoji($it['name'],$it['category'],$catIcons)];
+    $jsItems[]=['id'=>(int)$it['id'],'name'=>myItemName($it['id'],$it['name']),'price'=>(int)$it['price'],'category'=>(int)$it['category'],'img'=>$img??'','icon'=>itemEmoji($it['name'],$it['category'],$catIcons)];
   }
   echo json_encode($jsItems,JSON_UNESCAPED_UNICODE);
 ?>;
+const DRINK_CATS = <?php echo json_encode(array_values(array_map(fn($c)=>(int)$c['id'], array_filter($categories, fn($c)=>preg_match('/သောက်စရာ|ドリンク|飲み物/u',$c['categoryName']))))); ?>;
+const DESSERT_CATS = <?php echo json_encode(array_values(array_map(fn($c)=>(int)$c['id'], array_filter($categories, fn($c)=>preg_match('/အချိုပွဲ|デザート/u',$c['categoryName']))))); ?>;
 const CAT_ICONS = <?php echo json_encode($catIcons, JSON_UNESCAPED_UNICODE); ?>;
 function itemIcon(key){
   const it = ALL_ITEMS.find(i => i.id === Number(key)) || ALL_ITEMS.find(i => i.name === key);
@@ -1034,15 +1044,12 @@ function sendCallRequest(){
 
 /* ── COMBO ── */
 function getSuggestions(item){
-  const n=item.name;
+  // suggest a drink for food, a dessert for drinks (by category)
+  const full=ALL_ITEMS.find(i=>i.id===item.id)||item;
+  const isDrink=DRINK_CATS.includes(full.category);
   let pool=[];
-  const isDrink=n.includes('ビール')||n.includes('サワー')||n.includes('ハイボール')||n.includes('ドリンク')||n.includes('飲み放題');
-  if(!isDrink){
-    pool=ALL_ITEMS.filter(i=>i.id!==item.id&&(i.name.includes('ビール')||i.name.includes('サワー')||i.name.includes('ハイボール')));
-  }
-  if(pool.length===0){
-    pool=ALL_ITEMS.filter(i=>i.id!==item.id&&(i.name.includes('デザート')||i.name.includes('ワッフル')||i.name.includes('パンケーキ')||i.name.includes('アイス')||i.name.includes('枝豆')));
-  }
+  if(!isDrink) pool=ALL_ITEMS.filter(i=>i.id!==item.id&&DRINK_CATS.includes(i.category)&&i.price>0);
+  if(pool.length===0) pool=ALL_ITEMS.filter(i=>i.id!==item.id&&DESSERT_CATS.includes(i.category));
   if(pool.length===0)pool=ALL_ITEMS.filter(i=>i.id!==item.id).slice(0,4);
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
   return pool.slice(0,4);
@@ -1528,6 +1535,29 @@ function updateChatBadge(){
   badge.textContent=String(window.staffChatUnread);
   badge.classList.toggle('show', window.staffChatUnread>0);
 }
+// Escape chat text and turn [[add:ID]] tags from the AI into "add to cart" buttons
+function chatHTML(text, allowButtons){
+  const esc=String(text||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const btns=[];
+  let out=esc.replace(/\[\[add:(\d+)\]\]/g,(m,id)=>{
+    const it=ALL_ITEMS.find(i=>i.id===Number(id));
+    if(!allowButtons||!it) return '';
+    if(!btns.includes(it.id)) btns.push(it.id);
+    return '';
+  }).replace(/\n/g,'<br>');
+  if(btns.length){
+    out+='<div class="chat-add-row">'+btns.map(id=>{
+      const it=ALL_ITEMS.find(i=>i.id===id);
+      return '<button type="button" class="chat-add-btn" onclick="chatAddItem('+id+')"><span class="chat-add-ic">'+itemIcon(id)+'</span><span class="chat-add-name">'+it.name.replace(/[&<>]/g,'')+'</span><span class="chat-add-plus">＋🛒</span></button>';
+    }).join('')+'</div>';
+  }
+  return out;
+}
+function chatAddItem(id){
+  const it=ALL_ITEMS.find(i=>i.id===id); if(!it) return;
+  toggleStaffChat(false);
+  openOrderModal(it.id, it.name, it.price, it.img||'');
+}
 function renderStaffChat(){
   const box=document.getElementById('chat-messages');
   if(!box) return;
@@ -1537,7 +1567,7 @@ function renderStaffChat(){
   }
   box.innerHTML=window.staffChatMessages.map(msg=>{
     if(msg.type==='typing') return '<div class="chat-msg received"><span class="typing-dots">●●●</span></div>';
-    return '<div class="chat-msg '+msg.type+'">'+msg.text+(msg.time?'<div class="chat-msg-time">'+msg.time+'</div>':'')+'</div>';
+    return '<div class="chat-msg '+msg.type+'">'+chatHTML(msg.text, msg.type!=='sent')+(msg.time?'<div class="chat-msg-time">'+msg.time+'</div>':'')+'</div>';
   }).join('');
   box.scrollTop=box.scrollHeight;
 }
@@ -1902,7 +1932,7 @@ const I18N_DICT = {
   'スタッフ': ['Staff','服务员','ဝန်ထမ်း'],
   'カート': ['Cart','购物车','ခြင်းတောင်း'],
   'ショッピングカート': ['Shopping Cart','购物车','ဈေးခြင်းတောင်း'],
-  'メニューを検索... (例：寿司、ビール、デザート)': ['Search menu... (e.g. sushi, beer, dessert)','搜索菜单...（例：寿司、啤酒、甜点）','မီနူး ရှာရန်... (ဥပမာ - ဆူရှီ၊ ဘီယာ၊ အချိုပွဲ)'],
+  'メニューを検索... (例：寿司、ビール、デザート)': ['Search menu... (e.g. sushi, beer, dessert)','搜索菜单...（例：寿司、啤酒、甜点）','မီနူး ရှာရန်... (ဥပမာ - မုန့်ဟင်းခါး၊ လက်ဖက်ရည်)'],
   '全メニュー': ['All Menu','全部菜单','မီနူးအားလုံး'],
   ' メニュー': [' Menu',' 菜单',' မီနူး'],
   'とりあえず注文': ['Starters','先点这些','အစပြုဟင်းလျာ'],

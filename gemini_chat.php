@@ -33,8 +33,8 @@ $menuContext = '';
 $items = [];
 try {
     $stmt = $pdo->query("
-        SELECT i.name AS itemName, i.price, i.description,
-               i.is_popular, i.is_new, i.is_spicy,
+        SELECT i.id, i.name AS itemName, i.price, i.description,
+               i.is_popular, i.is_new, i.is_spicy, i.allergens,
                c.categoryName
         FROM sItem i
         LEFT JOIN sCategory c ON i.category = c.id
@@ -54,11 +54,13 @@ try {
         foreach ($byCategory as $cat => $catItems) {
             $lines[] = "[{$cat}]";
             foreach ($catItems as $it) {
-                $line = "  - {$it['itemName']} ({$it['price']}yen)";
-                if (!empty($it['description'])) $line .= ": {$it['description']}";
+                $name = trim(preg_replace('/\s*\[[^\]]*\]/u', '', $it['itemName']));
+                $line = "  - ID {$it['id']} | {$name} | {$it['price']} yen";
+                if (!empty($it['description'])) $line .= " | {$it['description']}";
+                $line .= ' | Allergens: ' . (($it['allergens'] ?? '') !== '' ? $it['allergens'] : 'UNKNOWN');
                 $badges = [];
                 if ($it['is_popular']) $badges[] = 'popular';
-                if ($it['is_new'])     $badges[] = 'new';
+                if ($it['is_new'])     $badges[] = 'limited-time';
                 if ($it['is_spicy'])   $badges[] = 'spicy';
                 if ($badges) $line .= ' [' . implode('/', $badges) . ']';
                 $lines[] = $line;
@@ -73,13 +75,12 @@ try {
 }
 
 // Language-specific instructions
-$langInstructions = [
-    'ja' => 'Detect the language the customer is using and reply in the SAME language. If they write in Japanese, reply in Japanese. If English, reply in English. If Chinese, reply in Chinese.',
-    'en' => 'The customer prefers English. Reply in English. But if the customer writes in another language, match their language.',
-    'zh' => 'The customer prefers Chinese (Simplified). Reply in Chinese. But if the customer writes in another language, match their language.',
-    'my' => 'The customer prefers Myanmar (Burmese). Always reply in natural, polite Myanmar (Burmese) language using Myanmar script, and give menu item names in Myanmar with the Japanese name in brackets. If the customer clearly writes in another language, match their language.',
-];
-$langInstruction = $langInstructions[$lang] ?? $langInstructions['ja'];
+// Always answer in the language of the customer's latest message.
+// The screen language ($lang) is only a fallback when the language is unclear.
+$screenLang = ['ja' => 'Japanese', 'en' => 'English', 'zh' => 'Chinese (Simplified)', 'my' => 'Myanmar (Burmese)'][$lang] ?? 'Japanese';
+$langInstruction = "Reply in the SAME language as the customer's latest message (Japanese -> Japanese, English -> English, Chinese -> Chinese, Myanmar -> Myanmar, Korean -> Korean, etc.). "
+    . "The menu screen is shown in {$screenLang}; only use {$screenLang} if the customer's language is unclear. "
+    . "Menu item names are written in Myanmar script on the screen: when you mention a dish, write its name exactly as it appears in the menu (Myanmar script) followed by a short translation/explanation in the customer's language, so they can find it on the screen.";
 
 $systemPrompt = <<<PROMPT
 You are an AI assistant for restaurant "SmartOrder", serving table {$tableNo}.
@@ -91,12 +92,13 @@ You are an AI assistant for restaurant "SmartOrder", serving table {$tableNo}.
 {$menuContext}
 
 [RESPONSE RULES]
+- This is a Myanmar restaurant. Many customers are foreign tourists who cannot read Myanmar script, so explain dishes simply.
 - When asked for recommendations, name 2-3 specific items with prices from the menu above.
-- For item descriptions, use the menu info provided.
-- For ordering, tell customers to use the "Add to Cart" button.
-- For allergies, say you will inform the staff.
+- For item descriptions, use only the menu info provided.
+- ALLERGIES: answer ONLY from the "Allergens" field of each item. Never guess. An item is safe for an allergy only if that allergen is not in its Allergens list. If Allergens is UNKNOWN, say you are not sure and the customer should ask the staff. Add a short note that the staff can double-check.
+- Every time you recommend or mention a dish the customer could order, put the tag [[add:ID]] right after the dish name (ID = the item's ID number from the menu). The screen turns these tags into "add to cart" buttons. Never invent IDs.
 - For water or service requests, say you will inform the staff.
-- Keep responses concise: 2-3 sentences.
+- Keep responses concise: 2-4 short sentences.
 - Never recommend items not on the menu above.
 PROMPT;
 
@@ -169,6 +171,11 @@ echo json_encode(['reply' => $reply, 'source' => $source]);
 
 function buildFallback(string $text, array $items, string $lang): string
 {
+    // answer in the language the customer typed
+    if (preg_match('/[\x{3040}-\x{30FF}]/u', $text)) $lang = 'ja';
+    elseif (preg_match('/[\x{1000}-\x{109F}]/u', $text)) $lang = 'my';
+    elseif (preg_match('/[\x{4E00}-\x{9FFF}]/u', $text)) $lang = 'zh';
+    elseif (preg_match('/[a-zA-Z]/', $text)) $lang = 'en';
     $l = mb_strtolower($text);
     $isRec = mb_strpos($l, 'recommend') !== false || mb_strpos($l, 'suggest') !== false
           || mb_strpos($l, 'おすすめ') !== false || mb_strpos($l, '推荐') !== false || mb_strpos($l, 'အကြံပြု') !== false;
@@ -179,7 +186,7 @@ function buildFallback(string $text, array $items, string $lang): string
             $pool    = !empty($popular) ? $popular : $items;
             shuffle($pool);
             $picks = array_slice($pool, 0, 3);
-            $names = array_map(fn($i) => "{$i['itemName']} ({$i['price']} yen)", $picks);
+            $names = array_map(fn($i) => trim(preg_replace('/\s*\[[^\]]*\]/u', '', $i['itemName'])) . " ({$i['price']} yen) [[add:{$i['id']}]]", $picks);
             $list  = implode(', ', $names);
             return match($lang) {
                 'en' => "We recommend: {$list}. Please enjoy!",

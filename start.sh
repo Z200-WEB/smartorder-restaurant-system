@@ -67,7 +67,8 @@ if [ ! -d /var/lib/mysql/mysql ]; then
                                                                             ADD COLUMN IF NOT EXISTS is_popular int(11) DEFAULT 0,
                                                                                   ADD COLUMN IF NOT EXISTS is_new int(11) DEFAULT 0,
                                                                                         ADD COLUMN IF NOT EXISTS is_spicy int(11) DEFAULT 0,
-                                                                                              ADD COLUMN IF NOT EXISTS sort_order int(11) DEFAULT 0;
+                                                                                              ADD COLUMN IF NOT EXISTS sort_order int(11) DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS allergens varchar(255) DEFAULT NULL;
                                                                                                   ALTER TABLE sManagement
                                                                                                         ADD COLUMN IF NOT EXISTS kitchen_state int(11) DEFAULT 0,
                                                                                                               ADD COLUMN IF NOT EXISTS estimated_minutes int(11) DEFAULT 15,

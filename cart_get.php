@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=UTF-8');
 require_once 'pdo.php';
+require_once __DIR__ . '/item_my.php';
 
 $tableNo = isset($_GET['tableNo']) ? (int)$_GET['tableNo'] : 1;
 
@@ -37,7 +38,7 @@ foreach ($cartItems as $ci) {
   $itemCount += $ci['amount'];
   $items[] = [
     'orderId' => (int)$ci['orderId'],
-    'name'    => $ci['name'],
+    'name'    => myItemName($ci['itemId'], $ci['name']),
     'price'   => (int)$ci['price'],
     'amount'  => (int)$ci['amount'],
     'img'     => getItemImage($ci['itemId']) ?? '',

@@ -16,12 +16,12 @@ CREATE TABLE `sCategory` (
   ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `sCategory` VALUES
-(1,1,1,'とりあえず注文','🍺',1),
-(2,1,2,'お寿司','🍣',2),
-(3,1,3,'焼き物','🔥',3),
-(7,1,0,'揚げ物','🍟',4),
-(8,1,0,'ドリンク','🥤',5),
-(9,1,0,'デザート','🍮',6);
+(1,1,1,'ခေါက်ဆွဲ / ထမင်း','🍜',1),
+(2,1,2,'အသုပ်','🥗',2),
+(3,1,3,'ဟင်း (ထမင်းပါ)','🍛',3),
+(4,1,4,'အကြော်','🍤',4),
+(5,1,5,'သောက်စရာ','🥤',5),
+(6,1,6,'အချိုပွဲ','🍮',6);
 
 DROP TABLE IF EXISTS `sItem`;
 CREATE TABLE `sItem` (
@@ -36,38 +36,34 @@ CREATE TABLE `sItem` (
     `is_new` int(11) DEFAULT 0,
     `is_spicy` int(11) DEFAULT 0,
     `sort_order` int(11) DEFAULT 0,
+    `allergens` varchar(255) DEFAULT NULL COMMENT 'Allergens (English, comma separated). none = no major allergens',
     PRIMARY KEY (`id`)
-  ) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  ) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `sItem` VALUES
-(2,1,1,'ナンとチキンカレー [期間限定]',1200,'スパイシーなチキンカレーとふわふわナン',NULL,0,1,1,1),
-(3,1,1,'インド風おにくとご飯 [おすすめ]',4000,'特製スパイスで煮込んだビーフと白ご飯',NULL,1,0,0,2),
-(4,1,1,'お寿司とチキンセット [期間限定]',2000,'新鮮なお寿司とジューシーなチキンのセット',NULL,0,1,0,3),
-(5,1,2,'可愛いお巻き',1000,'彩り豊かな細巻きセット',NULL,0,0,0,1),
-(6,1,2,'お寿司の森',2000,'季節の旬ネタ盛り合わせ',NULL,1,0,0,2),
-(8,1,2,'サーモン巻き',1000,'新鮮サーモンの巻き寿司',NULL,1,0,0,3),
-(9,1,2,'季節の巻き寿司',1000,'季節限定の特選巻き',NULL,0,1,0,4),
-(10,1,2,'美味しいお寿司セット',3000,'特上ネタ10貫セット',NULL,1,0,0,5),
-(13,1,3,'焼き鳥',2000,'備長炭で丁寧に焼き上げた串盛り',NULL,1,0,0,1),
-(14,1,3,'お寿司山盛りセット1号',4000,'特上ネタ山盛りセット',NULL,0,0,0,2),
-(16,1,3,'炭火焼4種 [おすすめ]',1600,'炭火で香ばしく焼いた4種盛り',NULL,1,0,0,3),
-(17,1,7,'旨辛唐揚げ',1500,'ピリ辛特製ダレの唐揚げ',NULL,0,0,1,1),
-(20,1,7,'ちょっといいポテト',690,'サクサクのクラフトフライドポテト',NULL,0,0,0,2),
-(21,1,7,'普通のポテト',650,'定番フライドポテト',NULL,0,0,0,3),
-(23,1,7,'FUJISANポテト [おすすめ]',670,'富士山型の見映えポテト',NULL,1,0,0,4),
-(24,1,8,'飲み放題 [おすすめ]',3000,'2時間飲み放題コース',NULL,1,0,0,1),
-(25,1,8,'生ビールメガ',500,'キンキンに冷えた生ビール大',NULL,1,0,0,2),
-(27,1,8,'レモンサワーメガ',500,'さっぱりレモンサワー大',NULL,0,0,0,3),
-(28,1,8,'レモンサワー',300,'定番レモンサワー',NULL,0,0,0,4),
-(29,1,8,'ハイボールメガ',500,'濃いめハイボール大',NULL,0,0,0,5),
-(30,1,8,'ハイボール',300,'すっきりハイボール',NULL,0,0,0,6),
-(32,1,9,'本日のデザート盛り合わせ [おすすめ]',1000,'シェフ特製デザート盛り合わせ',NULL,1,0,0,1),
-(33,1,9,'焦った目も美しいデザート',600,'見た目にもこだわったアーティスティックデザート',NULL,0,1,0,2),
-(34,1,9,'ワッフル',500,'もちもちワッフル',NULL,0,0,0,3),
-(35,1,9,'マカロンとバニラアイスの盛り合わせ [おすすめ]',700,'色とりどりマカロン＋バニラアイス',NULL,1,0,0,4),
-(36,1,9,'ブランビーパンケーキ [おすすめ]',600,'ふわふわパンケーキ',NULL,1,0,0,5),
-(37,1,3,'炭火焼8種',2000,'炭火で焼いた8種盛り合わせ',NULL,0,0,0,4),
-(38,1,1,'枝豆',0,'サービス枝豆',NULL,0,0,0,4);
+(1,1,1,'မုန့်ဟင်းခါး [おすすめ]',900,'Mohinga: thin rice noodles in a fish and lemongrass broth with banana stem, topped with a boiled egg, fried split-pea fritters, coriander and lime. The national breakfast of Myanmar.',NULL,1,0,0,1,'fish, egg'),
+(2,1,1,'ရှမ်းခေါက်ဆွဲ',850,'Shan noodles: rice noodles with a mild chicken and tomato sauce, topped with crushed peanuts and pickled mustard greens.',NULL,1,0,0,2,'peanut, soy'),
+(3,1,1,'အုန်းနို့ခေါက်ဆွဲ [期間限定]',950,'Ohn no khao swe: wheat egg noodles in a creamy coconut-milk chicken soup, with boiled egg, crispy noodles, shallots and lime.',NULL,0,1,0,3,'egg, wheat, coconut'),
+(4,1,1,'ဒံပေါက်',1100,'Danbauk (Myanmar biryani): fragrant butter rice cooked with spiced chicken, cashew nuts and raisins. Served with a small salad.',NULL,0,0,0,4,'milk, cashew (tree nut)'),
+(5,1,2,'လက်ဖက်သုပ် [おすすめ]',700,'Lahpet thoke (tea leaf salad): fermented green tea leaves mixed with fried beans, peanuts, sesame, dried shrimp, tomato, cabbage, garlic and chili. Contains caffeine.',NULL,1,0,1,1,'peanut, sesame, shrimp'),
+(6,1,2,'ခရမ်းချဉ်သီးသုပ်',600,'Tomato salad: fresh tomatoes and onion dressed with roasted chickpea powder, crushed peanuts, fish sauce and lime.',NULL,0,0,0,2,'peanut, fish'),
+(7,1,2,'ဂျင်းသုပ်',650,'Gyin thoke (ginger salad): shredded pickled ginger with fried beans, peanuts, sesame, dried shrimp and fried garlic.',NULL,0,0,0,3,'peanut, sesame, shrimp'),
+(8,1,3,'ကြက်သားဟင်း',1000,'Chicken curry: chicken slow-cooked with onion, garlic, ginger, turmeric and chili in oil (Myanmar style). Served with steamed rice.',NULL,1,0,1,1,'none'),
+(9,1,3,'ဝက်သားဆီပြန်',1100,'Pork curry: tender pork belly cooked with garlic, ginger, soy sauce and spices. Served with steamed rice.',NULL,0,0,0,2,'soy'),
+(10,1,3,'ပုစွန်ဆီပြန် [期間限定]',1300,'Prawn curry: large prawns cooked in a tomato, onion and chili sauce. Served with steamed rice.',NULL,0,1,1,3,'shrimp'),
+(11,1,3,'ပဲဟင်း',500,'Dal (lentil soup): yellow lentils cooked with vegetables and mild spices. Vegan. Served with steamed rice.',NULL,0,0,0,4,'none'),
+(12,1,4,'ဘူးသီးကြော်',500,'Bottle gourd fritters: strips of gourd fried in a rice and wheat flour batter. Vegan.',NULL,0,0,0,1,'wheat'),
+(13,1,4,'ပဲကြော်',400,'Split-pea fritters: crispy fritters made only from yellow split peas, onion and spices. Vegan and gluten-free.',NULL,1,0,0,2,'none'),
+(14,1,4,'ပုစွန်ကြော်',600,'Shrimp fritters: small shrimp fried in a wheat flour and egg batter.',NULL,0,0,0,3,'shrimp, wheat, egg'),
+(15,1,5,'ရေနွေးကြမ်း',0,'Myanmar green tea: plain hot green tea, free refills. Contains caffeine.',NULL,0,0,0,1,'none'),
+(16,1,5,'လက်ဖက်ရည်',400,'Myanmar milk tea: strong black tea with condensed and evaporated milk. Sweet. Contains caffeine.',NULL,1,0,0,2,'milk'),
+(17,1,5,'ကော်ဖီ',400,'Myanmar coffee: sweet coffee with condensed milk. Contains caffeine.',NULL,0,0,0,3,'milk'),
+(18,1,5,'ကြံရည်',350,'Sugarcane juice: freshly pressed sugarcane with a squeeze of lime. Non-alcoholic.',NULL,0,0,0,4,'none'),
+(19,1,5,'မြန်မာ ဘီယာ',600,'Myanmar Beer: local lager beer (alcoholic, 20+ only).',NULL,0,0,0,5,'wheat (barley)'),
+(20,1,6,'ဖါလူဒါ [おすすめ]',600,'Falooda: rose syrup and milk with vanilla ice cream, jelly, sago and basil seeds.',NULL,1,0,0,1,'milk, egg'),
+(21,1,6,'ရွှေကြည်',450,'Shwe gyi mont: baked semolina cake made with coconut milk, eggs and butter, topped with poppy seeds.',NULL,0,0,0,2,'egg, milk, wheat, coconut'),
+(22,1,6,'မုန့်လုံးရေပေါ်',400,'Mont lone yay paw: glutinous rice balls filled with palm sugar, topped with grated coconut. No egg, no milk.',NULL,0,0,0,3,'coconut'),
+(23,1,6,'ကျောက်ကျော',350,'Kyauk kyaw: two-layer agar jelly made with coconut milk and sugar. No egg, no milk.',NULL,0,0,0,4,'coconut');
 
 DROP TABLE IF EXISTS `sManagement`;
 CREATE TABLE `sManagement` (
