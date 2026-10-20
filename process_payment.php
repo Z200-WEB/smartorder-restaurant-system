@@ -16,7 +16,7 @@ try {
     $orderNo = isset($_POST['orderNo']) ? $_POST['orderNo'] : '';
 
     if (empty($orderNo)) {
-        throw new Exception('注文番号が指定されていません');
+        throw new Exception('အော်ဒါ နံပါတ် မပါပါ');
     }
 
     // Start transaction
@@ -30,7 +30,7 @@ try {
     $stmt->execute();
 
     if ($stmt->rowCount() === 0) {
-        throw new Exception('注文が見つかりませんでした');
+        throw new Exception('အော်ဒါ ရှာမတွေ့ပါ');
     }
 
     // Commit transaction
@@ -38,7 +38,7 @@ try {
 
     echo json_encode([
         'success' => true,
-        'message' => '会計が完了しました',
+        'message' => 'ငွေရှင်းပြီးပါပြီ',
         'orderNo' => $orderNo
     ]);
 

@@ -18,19 +18,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: admin.php');
         exit;
     } else {
-        $error = 'Invalid username or password';
+        $error = 'အသုံးပြုသူအမည် သို့မဟုတ် စကားဝှက် မှားနေပါတယ်';
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="my">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - SmartOrder Admin</title>
+    <title>Login - SmartOrder စီမံခန့်ခွဲမှု</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Myanmar:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -262,12 +262,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-brand">
         <div class="brand-icon">S</div>
         <h2>SmartOrder</h2>
-        <p>Restaurant Management System</p>
+        <p>စားသောက်ဆိုင် စီမံခန့်ခွဲမှု စနစ်</p>
     </div>
 
     <div class="login-card">
-        <h1>Admin Login</h1>
-        <p class="subtitle">Sign in to access the management panel</p>
+        <h1>စီမံသူ Login</h1>
+        <p class="subtitle">စီမံခန့်ခွဲမှု စခရင်ကို ဝင်ရန် login လုပ်ပါ</p>
 
         <?php if ($error): ?>
         <div class="error-message">⚠️ <?php echo htmlspecialchars($error); ?></div>
@@ -275,30 +275,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="POST" action="">
             <div class="form-group">
-                <label for="username">Username</label>
+                <label for="username">အသုံးပြုသူအမည်</label>
                 <div class="input-wrapper">
                     <span class="input-icon">👤</span>
                     <input type="text" id="username" name="username" required autofocus
-                           placeholder="Enter username">
+                           placeholder="အသုံးပြုသူအမည် ထည့်ပါ">
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">စကားဝှက်</label>
                 <div class="input-wrapper">
                     <span class="input-icon">🔑</span>
                     <input type="password" id="password" name="password" required
-                           placeholder="Enter password">
+                           placeholder="စကားဝှက် ထည့်ပါ">
                 </div>
             </div>
 
-            <button type="submit" class="btn-login">Login →</button>
+            <button type="submit" class="btn-login">ဝင်ရန် →</button>
         </form>
 
-        <a href="index.php?tableNo=1" class="back-link">← Back to Customer View</a>
+        <a href="index.php?tableNo=1" class="back-link">← ဖောက်သည် စခရင်သို့</a>
 
         <div class="credentials-hint">
-            Default: <strong>admin</strong> / <strong>admin123</strong>
+            နမူနာ: <strong>admin</strong> / <strong>admin123</strong>
         </div>
     </div>
 </div>

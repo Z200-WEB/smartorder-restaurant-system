@@ -23,12 +23,12 @@ $stmt->execute();
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="my">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>注文管理 - スマートオーダー</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <title>အော်ဒါ စီမံရန် - SmartOrder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Myanmar:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -355,27 +355,27 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="page-mgmt">
 <header class="m-topbar"><div class="m-topbar-inner">
-  <a class="m-brand" href="management.php"><span class="m-logo">S</span><span><div class="m-brand-name">SmartOrder</div><div class="m-brand-sub">管理画面</div></span></a>
-  <nav class="m-nav"><a href="management.php" class="active">注文管理</a><a href="kitchen.php">キッチン</a><a href="admin.php">メニュー管理</a></nav>
-  <div class="m-actions"><a class="m-btn-ghost" href="index.php?tableNo=1" target="_blank">お客様画面 ↗</a><a class="m-btn-ghost" href="logout.php">ログアウト</a></div>
+  <a class="m-brand" href="management.php"><span class="m-logo">S</span><span><div class="m-brand-name">SmartOrder</div><div class="m-brand-sub">စီမံခန့်ခွဲမှု</div></span></a>
+  <nav class="m-nav"><a href="management.php" class="active">အော်ဒါ စီမံရန်</a><a href="kitchen.php">မီးဖိုချောင်</a><a href="admin.php">မီနူး စီမံရန်</a></nav>
+  <div class="m-actions"><a class="m-btn-ghost" href="index.php?tableNo=1" target="_blank">ဖောက်သည် စခရင် ↗</a><a class="m-btn-ghost" href="logout.php">ထွက်ရန်</a></div>
 </div></header>
-<div class="m-page-title"><div><h1>注文管理</h1><p>お客様からの注文をリアルタイムで管理</p></div><span class="refresh-badge"><span class="refresh-dot"></span>リアルタイム更新中</span></div>
+<div class="m-page-title"><div><h1>အော်ဒါ စီမံရန်</h1><p>ဖောက်သည်တွေရဲ့ အော်ဒါကို အချိန်နဲ့တပြေးညီ စီမံပါ</p></div><span class="refresh-badge"><span class="refresh-dot"></span>အချိန်နဲ့တပြေးညီ ပြောင်းလဲနေသည်</span></div>
 <div class="container">
 
   <!-- PAGE HEADER -->
   <div class="page-header">
     <div class="header-left">
-      <h1>📊 注文管理一覧</h1>
-      <p>お客様からの注文をリアルタイムで管理</p>
+      <h1>📊 အော်ဒါ စာရင်း</h1>
+      <p>ဖောက်သည်တွေရဲ့ အော်ဒါကို အချိန်နဲ့တပြေးညီ စီမံပါ</p>
     </div>
     <div class="header-actions">
-      <a href="admin.php" class="back-button">← 管理画面に戻る</a>
+      <a href="admin.php" class="back-button">← စီမံခန့်ခွဲမှုသို့</a>
     </div>
   </div>
 
   <!-- TABLE LINKS -->
   <div class="table-links">
-    <div class="table-links-title">📱 お客様テーブルへのリンク:</div>
+    <div class="table-links-title">📱 ဖောက်သည် စားပွဲ လင့်ခ်များ:</div>
     <div class="table-buttons">
       <?php for($i=1; $i<=5; $i++): ?>
       <a href="index.php?tableNo=<?php echo $i; ?>" class="table-btn" target="_blank">🪑 Table <?php echo $i; ?></a>
@@ -387,7 +387,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <div class="stats-bar">
     <div class="stat-card">
       <div class="stat-number"><?php echo count($orders); ?></div>
-      <div class="stat-label">アクティブな注文</div>
+      <div class="stat-label">လက်ရှိ အော်ဒါ</div>
     </div>
     <?php
       $totalRevenue = array_sum(array_column($orders, 'totalAmount'));
@@ -396,15 +396,15 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     ?>
     <div class="stat-card">
       <div class="stat-number">¥<?php echo number_format($totalRevenue); ?></div>
-      <div class="stat-label">合計金額</div>
+      <div class="stat-label">စုစုပေါင်း ငွေပမာဏ</div>
     </div>
     <div class="stat-card">
       <div class="stat-number"><?php echo $totalItems; ?></div>
-      <div class="stat-label">注文商品数</div>
+      <div class="stat-label">မှာထားသော ဟင်းလျာ အရေအတွက်</div>
     </div>
     <div class="stat-card">
       <div class="stat-number"><?php echo count($tableNos); ?></div>
-      <div class="stat-label">使用中テーブル</div>
+      <div class="stat-label">အသုံးပြုနေသော စားပွဲ</div>
     </div>
   </div>
 
@@ -413,8 +413,8 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <div class="orders-grid">
     <div class="empty-state">
       <div class="empty-icon">📭</div>
-      <div class="empty-title">注文がありません</div>
-      <div class="empty-text">新しい注文が入るとここに表示されます</div>
+      <div class="empty-title">အော်ဒါ မရှိပါ</div>
+      <div class="empty-text">အော်ဒါအသစ် ဝင်လာရင် ဒီမှာ ပြပါမယ်</div>
     </div>
   </div>
   <?php else: ?>
@@ -430,27 +430,27 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </div>
       <div class="order-body">
         <div class="order-info-row">
-          <span class="order-label">注文番号:</span>
+          <span class="order-label">အော်ဒါ နံပါတ်:</span>
           <span class="order-value"><?php echo htmlspecialchars(substr($order['orderNo'], -8)); ?></span>
         </div>
         <div class="order-info-row">
-          <span class="order-label">商品点数:</span>
-          <span class="order-value"><?php echo (int)$order['itemCount']; ?> 点</span>
+          <span class="order-label">ဟင်းလျာ အရေအတွက်:</span>
+          <span class="order-value"><?php echo (int)$order['itemCount']; ?> ခု</span>
         </div>
       </div>
       <div class="order-total">
         <div class="order-total-row">
-          <span>💴 合計金額</span>
+          <span>💴 စုစုပေါင်း</span>
           <span>¥<?php echo number_format($order['totalAmount']); ?></span>
         </div>
       </div>
       <div class="order-actions">
         <a href="order.php?orderNo=<?php echo urlencode($order['orderNo']); ?>" class="btn-details">
-          📋 詳細を見る
+          📋 အသေးစိတ် ကြည့်ရန်
         </a>
         <button onclick="confirmPayment('<?php echo htmlspecialchars($order['orderNo']); ?>', <?php echo (int)$order['tableNo']; ?>, <?php echo (float)$order['totalAmount']; ?>)"
                 class="btn-payment">
-          ✅ 会計済み
+          ✅ ငွေရှင်းပြီး
         </button>
       </div>
     </div>
@@ -464,25 +464,25 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div id="paymentModal" class="payment-modal-overlay" style="display:none;">
   <div class="payment-modal-content">
     <div class="payment-modal-icon">💳</div>
-    <h2 class="payment-modal-title">会計を完了しますか？</h2>
+    <h2 class="payment-modal-title">ငွေရှင်းမှု ပြီးဆုံးမလား?</h2>
     <div class="payment-modal-details">
       <div class="detail-row">
-        <span class="detail-label">テーブル:</span>
+        <span class="detail-label">စားပွဲ:</span>
         <span class="detail-value" id="modalTableNo">Table 1</span>
       </div>
       <div class="detail-row">
-        <span class="detail-label">注文番号:</span>
+        <span class="detail-label">အော်ဒါ နံပါတ်:</span>
         <span class="detail-value" id="modalOrderNo">-</span>
       </div>
       <div class="detail-row total-row">
-        <span class="detail-label">合計金額:</span>
+        <span class="detail-label">စုစုပေါင်း:</span>
         <span class="detail-value" id="modalAmount">¥0</span>
       </div>
     </div>
-    <p class="payment-modal-warning">⚠️ 会計を完了すると、この注文は一覧から削除されます</p>
+    <p class="payment-modal-warning">⚠️ ငွေရှင်းပြီးရင် ဒီအော်ဒါကို စာရင်းထဲက ဖယ်ပါမယ်</p>
     <div class="payment-modal-buttons">
-      <button class="modal-btn cancel-btn" onclick="closePaymentModal()">キャンセル</button>
-      <button class="modal-btn confirm-btn" onclick="executePayment()" id="confirmPaymentBtn">✓ 会計完了</button>
+      <button class="modal-btn cancel-btn" onclick="closePaymentModal()">မလုပ်တော့ပါ</button>
+      <button class="modal-btn confirm-btn" onclick="executePayment()" id="confirmPaymentBtn">✓ ငွေရှင်းပြီး</button>
     </div>
   </div>
 </div>
@@ -492,8 +492,8 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <div class="success-content">
     <div class="success-icon">✓</div>
     <div class="success-message">
-      <strong>会計が完了しました！</strong>
-      <p id="successDetails">Table 1 の注文をクリアしました</p>
+      <strong>ငွေရှင်းပြီးပါပြီ!</strong>
+      <p id="successDetails">Table 1 ရဲ့ အော်ဒါကို ရှင်းပြီးပါပြီ</p>
     </div>
   </div>
 </div>
@@ -516,7 +516,7 @@ function closePaymentModal() { document.getElementById('paymentModal').style.dis
 function executePayment() {
   const btn = document.getElementById('confirmPaymentBtn');
   btn.disabled = true;
-  btn.textContent = '処理中...';
+  btn.textContent = 'လုပ်ဆောင်နေသည်...';
   const formData = new FormData();
   formData.append('orderNo', currentOrderNo);
   formData.append('csrf_token', csrfToken);
@@ -528,22 +528,22 @@ function executePayment() {
         showSuccessNotification(currentTableNo);
         setTimeout(() => location.reload(), 2000);
       } else {
-        alert('エラー: ' + data.message);
+        alert('အမှား: ' + data.message);
         btn.disabled = false;
-        btn.textContent = '✓ 会計完了';
+        btn.textContent = '✓ ငွေရှင်းပြီး';
       }
     })
     .catch(err => {
       console.error(err);
-      alert('通信エラーが発生しました');
+      alert('ချိတ်ဆက်မှု အမှား ဖြစ်သွားပါတယ်');
       btn.disabled = false;
-      btn.textContent = '✓ 会計完了';
+      btn.textContent = '✓ ငွေရှင်းပြီး';
     });
 }
 
 function showSuccessNotification(tableNo) {
   const n = document.getElementById('successNotification');
-  document.getElementById('successDetails').textContent = 'Table ' + tableNo + ' の注文をクリアしました';
+  document.getElementById('successDetails').textContent = 'Table ' + tableNo + ' ရဲ့ အော်ဒါကို ရှင်းပြီးပါပြီ';
   n.style.display = 'block';
   setTimeout(() => { n.style.display = 'none'; }, 3000);
 }
@@ -580,7 +580,7 @@ function renderOrders(orders){
   const grid = document.querySelector('.orders-grid');
   if(!grid) return;
   if(!orders || orders.length === 0){
-    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">注文がありません</div><div class="empty-text">新しい注文が入るとここに表示されます</div></div>';
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">အော်ဒါ မရှိပါ</div><div class="empty-text">အော်ဒါအသစ် ဝင်လာရင် ဒီမှာ ပြပါမယ်</div></div>';
     return;
   }
   // Check if new orders appeared
@@ -595,19 +595,19 @@ function renderOrders(orders){
         <div class="order-time">🕐 ${dateStr}</div>
       </div>
       <div class="order-body">
-        <div class="order-info-row"><span class="order-label">注文番号:</span><span class="order-value">${shortOrderNo}</span></div>
-        <div class="order-info-row"><span class="order-label">商品点数:</span><span class="order-value">${order.itemCount} 点</span></div>
+        <div class="order-info-row"><span class="order-label">အော်ဒါ နံပါတ်:</span><span class="order-value">${shortOrderNo}</span></div>
+        <div class="order-info-row"><span class="order-label">ဟင်းလျာ အရေအတွက်:</span><span class="order-value">${order.itemCount} ခု</span></div>
       </div>
-      <div class="order-total"><div class="order-total-row"><span>💴 合計金額</span><span>¥${Number(order.totalAmount).toLocaleString()}</span></div></div>
+      <div class="order-total"><div class="order-total-row"><span>💴 စုစုပေါင်း</span><span>¥${Number(order.totalAmount).toLocaleString()}</span></div></div>
       <div class="order-actions">
-        <a href="order.php?orderNo=${encodeURIComponent(order.orderNo)}" class="btn-details">📋 詳細を見る</a>
-        <button onclick="confirmPayment('${order.orderNo}', ${order.tableNo}, ${order.totalAmount})" class="btn-payment">✅ 会計済み</button>
+        <a href="order.php?orderNo=${encodeURIComponent(order.orderNo)}" class="btn-details">📋 အသေးစိတ် ကြည့်ရန်</a>
+        <button onclick="confirmPayment('${order.orderNo}', ${order.tableNo}, ${order.totalAmount})" class="btn-payment">✅ ငွေရှင်းပြီး</button>
       </div>
     </div>`;
   }).join('');
   // Notify if new orders
   if(newCount > oldCount && oldCount > 0 && Notification.permission === 'granted'){
-    new Notification('新しい注文が入りました！', {icon:'/favicon.ico'});
+    new Notification('အော်ဒါအသစ် ဝင်လာပါပြီ!', {icon:'/favicon.ico'});
   }
 }
 
@@ -665,22 +665,22 @@ fetchOrdersRealtime(); // immediate first call
 </style>
 
 <button id="staff-chat-fab" onclick="toggleStaffChatPanel()">
-  💬 チャット <span id="staff-chat-badge" class="staff-chat-badge"></span>
+  💬 စကားပြော <span id="staff-chat-badge" class="staff-chat-badge"></span>
 </button>
 <div id="staff-chat-panel">
   <div class="scp-header">
     <button class="scp-back" id="scp-back-btn" onclick="scpShowTableList()" style="display:none">←</button>
-    <span id="scp-title">スタッフチャット管理</span>
+    <span id="scp-title">ဖောက်သည် စကားပြော စီမံရန်</span>
   </div>
   <div class="scp-tabs">
-    <div class="scp-tab active" onclick="scpSetTab('active')">アクティブ</div>
-    <div class="scp-tab" onclick="scpSetTab('all')">全テーブル</div>
+    <div class="scp-tab active" onclick="scpSetTab('active')">လက်ရှိ</div>
+    <div class="scp-tab" onclick="scpSetTab('all')">စားပွဲအားလုံး</div>
   </div>
   <div id="scp-table-list" class="scp-table-list"></div>
   <div id="scp-msgs" class="scp-msgs"></div>
   <div id="scp-reply-area" class="scp-reply-area">
-    <textarea id="scp-reply-input" class="scp-reply-input" placeholder="返信を入力..."></textarea>
-    <button class="scp-reply-btn" onclick="scpSendReply()">送信</button>
+    <textarea id="scp-reply-input" class="scp-reply-input" placeholder="ပြန်စာ ရေးပါ..."></textarea>
+    <button class="scp-reply-btn" onclick="scpSendReply()">ပို့ရန်</button>
   </div>
 </div>
 
@@ -721,7 +721,7 @@ function scpLoadTables(){
     const entries = Object.values(tables).sort((a,b)=>b.tableNo-a.tableNo);
     
     if(entries.length === 0){
-      list.innerHTML = '<div style="padding:20px;text-align:center;color:#999;font-size:13px;">チャットはありません</div>';
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#999;font-size:13px;">စကားပြော မရှိပါ</div>';
       return;
     }
     
@@ -729,7 +729,7 @@ function scpLoadTables(){
       const lastMsg = t.msgs[t.msgs.length-1];
       const preview = lastMsg ? lastMsg.message.substring(0,30) : '';
       const unreadDot = t.hasNew ? '<span class="scp-unread">NEW</span>' : '';
-      return '<div class="scp-table-item" onclick="scpOpenTable('+t.tableNo+')"><div><div style="font-weight:700">テーブル'+t.tableNo+'</div><div style="font-size:12px;color:#999">'+preview+'</div></div>'+unreadDot+'</div>';
+      return '<div class="scp-table-item" onclick="scpOpenTable('+t.tableNo+')"><div><div style="font-weight:700">စားပွဲ '+t.tableNo+'</div><div style="font-size:12px;color:#999">'+preview+'</div></div>'+unreadDot+'</div>';
     }).join('');
   })
   .catch(e=>console.error(e));
@@ -737,7 +737,7 @@ function scpLoadTables(){
 
 function scpOpenTable(tableNo){
   scpCurrentTable = tableNo;
-  document.getElementById('scp-title').textContent = 'テーブル'+tableNo;
+  document.getElementById('scp-title').textContent = 'စားပွဲ '+tableNo;
   document.getElementById('scp-back-btn').style.display = 'inline';
   document.getElementById('scp-table-list').style.display = 'none';
   document.getElementById('scp-msgs').classList.add('active');
@@ -747,7 +747,7 @@ function scpOpenTable(tableNo){
 
 function scpShowTableList(){
   scpCurrentTable = 0;
-  document.getElementById('scp-title').textContent = 'スタッフチャット管理';
+  document.getElementById('scp-title').textContent = 'ဖောက်သည် စကားပြော စီမံရန်';
   document.getElementById('scp-back-btn').style.display = 'none';
   document.getElementById('scp-table-list').style.display = 'block';
   document.getElementById('scp-msgs').classList.remove('active');
@@ -764,7 +764,7 @@ function scpLoadMessages(tableNo){
     const box = document.getElementById('scp-msgs');
     box.innerHTML = msgs.map(m=>{
       const time = new Date(m.created_at).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-      const roleLabel = m.role==='user'?'👤 お客様':m.role==='ai'?'🤖 AI':'👔 スタッフ';
+      const roleLabel = m.role==='user'?'👤 ဖောက်သည်':m.role==='ai'?'🤖 AI':'👔 ဝန်ထမ်း';
       return '<div class="scp-msg '+m.role+'"><div class="scp-msg-table">'+roleLabel+'</div>'+m.message+'<div class="scp-msg-time">'+time+'</div></div>';
     }).join('');
     box.scrollTop = box.scrollHeight;
@@ -773,10 +773,10 @@ function scpLoadMessages(tableNo){
 
 function scpSendReply(){
   const inputEl = document.getElementById('scp-reply-input');
-  if(!inputEl) { alert('入力フィールドが見つかりません'); return; }
+  if(!inputEl) { alert('စာရိုက်ကွက် မတွေ့ပါ'); return; }
   const msg = inputEl.value.trim();
   if(!msg) return;
-  if(!scpCurrentTable) { alert('テーブルを選択してください'); return; }
+  if(!scpCurrentTable) { alert('စားပွဲ ရွေးပါ'); return; }
   inputEl.value = '';
   inputEl.disabled = true;
   
@@ -799,7 +799,7 @@ function scpSendReply(){
     if(data.ok){
       scpLoadMessages(scpCurrentTable);
     } else {
-      alert('送信失敗: ' + (data.error || '不明なエラー'));
+      alert('ပို့လို့ မရပါ: ' + (data.error || 'မသိသော အမှား'));
       inputEl.value = msg; // restore
     }
   })
@@ -808,7 +808,7 @@ function scpSendReply(){
     if(btn) btn.disabled = false;
     console.error('Reply error:', e);
     inputEl.value = msg; // restore
-    alert('通信エラー: ' + e.message);
+    alert('ချိတ်ဆက်မှု အမှား: ' + e.message);
   });
 }
 

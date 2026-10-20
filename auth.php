@@ -117,7 +117,7 @@ function requireCsrf(): void {
                 header('Content-Type: application/json; charset=UTF-8');
                 echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
             } else {
-                header('Location: admin.php?error=' . urlencode('Security token expired. Please try again.'));
+                header('Location: admin.php?error=' . urlencode('လုံခြုံရေး token သက်တမ်း ကုန်သွားပါပြီ။ ထပ်ကြိုးစားပါ။'));
             }
             exit;
         }

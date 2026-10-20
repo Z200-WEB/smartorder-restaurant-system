@@ -6,12 +6,12 @@ requireAuth();
 $csrfToken = generateCsrfToken();
 ?>
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="my">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>キッチン - スマートオーダー</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<title>မီးဖိုချောင် - SmartOrder</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+Myanmar:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/modern-admin.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -82,33 +82,33 @@ body.tv .t-name{font-size:1.2rem}
 </head>
 <body class="page-mgmt page-kds">
 <header class="m-topbar"><div class="m-topbar-inner">
-  <a class="m-brand" href="management.php"><span class="m-logo">S</span><span><div class="m-brand-name">SmartOrder</div><div class="m-brand-sub">管理画面</div></span></a>
-  <nav class="m-nav"><a href="management.php">注文管理</a><a href="kitchen.php" class="active">キッチン</a><a href="admin.php">メニュー管理</a></nav>
-  <div class="m-actions"><a class="m-btn-ghost" href="index.php?tableNo=1" target="_blank">お客様画面 ↗</a><a class="m-btn-ghost" href="logout.php">ログアウト</a></div>
+  <a class="m-brand" href="management.php"><span class="m-logo">S</span><span><div class="m-brand-name">SmartOrder</div><div class="m-brand-sub">စီမံခန့်ခွဲမှု</div></span></a>
+  <nav class="m-nav"><a href="management.php">အော်ဒါ စီမံရန်</a><a href="kitchen.php" class="active">မီးဖိုချောင်</a><a href="admin.php">မီနူး စီမံရန်</a></nav>
+  <div class="m-actions"><a class="m-btn-ghost" href="index.php?tableNo=1" target="_blank">ဖောက်သည် စခရင် ↗</a><a class="m-btn-ghost" href="logout.php">ထွက်ရန်</a></div>
 </div></header>
 
 <div class="kds-wrap">
   <div class="kds-head">
-    <div><h1>キッチンモニター</h1><p>新しい注文はリアルタイムで表示されます</p></div>
+    <div><h1>မီးဖိုချောင် မော်နီတာ</h1><p>အော်ဒါအသစ်တွေကို အချိန်နဲ့တပြေးညီ ပြပါတယ်</p></div>
     <div class="kds-tools">
       <span class="kds-clock" id="kdsClock">--:--</span>
-      <span class="kds-status" id="kdsStatus"><span class="dot"></span><span id="kdsStatusText">接続中…</span></span>
-      <button class="kds-btn" id="soundBtn" type="button" onclick="toggleSound()">🔕 通知音 OFF</button>
-      <button class="kds-btn" type="button" onclick="toggleTV()">⛶ 全画面</button>
+      <span class="kds-status" id="kdsStatus"><span class="dot"></span><span id="kdsStatusText">ချိတ်ဆက်နေသည်…</span></span>
+      <button class="kds-btn" id="soundBtn" type="button" onclick="toggleSound()">🔕 အသံ OFF</button>
+      <button class="kds-btn" type="button" onclick="toggleTV()">⛶ မျက်နှာပြင်အပြည့်</button>
     </div>
   </div>
 
   <div class="kds-board">
     <section class="kds-col col-new">
-      <div class="kds-col-head"><div class="kds-col-title"><i></i>新規</div><div class="kds-count" id="count0">0</div></div>
+      <div class="kds-col-head"><div class="kds-col-title"><i></i>အသစ်</div><div class="kds-count" id="count0">0</div></div>
       <div class="kds-list" id="list0"></div>
     </section>
     <section class="kds-col col-cooking">
-      <div class="kds-col-head"><div class="kds-col-title"><i></i>調理中</div><div class="kds-count" id="count1">0</div></div>
+      <div class="kds-col-head"><div class="kds-col-title"><i></i>ချက်နေဆဲ</div><div class="kds-count" id="count1">0</div></div>
       <div class="kds-list" id="list1"></div>
     </section>
     <section class="kds-col col-ready">
-      <div class="kds-col-head"><div class="kds-col-title"><i></i>完成・提供待ち</div><div class="kds-count" id="count2">0</div></div>
+      <div class="kds-col-head"><div class="kds-col-title"><i></i>ပြီးပြီ / ချပေးရန်</div><div class="kds-count" id="count2">0</div></div>
       <div class="kds-list" id="list2"></div>
     </section>
   </div>
@@ -118,8 +118,8 @@ body.tv .t-name{font-size:1.2rem}
 <script>
 const CSRF = <?php echo json_encode($csrfToken); ?>;
 const POLL_MS = 3000;
-const NEXT_LABEL = ['調理開始 →', '完成 ✓', '提供済み ✓'];
-const EMPTY_LABEL = ['新しい注文はありません', '調理中の注文はありません', '提供待ちはありません'];
+const NEXT_LABEL = ['ချက်မယ် →', 'ပြီးပြီ ✓', 'ချပေးပြီး ✓'];
+const EMPTY_LABEL = ['အော်ဒါအသစ် မရှိပါ', 'ချက်နေတဲ့ အော်ဒါ မရှိပါ', 'ချပေးရန် မရှိပါ'];
 let tickets = [];          // latest tickets from the server
 let fetchedAt = Date.now(); // when "elapsed" values were measured
 let known = null;          // orderNos already seen (null until first load)
@@ -146,7 +146,7 @@ function render(){
         + '<div class="t-time" data-elapsed="'+t.elapsed+'">'+fmt(t.elapsed)+'</div></div>'
         + '<ul class="t-items">'+items+'</ul>'
         + '<div class="t-actions">'
-        + (t.state > 0 ? '<button class="t-back" type="button" title="1つ前に戻す" onclick="setState(\''+esc(t.orderNo)+'\','+(t.state-1)+')"'+dis+'>↩</button>' : '')
+        + (t.state > 0 ? '<button class="t-back" type="button" title="တစ်ဆင့် နောက်ပြန်ရန်" onclick="setState(\''+esc(t.orderNo)+'\','+(t.state-1)+')"'+dis+'>↩</button>' : '')
         + '<button class="t-next" type="button" onclick="setState(\''+esc(t.orderNo)+'\','+(t.state+1)+')"'+dis+'>'+NEXT_LABEL[t.state]+'</button>'
         + '</div></article>';
     }).join('');
@@ -176,7 +176,7 @@ function setStatus(ok, text){
 async function load(){
   try {
     const res = await fetch('kitchen_api.php', {cache:'no-store', credentials:'same-origin'});
-    if (res.status === 403) { setStatus(false, 'ログインが切れました'); setTimeout(() => location.href = 'login.php', 1500); return; }
+    if (res.status === 403) { setStatus(false, 'Login သက်တမ်း ကုန်သွားပါပြီ'); setTimeout(() => location.href = 'login.php', 1500); return; }
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || 'error');
     const incoming = data.tickets || [];
@@ -186,15 +186,15 @@ async function load(){
         added.forEach(t => fresh.add(t.orderNo));
         setTimeout(() => { added.forEach(t => fresh.delete(t.orderNo)); render(); }, 8000);
         chime();
-        toast('🔔 新しい注文: ' + added.map(t => 'Table ' + t.tableNo).join(', '));
+        toast('🔔 အော်ဒါအသစ်: ' + added.map(t => 'Table ' + t.tableNo).join(', '));
       }
     }
     known = new Set(incoming.map(t => t.orderNo));
     tickets = incoming; fetchedAt = Date.now();
     render();
-    setStatus(true, 'リアルタイム更新中');
+    setStatus(true, 'အချိန်နဲ့တပြေးညီ ပြောင်းလဲနေသည်');
   } catch (e) {
-    setStatus(false, '接続エラー・再試行中');
+    setStatus(false, 'ချိတ်ဆက်မှု အမှား - ထပ်ကြိုးစားနေသည်');
   }
 }
 
@@ -213,9 +213,9 @@ async function setState(orderNo, state){
     const res = await fetch('api_kitchen_update.php', {method:'POST', body, credentials:'same-origin', headers:{'Accept':'application/json'}});
     const data = await res.json();
     if (!data.success) throw new Error(data.message || 'failed');
-    if (state >= 3) toast('✓ Table ' + (t ? t.tableNo : '') + ' 提供済み');
+    if (state >= 3) toast('✓ Table ' + (t ? t.tableNo : '') + ' ချပေးပြီးပါပြီ');
   } catch (e) {
-    toast('更新できませんでした。もう一度お試しください');
+    toast('ပြောင်းလို့ မရပါ။ ထပ်ကြိုးစားပါ');
     if (t && prev !== null) { t.state = prev; if (!tickets.includes(t)) tickets.push(t); }
   } finally {
     busy.delete(orderNo);
@@ -235,7 +235,7 @@ function toggleSound(){
   soundOn = !soundOn;
   if (soundOn && !audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
   const b = document.getElementById('soundBtn');
-  b.textContent = soundOn ? '🔔 通知音 ON' : '🔕 通知音 OFF';
+  b.textContent = soundOn ? '🔔 အသံ ON' : '🔕 အသံ OFF';
   b.classList.toggle('on', soundOn);
   try { localStorage.setItem('kds_sound', soundOn ? '1' : '0'); } catch(e) {}
   if (soundOn) chime();

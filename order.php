@@ -8,10 +8,11 @@ requireAuth();
 
 // Load database connection
 require_once 'pdo.php';
+require_once __DIR__ . '/item_my.php';
 
 $orderNo = isset($_GET['orderNo']) ? $_GET['orderNo'] : '';
 if (!$orderNo) {
-    echo "注文番号が指定されていません。";
+    echo "အော်ဒါ နံပါတ် မပါပါ။";
     exit;
 }
 
@@ -22,12 +23,12 @@ $stmtMgmt->execute();
 $mgmt = $stmtMgmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$mgmt) {
-    echo "注文が見つかりません。";
+    echo "အော်ဒါ ရှာမတွေ့ပါ။";
     exit;
 }
 
 $sqlDetail = "
-    SELECT o.*, i.name, i.price
+    SELECT o.*, i.id AS itemId, i.name, i.price
     FROM sOrder o
     JOIN sItem i ON o.itemNo = i.id
     WHERE o.orderNo = :orderNo
@@ -43,14 +44,14 @@ foreach ($details as $d) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="my">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧾 注文詳細 - <?php echo htmlspecialchars($orderNo); ?></title>
+    <title>🧾 အော်ဒါ အသေးစိတ် - <?php echo htmlspecialchars($orderNo); ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Myanmar:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -59,7 +60,7 @@ foreach ($details as $d) {
         }
 
         body {
-            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', 'Noto Sans Myanmar', 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #0f766e 0%, #0d9488 40%, #14b8a6 100%);
             min-height: 100vh;
             padding: 40px 20px;
@@ -318,7 +319,7 @@ foreach ($details as $d) {
 <div class="container">
     <div class="page-header">
         <div>
-            <div class="page-title">🧾 注文詳細</div>
+            <div class="page-title">🧾 အော်ဒါ အသေးစိတ်</div>
             <div class="page-subtitle">Order Receipt</div>
         </div>
     </div>
@@ -326,25 +327,25 @@ foreach ($details as $d) {
     <div class="receipt-wrapper">
         <div class="receipt-header">
             <div class="receipt-title">🍽️ SmartOrder</div>
-            <div class="receipt-subtitle">Order Receipt / 注文レシート</div>
+            <div class="receipt-subtitle">Order Receipt / အော်ဒါ ပြေစာ</div>
         </div>
 
         <div class="order-info-box">
             <div class="order-info-grid">
                 <div class="info-item">
-                    <div class="info-label">📋 注文番号</div>
+                    <div class="info-label">📋 အော်ဒါ နံပါတ်</div>
                     <div class="info-value"><?php echo htmlspecialchars(substr($mgmt['orderNo'], -12)); ?></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">🍽️ テーブル番号</div>
+                    <div class="info-label">🍽️ စားပွဲ နံပါတ်</div>
                     <div class="info-value">Table <?php echo htmlspecialchars($mgmt['tableNo']); ?></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">📅 注文日時</div>
+                    <div class="info-label">📅 မှာယူချိန်</div>
                     <div class="info-value"><?php echo date('Y/m/d H:i', strtotime($mgmt['dateA'])); ?></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">🔄 最終更新</div>
+                    <div class="info-label">🔄 နောက်ဆုံး ပြင်ချိန်</div>
                     <div class="info-value"><?php echo date('Y/m/d H:i', strtotime($mgmt['dateB'])); ?></div>
                 </div>
             </div>
@@ -353,21 +354,21 @@ foreach ($details as $d) {
         <div class="items-section">
             <div class="section-title">
                 <span>📝</span>
-                <span>注文商品</span>
+                <span>မှာထားသော ဟင်းလျာ</span>
             </div>
             <table class="items-table">
                 <thead>
                     <tr>
-                        <th>商品名</th>
-                        <th style="text-align: right;">単価</th>
-                        <th style="text-align: right;">数量</th>
-                        <th style="text-align: right;">小計</th>
+                        <th>ဟင်းလျာ အမည်</th>
+                        <th style="text-align: right;">တစ်ခုဈေး</th>
+                        <th style="text-align: right;">အရေအတွက်</th>
+                        <th style="text-align: right;">စုစုပေါင်း</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($details as $detail): ?>
                     <tr>
-                        <td class="item-name"><?php echo htmlspecialchars($detail['name']); ?></td>
+                        <td class="item-name"><?php echo htmlspecialchars(myItemName($detail['itemId'], $detail['name'])); ?></td>
                         <td class="item-price">&yen;<?php echo number_format($detail['price']); ?></td>
                         <td class="item-qty">&times; <?php echo htmlspecialchars($detail['amount']); ?></td>
                         <td class="item-subtotal">&yen;<?php echo number_format($detail['price'] * $detail['amount']); ?></td>
@@ -379,22 +380,22 @@ foreach ($details as $d) {
 
         <div class="total-section">
             <div class="total-row">
-                <span>商品点数:</span>
-                <span><?php echo count($details); ?>点</span>
+                <span>ဟင်းလျာ အရေအတွက်:</span>
+                <span><?php echo count($details); ?> ခု</span>
             </div>
             <div class="total-row grand-total">
-                <span>💰 合計金額</span>
+                <span>💰 စုစုပေါင်း ငွေပမာဏ</span>
                 <span>&yen;<?php echo number_format($total); ?></span>
             </div>
         </div>
 
         <div class="actions">
-            <a href="management.php" class="btn btn-back">&larr; 一覧に戻る</a>
-            <button onclick="window.print()" class="btn btn-print">🖨️ 印刷する</button>
+            <a href="management.php" class="btn btn-back">&larr; စာရင်းသို့ ပြန်ရန်</a>
+            <button onclick="window.print()" class="btn btn-print">🖨️ ပရင့်ထုတ်ရန်</button>
         </div>
 
         <div class="receipt-footer">
-            <p>✨ ご注文ありがとうございました ✨</p>
+            <p>✨ မှာယူပေးလို့ ကျေးဇူးတင်ပါတယ် ✨</p>
         </div>
     </div>
 </div>

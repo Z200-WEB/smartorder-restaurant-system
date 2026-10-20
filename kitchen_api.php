@@ -6,6 +6,7 @@ header('Cache-Control: no-cache');
 require_once 'auth.php';
 require_once 'pdo.php';
 require_once __DIR__ . '/item_emoji.php';
+require_once __DIR__ . '/item_my.php';
 
 if (!isLoggedIn()) {
     http_response_code(403);
@@ -31,7 +32,7 @@ try {
     }
 
     $stmtItems = $pdo->prepare("
-        SELECT o.amount, o.item_notes, i.name, i.category
+        SELECT o.amount, o.item_notes, i.id, i.name, i.category
           FROM sOrder o JOIN sItem i ON o.itemNo = i.id
          WHERE o.orderNo = :orderNo
          ORDER BY o.id ASC
@@ -43,7 +44,7 @@ try {
         $items = [];
         foreach ($stmtItems->fetchAll(PDO::FETCH_ASSOC) as $it) {
             $items[] = [
-                'name'  => trim(str_replace(['[期間限定]', '[おすすめ]'], '', $it['name'])),
+                'name'  => myItemName($it['id'], trim(str_replace(['[期間限定]', '[おすすめ]'], '', $it['name']))),
                 'qty'   => (int)$it['amount'],
                 'notes' => (string)($it['item_notes'] ?? ''),
                 'icon'  => itemEmoji($it['name'], $it['category'], $catIcons),

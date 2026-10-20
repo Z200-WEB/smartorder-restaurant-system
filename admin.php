@@ -12,6 +12,7 @@ requireAuth();
 // Load database connection
 require_once 'pdo.php';
 require_once __DIR__ . '/item_emoji.php';
+require_once __DIR__ . '/item_my.php';
 
 // Get categories
 $sqlCategory = "SELECT * FROM sCategory ORDER BY id ASC";
@@ -31,15 +32,15 @@ $items = $stmtItem->fetchAll(PDO::FETCH_ASSOC);
 $csrfToken = generateCsrfToken();
 ?>
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="my">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>管理画面 - メニュー管理システム</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <title>မီနူး စီမံခန့်ခွဲမှု - SmartOrder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Myanmar:wght@400;500;700&display=swap" rel="stylesheet">
   <!-- Design System CSS -->
   <link rel="stylesheet" href="css/design-system.css">
   <link rel="stylesheet" href="css/animations.css">
@@ -145,37 +146,37 @@ $csrfToken = generateCsrfToken();
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-content">
     <div class="loading-spinner"></div>
-    <div class="loading-text">処理中...</div>
+    <div class="loading-text">လုပ်ဆောင်နေသည်...</div>
   </div>
 </div>
 
 <header class="m-topbar"><div class="m-topbar-inner">
-  <a class="m-brand" href="management.php"><span class="m-logo">S</span><span><div class="m-brand-name">SmartOrder</div><div class="m-brand-sub">管理画面</div></span></a>
-  <nav class="m-nav"><a href="management.php">注文管理</a><a href="kitchen.php">キッチン</a><a href="admin.php" class="active">メニュー管理</a></nav>
-  <div class="m-actions"><a class="m-btn-ghost" href="index.php?tableNo=1" target="_blank">お客様画面 ↗</a><a class="m-btn-ghost" href="logout.php">ログアウト</a></div>
+  <a class="m-brand" href="management.php"><span class="m-logo">S</span><span><div class="m-brand-name">SmartOrder</div><div class="m-brand-sub">စီမံခန့်ခွဲမှု</div></span></a>
+  <nav class="m-nav"><a href="management.php">အော်ဒါ စီမံရန်</a><a href="kitchen.php">မီးဖိုချောင်</a><a href="admin.php" class="active">မီနူး စီမံရန်</a></nav>
+  <div class="m-actions"><a class="m-btn-ghost" href="index.php?tableNo=1" target="_blank">ဖောက်သည် စခရင် ↗</a><a class="m-btn-ghost" href="logout.php">ထွက်ရန်</a></div>
 </div></header>
-<div class="m-page-title"><div><h1>メニュー管理</h1><p>商品とカテゴリを管理できます</p></div></div>
+<div class="m-page-title"><div><h1>မီနူး စီမံရန်</h1><p>ဟင်းလျာနဲ့ အမျိုးအစားတွေကို စီမံနိုင်ပါတယ်</p></div></div>
 <div class="admin-container">
 
   <!-- ADMIN HEADER -->
   <div class="admin-header">
     <h1>
       <span>⚙️</span>
-      <span>管理画面 - メニュー管理システム</span>
+      <span>မီနူး စီမံခန့်ခွဲမှု - SmartOrder</span>
     </h1>
-    <p>商品とカテゴリを簡単に管理できます</p>
+    <p>ဟင်းလျာနဲ့ အမျိုးအစားတွေကို လွယ်ကူစွာ စီမံနိုင်ပါတယ်</p>
     <div class="admin-header-links">
       <a href="index.php?tableNo=1" class="admin-link">
         <span>←</span>
-        <span>お客様画面に戻る</span>
+        <span>ဖောက်သည် စခရင်သို့</span>
       </a>
       <a href="management.php" class="admin-link">
         <span>📊</span>
-        <span>注文管理</span>
+        <span>အော်ဒါ စီမံရန်</span>
       </a>
       <a href="logout.php" class="admin-link" style="background:rgba(220,38,38,.25);border-color:rgba(220,38,38,.4);">
         <span>🚪</span>
-        <span>ログアウト</span>
+        <span>ထွက်ရန်</span>
       </a>
     </div>
   </div>
@@ -184,11 +185,11 @@ $csrfToken = generateCsrfToken();
   <div class="admin-tabs">
     <button class="admin-tab active" onclick="switchTab('items', event)">
       <span>📦</span>
-      <span>商品管理</span>
+      <span>ဟင်းလျာ စီမံရန်</span>
     </button>
     <button class="admin-tab" onclick="switchTab('categories', event)">
       <span>📂</span>
-      <span>カテゴリ管理</span>
+      <span>အမျိုးအစား စီမံရန်</span>
     </button>
   </div>
 
@@ -196,7 +197,7 @@ $csrfToken = generateCsrfToken();
   <div id="tab-items" class="tab-content active">
     <button class="add-button-large" onclick="openItemModal()">
       <span>➕</span>
-      <span>新しい商品を追加</span>
+      <span>ဟင်းလျာအသစ် ထည့်ရန်</span>
     </button>
     <div class="item-grid">
       <?php foreach ($items as $item): ?>
@@ -217,28 +218,30 @@ $csrfToken = generateCsrfToken();
           <div class="admin-item-image admin-item-emoji"><?php echo htmlspecialchars(itemEmoji($item['name'], $item['category'], $catIcons)); ?></div>
           <?php endif; ?>
           <div class="admin-item-info">
-            <div class="admin-item-name"><?php echo htmlspecialchars($displayName); ?></div>
+            <?php $myName = myItemName($item['id'], $displayName); ?>
+            <div class="admin-item-name"><?php echo htmlspecialchars($myName); ?></div>
+            <?php if ($myName !== $displayName): ?><div class="admin-item-sub">မူရင်းအမည်: <?php echo htmlspecialchars($displayName); ?></div><?php endif; ?>
             <?php if ($hasLimited || $hasRecommend): ?>
             <div class="item-badges">
               <?php if ($hasLimited): ?>
-              <span class="badge badge-limited"><span>⏰</span><span>期間限定</span></span>
+              <span class="badge badge-limited"><span>⏰</span><span>ကာလအကန့်အသတ်</span></span>
               <?php endif; ?>
               <?php if ($hasRecommend): ?>
-              <span class="badge badge-recommend"><span>⭐</span><span>おすすめ</span></span>
+              <span class="badge badge-recommend"><span>⭐</span><span>အကြံပြု</span></span>
               <?php endif; ?>
             </div>
             <?php endif; ?>
             <div class="admin-item-details">
-              📂 <?php echo htmlspecialchars($item['categoryName']); ?><br>
+              📂 <?php echo htmlspecialchars(myCategoryName((string)$item['categoryName'])); ?><br>
               💴 ¥<?php echo number_format($item['price']); ?>
             </div>
             <div class="admin-item-actions">
               <button class="btn-edit" onclick='editItem(<?php echo json_encode($item); ?>)'>
-                <span>✏️</span> <span>編集</span>
+                <span>✏️</span> <span>ပြင်ရန်</span>
               </button>
               <a href="#" class="btn-delete"
                  onclick="showDeleteConfirm('item', <?php echo $item['id']; ?>, <?php echo htmlspecialchars(json_encode($displayName), ENT_QUOTES); ?>); return false;">
-                <span>🗑️</span> <span>削除</span>
+                <span>🗑️</span> <span>ဖျက်ရန်</span>
               </a>
             </div>
           </div>
@@ -251,23 +254,23 @@ $csrfToken = generateCsrfToken();
   <div id="tab-categories" class="tab-content">
     <button class="add-button-large" onclick="openCategoryModal()">
       <span>➕</span>
-      <span>新しいカテゴリを追加</span>
+      <span>အမျိုးအစားအသစ် ထည့်ရန်</span>
     </button>
     <div class="category-list">
       <?php foreach ($categories as $cat): ?>
       <div class="category-item">
         <div>
-          <strong><?php echo htmlspecialchars($cat['icon'] ?? ''); ?> <?php echo htmlspecialchars($cat['categoryName']); ?></strong>
+          <strong><?php echo htmlspecialchars($cat['icon'] ?? ''); ?> <?php echo htmlspecialchars(myCategoryName((string)$cat['categoryName'])); ?></strong>
           <span>ID: <?php echo $cat['id']; ?></span>
         </div>
         <div style="display:flex;gap:var(--space-3);">
           <button class="btn-edit" style="padding:var(--space-2) var(--space-5);"
                   onclick='editCategory(<?php echo json_encode($cat); ?>)'>
-            <span>✏️</span> <span>編集</span>
+            <span>✏️</span> <span>ပြင်ရန်</span>
           </button>
           <a href="#" class="btn-delete" style="padding:var(--space-2) var(--space-5);"
              onclick="showDeleteConfirm('category', <?php echo $cat['id']; ?>, <?php echo htmlspecialchars(json_encode($cat['categoryName']), ENT_QUOTES); ?>); return false;">
-            <span>🗑️</span> <span>削除</span>
+            <span>🗑️</span> <span>ဖျက်ရန်</span>
           </a>
         </div>
       </div>
@@ -280,50 +283,50 @@ $csrfToken = generateCsrfToken();
 <!-- Item Add/Edit Modal -->
 <div id="itemModal" class="modal-form">
   <div class="form-container">
-    <h2 id="itemModalTitle">新しい商品を追加</h2>
+    <h2 id="itemModalTitle">ဟင်းလျာအသစ် ထည့်ရန်</h2>
     <form id="itemForm" action="admin_item_save.php" method="POST" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
       <input type="hidden" name="id" id="itemId">
       <div class="form-group">
-        <label>商品名 *</label>
-        <input type="text" name="name" id="itemName" required placeholder="例: 唐揚げ">
+        <label>ဟင်းလျာ အမည် *</label>
+        <input type="text" name="name" id="itemName" required placeholder="ဥပမာ - ကြက်သားကြော်">
       </div>
       <div class="form-group">
-        <label>カテゴリ *</label>
+        <label>အမျိုးအစား *</label>
         <select name="category" id="itemCategory" required>
-          <option value="">選択してください</option>
+          <option value="">ရွေးချယ်ပါ</option>
           <?php foreach ($categories as $cat): ?>
-          <option value="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['categoryName']); ?></option>
+          <option value="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars(myCategoryName((string)$cat['categoryName'])); ?></option>
           <?php endforeach; ?>
         </select>
       </div>
       <div class="form-group">
-        <label>価格 (円) *</label>
-        <input type="number" name="price" id="itemPrice" required min="0" placeholder="例: 680">
+        <label>ဈေးနှုန်း (ယန်း) *</label>
+        <input type="number" name="price" id="itemPrice" required min="0" placeholder="ဥပမာ - 680">
       </div>
       <div class="form-group">
-        <label>タグ (バッジ表示)</label>
+        <label>တံဆိပ် (badge ပြရန်)</label>
         <div style="display:flex;gap:var(--space-5);margin-top:var(--space-2);">
           <label style="display:flex;align-items:center;gap:var(--space-2);cursor:pointer;">
             <input type="checkbox" name="tag_limited" id="tagLimited">
-            <span>⏰ 期間限定</span>
+            <span>⏰ ကာလအကန့်အသတ်</span>
           </label>
           <label style="display:flex;align-items:center;gap:var(--space-2);cursor:pointer;">
             <input type="checkbox" name="tag_recommend" id="tagRecommend">
-            <span>⭐ おすすめ</span>
+            <span>⭐ အကြံပြု</span>
           </label>
         </div>
-        <p class="text-muted mt-2">チェックを入れると商品にバッジが表示されます</p>
+        <p class="text-muted mt-2">အမှန်ခြစ်ရင် ဟင်းလျာပေါ်မှာ badge ပြပါမယ်</p>
       </div>
       <div class="form-group">
-        <label>商品画像</label>
+        <label>ဟင်းလျာ ဓာတ်ပုံ</label>
         <input type="file" name="image" id="itemImage" accept="image/*" onchange="previewImage(this)">
-        <img id="imagePreview" class="image-preview" src="" alt="プレビュー">
-        <p class="text-muted mt-2">推奨: 正方形の画像（JPG/PNG/WebP）</p>
+        <img id="imagePreview" class="image-preview" src="" alt="ကြိုကြည့်ရန်">
+        <p class="text-muted mt-2">အကြံပြုချက် - စတုရန်းပုံ (JPG/PNG/WebP)</p>
       </div>
       <div class="form-actions">
-        <button type="button" class="btn-cancel" onclick="closeItemModal()">キャンセル</button>
-        <button type="submit" class="btn-submit">💾 保存する</button>
+        <button type="button" class="btn-cancel" onclick="closeItemModal()">မလုပ်တော့ပါ</button>
+        <button type="submit" class="btn-submit">💾 သိမ်းရန်</button>
       </div>
     </form>
   </div>
@@ -332,17 +335,17 @@ $csrfToken = generateCsrfToken();
 <!-- Category Add/Edit Modal -->
 <div id="categoryModal" class="modal-form">
   <div class="form-container">
-    <h2 id="categoryModalTitle">新しいカテゴリを追加</h2>
+    <h2 id="categoryModalTitle">အမျိုးအစားအသစ် ထည့်ရန်</h2>
     <form id="categoryForm" action="admin_category_save.php" method="POST">
       <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
       <input type="hidden" name="id" id="categoryId">
       <div class="form-group">
-        <label>カテゴリ名 *</label>
-        <input type="text" name="categoryName" id="categoryName" required placeholder="例: ドリンク、おつまみ">
+        <label>အမျိုးအစား အမည် *</label>
+        <input type="text" name="categoryName" id="categoryName" required placeholder="ဥပမာ - သောက်စရာ">
       </div>
       <div class="form-actions">
-        <button type="button" class="btn-cancel" onclick="closeCategoryModal()">キャンセル</button>
-        <button type="submit" class="btn-submit">💾 保存する</button>
+        <button type="button" class="btn-cancel" onclick="closeCategoryModal()">မလုပ်တော့ပါ</button>
+        <button type="submit" class="btn-submit">💾 သိမ်းရန်</button>
       </div>
     </form>
   </div>
@@ -352,12 +355,12 @@ $csrfToken = generateCsrfToken();
 <div class="modal-confirm-delete" id="confirmDeleteModal" onclick="if(event.target===this)closeDeleteConfirmModal();">
   <div class="modal-confirm-content">
     <div class="confirm-delete-icon">⚠️</div>
-    <h3 class="confirm-delete-title" id="confirmDeleteTitle">削除の確認</h3>
-    <p class="confirm-delete-message" id="confirmDeleteMessage">この項目を削除しますか?</p>
-    <p class="confirm-delete-name" id="confirmDeleteItemName">項目名</p>
+    <h3 class="confirm-delete-title" id="confirmDeleteTitle">ဖျက်ရန် အတည်ပြုခြင်း</h3>
+    <p class="confirm-delete-message" id="confirmDeleteMessage">ဒါကို ဖျက်မလား?</p>
+    <p class="confirm-delete-name" id="confirmDeleteItemName">အမည်</p>
     <div class="modal-confirm-buttons">
-      <button type="button" class="btn-modal-cancel" onclick="closeDeleteConfirmModal()">キャンセル</button>
-      <button type="button" class="btn-modal-delete" onclick="executeDelete()">🗑️ 削除する</button>
+      <button type="button" class="btn-modal-cancel" onclick="closeDeleteConfirmModal()">မလုပ်တော့ပါ</button>
+      <button type="button" class="btn-modal-delete" onclick="executeDelete()">🗑️ ဖျက်ရန်</button>
     </div>
   </div>
 </div>
@@ -407,7 +410,7 @@ function switchTab(tab, e) {
 
 // ========== ITEM MODAL ==========
 function openItemModal() {
-  document.getElementById('itemModalTitle').textContent = '新しい商品を追加';
+  document.getElementById('itemModalTitle').textContent = 'ဟင်းလျာအသစ် ထည့်ရန်';
   document.getElementById('itemForm').reset();
   document.getElementById('itemId').value = '';
   document.getElementById('tagLimited').checked = false;
@@ -418,7 +421,7 @@ function openItemModal() {
 function closeItemModal() { document.getElementById('itemModal').classList.remove('active'); }
 
 function editItem(item) {
-  document.getElementById('itemModalTitle').textContent = '商品を編集';
+  document.getElementById('itemModalTitle').textContent = 'ဟင်းလျာ ပြင်ရန်';
   document.getElementById('itemId').value = item.id;
   let itemName = item.name;
   const hasLimited  = itemName.includes('[期間限定]');
@@ -438,7 +441,7 @@ function editItem(item) {
 
 // ========== CATEGORY MODAL ==========
 function openCategoryModal() {
-  document.getElementById('categoryModalTitle').textContent = '新しいカテゴリを追加';
+  document.getElementById('categoryModalTitle').textContent = 'အမျိုးအစားအသစ် ထည့်ရန်';
   document.getElementById('categoryForm').reset();
   document.getElementById('categoryId').value = '';
   document.getElementById('categoryModal').classList.add('active');
@@ -446,7 +449,7 @@ function openCategoryModal() {
 function closeCategoryModal() { document.getElementById('categoryModal').classList.remove('active'); }
 
 function editCategory(cat) {
-  document.getElementById('categoryModalTitle').textContent = 'カテゴリを編集';
+  document.getElementById('categoryModalTitle').textContent = 'အမျိုးအစား ပြင်ရန်';
   document.getElementById('categoryId').value = cat.id;
   document.getElementById('categoryName').value = cat.categoryName;
   document.getElementById('categoryModal').classList.add('active');
@@ -460,13 +463,13 @@ function showDeleteConfirm(type, id, name) {
   pendingDeleteType = type;
   pendingDeleteId = id;
   if (type === 'item') {
-    document.getElementById('confirmDeleteTitle').textContent = '商品を削除しますか?';
-    document.getElementById('confirmDeleteMessage').textContent = 'この商品を削除します。この操作は取り消せません。';
+    document.getElementById('confirmDeleteTitle').textContent = 'ဒီဟင်းလျာကို ဖျက်မလား?';
+    document.getElementById('confirmDeleteMessage').textContent = 'ဒီဟင်းလျာကို ဖျက်ပါမယ်။ ပြန်ယူလို့ မရပါ။';
   } else {
-    document.getElementById('confirmDeleteTitle').textContent = 'カテゴリを削除しますか?';
-    document.getElementById('confirmDeleteMessage').textContent = 'このカテゴリを削除します。この操作は取り消せません。';
+    document.getElementById('confirmDeleteTitle').textContent = 'ဒီအမျိုးအစားကို ဖျက်မလား?';
+    document.getElementById('confirmDeleteMessage').textContent = 'ဒီအမျိုးအစားကို ဖျက်ပါမယ်။ ပြန်ယူလို့ မရပါ။';
   }
-  document.getElementById('confirmDeleteItemName').textContent = '「' + name + '」';
+  document.getElementById('confirmDeleteItemName').textContent = '"' + name + '"';
   document.getElementById('confirmDeleteModal').classList.add('active');
 }
 
@@ -522,17 +525,17 @@ window.addEventListener('DOMContentLoaded', function() {
   if (urlParams.has('success')) {
     const successType = urlParams.get('success');
     const messages = {
-      item_saved:       ['商品を保存しました', '商品情報が正常に保存されました'],
-      item_deleted:     ['商品を削除しました', '商品が正常に削除されました'],
-      category_saved:   ['カテゴリを保存しました', 'カテゴリ情報が正常に保存されました'],
-      category_deleted: ['カテゴリを削除しました', 'カテゴリが正常に削除されました'],
+      item_saved:       ['ဟင်းလျာ သိမ်းပြီးပါပြီ', 'ဟင်းလျာ အချက်အလက်ကို သိမ်းပြီးပါပြီ'],
+      item_deleted:     ['ဟင်းလျာ ဖျက်ပြီးပါပြီ', 'ဟင်းလျာကို ဖျက်ပြီးပါပြီ'],
+      category_saved:   ['အမျိုးအစား သိမ်းပြီးပါပြီ', 'အမျိုးအစား အချက်အလက်ကို သိမ်းပြီးပါပြီ'],
+      category_deleted: ['အမျိုးအစား ဖျက်ပြီးပါပြီ', 'အမျိုးအစားကို ဖျက်ပြီးပါပြီ'],
     };
-    const [title, message] = messages[successType] || ['成功', '操作が完了しました'];
+    const [title, message] = messages[successType] || ['အောင်မြင်ပါပြီ', 'လုပ်ဆောင်ပြီးပါပြီ'];
     showToast('success', title, message);
     window.history.replaceState({}, document.title, window.location.pathname);
   }
   if (urlParams.has('error')) {
-    showToast('error', 'エラーが発生しました', decodeURIComponent(urlParams.get('error')));
+    showToast('error', 'အမှား ဖြစ်သွားပါတယ်', decodeURIComponent(urlParams.get('error')));
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 });
