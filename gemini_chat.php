@@ -14,7 +14,7 @@ $input       = json_decode(file_get_contents('php://input'), true);
 $userMessage = trim($input['message'] ?? '');
 $tableNo     = intval($input['tableNo'] ?? 1);
 $history     = $input['history'] ?? [];
-$lang        = $input['lang'] ?? 'ja'; // ja / en / zh
+$lang        = $input['lang'] ?? 'ja'; // ja / en / zh / my
 
 if (!$userMessage) {
     http_response_code(400);
@@ -77,6 +77,7 @@ $langInstructions = [
     'ja' => 'Detect the language the customer is using and reply in the SAME language. If they write in Japanese, reply in Japanese. If English, reply in English. If Chinese, reply in Chinese.',
     'en' => 'The customer prefers English. Reply in English. But if the customer writes in another language, match their language.',
     'zh' => 'The customer prefers Chinese (Simplified). Reply in Chinese. But if the customer writes in another language, match their language.',
+    'my' => 'The customer prefers Myanmar (Burmese). Always reply in natural, polite Myanmar (Burmese) language using Myanmar script, and give menu item names in Myanmar with the Japanese name in brackets. If the customer clearly writes in another language, match their language.',
 ];
 $langInstruction = $langInstructions[$lang] ?? $langInstructions['ja'];
 
@@ -170,7 +171,7 @@ function buildFallback(string $text, array $items, string $lang): string
 {
     $l = mb_strtolower($text);
     $isRec = mb_strpos($l, 'recommend') !== false || mb_strpos($l, 'suggest') !== false
-          || mb_strpos($l, 'おすすめ') !== false || mb_strpos($l, '推荐') !== false;
+          || mb_strpos($l, 'おすすめ') !== false || mb_strpos($l, '推荐') !== false || mb_strpos($l, 'အကြံပြု') !== false;
 
     if ($isRec) {
         if (!empty($items)) {
@@ -183,6 +184,7 @@ function buildFallback(string $text, array $items, string $lang): string
             return match($lang) {
                 'en' => "We recommend: {$list}. Please enjoy!",
                 'zh' => "我们推荐：{$list}。请享用！",
+                'my' => "အကြံပြုချင်တာကတော့ {$list} ဖြစ်ပါတယ်။ အရသာရှိရှိ သုံးဆောင်ပါ!",
                 default => "おすすめは {$list} などがございます。ぜひお試しください！",
             };
         }
@@ -190,6 +192,7 @@ function buildFallback(string $text, array $items, string $lang): string
     return match($lang) {
         'en' => 'Thank you. Our staff will assist you shortly.',
         'zh' => '谢谢您。工作人员将很快为您服务。',
+        'my' => 'ကျေးဇူးတင်ပါတယ်။ ဝန်ထမ်းက မကြာမီ ကူညီပေးပါမယ်။',
         default => 'ありがとうございます。スタッフが確認してすぐ対応いたします。',
     };
 }

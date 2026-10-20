@@ -2,9 +2,10 @@
 header('Content-Type: text/html; charset=UTF-8');
 require_once 'pdo.php';
 $tableNo = isset($_GET['tableNo']) ? (int)$_GET['tableNo'] : 1;
-// Basic mode (basic.php): English only, no language switcher, no AI chat — used as System A in user tests
+// Basic mode (basic.php): Myanmar only, no AI chat — used as System A in user tests
 $isBasic = defined('SMARTORDER_BASIC');
-$enNames = $isBasic ? (require __DIR__ . '/menu_en.php') : [];
+// Both pages are Myanmar-only (no language switcher)
+$myNames = require __DIR__ . '/menu_my.php';
 
 // Get categories
 $sqlCategory = "SELECT * FROM sCategory WHERE state = 1 ORDER BY sort_order ASC, id ASC";
@@ -53,12 +54,12 @@ function getItemImage($itemId) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo $isBasic ? 'en' : 'ja'; ?>">
+<html lang="my">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SmartOrder - Table <?php echo (int)$tableNo; ?></title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+Myanmar:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -71,7 +72,7 @@ function getItemImage($itemId) {
   --shadow:0 4px 16px rgba(15,118,110,.1);--shadow-md:0 8px 24px rgba(15,118,110,.15);
   --shadow-lg:0 16px 40px rgba(15,118,110,.2);--transition:.2s ease;
 }
-body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body{font-family:'Inter','Noto Sans Myanmar','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 .app-header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#134e4a 0%,#0f766e 100%);color:#fff;padding:12px 20px;box-shadow:0 2px 16px rgba(0,0,0,.15)}
 .header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .header-brand{display:flex;align-items:center;gap:10px}
@@ -713,8 +714,8 @@ button{font-family:inherit}
 </style>
 <?php if ($isBasic): ?>
 <style>
-/* Basic mode: no language switcher, no AI chat */
-#langSwitcher,#chat-btn,#chat-overlay{display:none!important}
+/* Basic mode: no AI chat */
+#chat-btn,#chat-overlay{display:none!important}
 </style>
 <?php endif; ?>
 </head>
@@ -828,11 +829,7 @@ button{font-family:inherit}
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <button onclick="openCallStaff()" style="padding:8px 14px;font-size:.78rem;border-radius:999px;background:rgba(245,158,11,.85);border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:5px;transition:background .2s">🔔 スタッフ</button>
-      <div class="lang-switcher" id="langSwitcher">
-    <button class="lang-btn active" onclick="setLang('ja')" id="langJa">JP</button>
-    <button class="lang-btn" onclick="setLang('en')" id="langEn">EN</button>
-    <button class="lang-btn" onclick="setLang('zh')" id="langZh">中</button>
-  </div>
+
   <button class="btn-cart-header" onclick="showCart()">🛒 カート <span class="cart-badge" id="cartCountBadge"><?php echo $itemCount; ?></span></button>
     </div>
   </div>
@@ -979,7 +976,8 @@ button{font-family:inherit}
 <script>
 const TABLE_NO = <?php echo (int)$tableNo; ?>;
 const BASIC_MODE = <?php echo $isBasic ? 'true' : 'false'; ?>;
-const EN_NAMES = <?php echo json_encode((object)$enNames, JSON_UNESCAPED_UNICODE); ?>;
+const FIXED_LANG = 'my';
+const MY_NAMES = <?php echo json_encode((object)$myNames, JSON_UNESCAPED_UNICODE); ?>;
 let selectedItemId=null,selectedItemName='',selectedItemPrice=0,selectedItemImg='',modalQty=1,pendingAction=null;
 let selectedCallOption='',selectedComboId=null,selectedComboName='',selectedComboPrice=0,selectedComboImg='';
 let _pendingOrderAfterCombo=null;
@@ -1121,7 +1119,7 @@ function filterCategory(catId,btn){
   document.getElementById('sectionTitle').textContent=catId==='all'?'全メニュー':btn.textContent+' メニュー';
 }
 function openOrderModal(itemId,itemName,itemPrice,imgUrl){
-  if(BASIC_MODE&&EN_NAMES[itemId])itemName=EN_NAMES[itemId];
+  if(MY_NAMES[itemId])itemName=MY_NAMES[itemId];
   selectedItemId=itemId;selectedItemName=itemName;selectedItemPrice=itemPrice;selectedItemImg=imgUrl;modalQty=1;
   document.getElementById('modalTitle').textContent=itemName;
   document.getElementById('modalPrice').textContent=fmtPrice(itemPrice);
@@ -1551,11 +1549,11 @@ function addStaffSystemMessage(text, unread){
 }
 
 /* Language Switcher Logic */
-let currentLang = BASIC_MODE ? 'en' : (localStorage.getItem('smartorder_lang') || 'ja');
+let currentLang = FIXED_LANG;
 const menuTranslCache = {};
 function setLang(lang) {
   currentLang = lang;
-  if (BASIC_MODE) lang = 'en'; else localStorage.setItem('smartorder_lang', lang);
+  lang = FIXED_LANG; // Myanmar only
   currentLang = lang;
   ['ja','en','zh'].forEach(l => {
     const id = 'lang' + l.charAt(0).toUpperCase() + l.slice(1);
@@ -1572,7 +1570,8 @@ function updateChatLangHint(lang) {
   const hints = {
     ja: {title:'スタッフチャット', sub:'注文前の相談やおすすめ確認にどうぞ'},
     en: {title:'Staff Chat', sub:'Ask about menu, recommendations & more'},
-    zh: {title:'服务员聊天', sub:'询问菜单推荐，随时为您服务'}
+    zh: {title:'服务员聊天', sub:'询问菜单推荐，随时为您服务'},
+    my: {title:'ဝန်ထမ်းနှင့် စကားပြောရန်', sub:'မီနူး၊ အကြံပြုချက်၊ ဓာတ်မတည့်မှု စသည် မေးနိုင်ပါသည်'}
   };
   if (title && hints[lang]) title.textContent = hints[lang].title;
   if (subtitle && hints[lang]) subtitle.textContent = hints[lang].sub;
@@ -1610,15 +1609,10 @@ function applyTranslToDOM(translations) {
   if (typeof applyUITranslation === 'function') applyUITranslation();
 }
 document.addEventListener('DOMContentLoaded', () => {
-  if (BASIC_MODE) {
-    // fixed English names, no AI translation
-    menuTranslCache.en = {};
-    Object.keys(EN_NAMES).forEach(id => { menuTranslCache.en[id] = { name: EN_NAMES[id] }; });
-    setLang('en');
-    return;
-  }
-  const saved = localStorage.getItem('smartorder_lang') || 'ja';
-  if (saved !== 'ja') setTimeout(() => setLang(saved), 800);
+  // fixed Myanmar names, no AI translation
+  menuTranslCache.my = {};
+  Object.keys(MY_NAMES).forEach(id => { menuTranslCache.my[id] = { name: MY_NAMES[id] }; });
+  setLang(FIXED_LANG);
 });
 
 // ── Order History / Receipt ──
@@ -1905,135 +1899,135 @@ document.getElementById('comboOverlay').addEventListener('click',function(e){if(
    Menu item names come from translate_menu.php (menuTranslCache). */
 const I18N_DICT = {
   // header / navigation
-  'スタッフ': ['Staff','服务员'],
-  'カート': ['Cart','购物车'],
-  'ショッピングカート': ['Shopping Cart','购物车'],
-  'メニューを検索... (例：寿司、ビール、デザート)': ['Search menu... (e.g. sushi, beer, dessert)','搜索菜单...（例：寿司、啤酒、甜点）'],
-  '全メニュー': ['All Menu','全部菜单'],
-  ' メニュー': [' Menu',' 菜单'],
-  'とりあえず注文': ['Starters','先点这些'],
-  'お寿司': ['Sushi','寿司'],
-  '焼き物': ['Grilled','烧烤'],
-  '揚げ物': ['Fried','炸物'],
-  'ドリンク': ['Drinks','饮品'],
-  'デザート': ['Desserts','甜点'],
+  'スタッフ': ['Staff','服务员','ဝန်ထမ်း'],
+  'カート': ['Cart','购物车','ခြင်းတောင်း'],
+  'ショッピングカート': ['Shopping Cart','购物车','ဈေးခြင်းတောင်း'],
+  'メニューを検索... (例：寿司、ビール、デザート)': ['Search menu... (e.g. sushi, beer, dessert)','搜索菜单...（例：寿司、啤酒、甜点）','မီနူး ရှာရန်... (ဥပမာ - ဆူရှီ၊ ဘီယာ၊ အချိုပွဲ)'],
+  '全メニュー': ['All Menu','全部菜单','မီနူးအားလုံး'],
+  ' メニュー': [' Menu',' 菜单',' မီနူး'],
+  'とりあえず注文': ['Starters','先点这些','အစပြုဟင်းလျာ'],
+  'お寿司': ['Sushi','寿司','ဆူရှီ'],
+  '焼き物': ['Grilled','烧烤','အကင်'],
+  '揚げ物': ['Fried','炸物','အကြော်'],
+  'ドリンク': ['Drinks','饮品','သောက်စရာ'],
+  'デザート': ['Desserts','甜点','အချိုပွဲ'],
   // badges
-  '人気': ['Popular','人气'],
-  'おすすめ': ['Recommended','推荐'],
-  '期間限定': ['Limited','限时'],
-  '無料': ['Free','免费'],
-  '以前に注文': ['Ordered before','之前点过'],
-  'お気に入り': ['Favorite','收藏'],
+  '人気': ['Popular','人气','လူကြိုက်များ'],
+  'おすすめ': ['Recommended','推荐','အကြံပြု'],
+  '期間限定': ['Limited','限时','ကာလအကန့်အသတ်'],
+  '無料': ['Free','免费','အခမဲ့'],
+  '以前に注文': ['Ordered before','之前点过','ယခင်က မှာဖူး'],
+  'お気に入り': ['Favorite','收藏','အကြိုက်ဆုံး'],
   // wait time
-  'ご注文数に応じて更新されます': ['Updated based on current orders','根据订单量更新'],
-  '少なめのご注文なら比較的スムーズです': ['Smaller orders are usually quicker','少量点餐通常更快'],
+  'ご注文数に応じて更新されます': ['Updated based on current orders','根据订单量更新','အော်ဒါအရေအတွက်အလိုက် ပြောင်းလဲပါသည်'],
+  '少なめのご注文なら比較的スムーズです': ['Smaller orders are usually quicker','少量点餐通常更快','အော်ဒါနည်းလျှင် ပိုမြန်ပါသည်'],
   // menu / cart
-  '＋ カートに追加': ['+ Add to cart','＋ 加入购物车'],
-  'カートに追加': ['Add to cart','加入购物车'],
-  'カートに追加しました！': ['Added to cart!','已加入购物车！'],
-  'カートを見る': ['View cart','查看购物车'],
-  'ぜひお楽しみください！': ['Enjoy!','请慢慢享用！'],
-  'を追加しました！🎉': [' added! 🎉',' 已添加！🎉'],
-  'セット追加完了！🎊': ['Set added! 🎊','套餐已添加！🎊'],
-  'まだ何も入っていません': ['Your cart is empty','购物车是空的'],
-  'メニューをタップして注文しましょう！': ['Tap a menu item to order!','点击菜单开始点餐吧！'],
-  '合計金額': ['Total','合计金额'],
-  '合計': ['Total','合计'],
-  '✓ 注文を確定する': ['✓ Place order','✓ 确认下单'],
-  'スタッフを呼ぶ': ['Call staff','呼叫服务员'],
-  '見つかりませんでした。': ['No results found.','未找到结果。'],
-  '別のキーワードで試してみてください！': ['Try a different keyword!','请尝试其他关键词！'],
-  '特別なリクエスト、アレルギーなど...': ['Special requests, allergies...','特殊要求、过敏等...'],
-  'キャンセル': ['Cancel','取消'],
-  '確認': ['Confirm','确认'],
-  'ご注文の確認': ['Confirm order','确认订单'],
-  'ご注文を確定しますか？': ['Place this order?','确定下单吗？'],
-  '読み込み中...': ['Loading...','加载中...'],
+  '＋ カートに追加': ['+ Add to cart','＋ 加入购物车','＋ ခြင်းတောင်းထဲထည့်ရန်'],
+  'カートに追加': ['Add to cart','加入购物车','ခြင်းတောင်းထဲထည့်ရန်'],
+  'カートに追加しました！': ['Added to cart!','已加入购物车！','ခြင်းတောင်းထဲ ထည့်ပြီးပါပြီ!'],
+  'カートを見る': ['View cart','查看购物车','ခြင်းတောင်းကြည့်ရန်'],
+  'ぜひお楽しみください！': ['Enjoy!','请慢慢享用！','အရသာရှိရှိ သုံးဆောင်ပါ!'],
+  'を追加しました！🎉': [' added! 🎉',' 已添加！🎉',' ကို ထည့်ပြီးပါပြီ!🎉'],
+  'セット追加完了！🎊': ['Set added! 🎊','套餐已添加！🎊','ဆက်တ် ထည့်ပြီးပါပြီ!🎊'],
+  'まだ何も入っていません': ['Your cart is empty','购物车是空的','ခြင်းတောင်းထဲ ဘာမှမရှိသေးပါ'],
+  'メニューをタップして注文しましょう！': ['Tap a menu item to order!','点击菜单开始点餐吧！','မီနူးကို နှိပ်ပြီး မှာယူပါ!'],
+  '合計金額': ['Total','合计金额','စုစုပေါင်း ငွေပမာဏ'],
+  '合計': ['Total','合计','စုစုပေါင်း'],
+  '✓ 注文を確定する': ['✓ Place order','✓ 确认下单','✓ အော်ဒါ အတည်ပြုရန်'],
+  'スタッフを呼ぶ': ['Call staff','呼叫服务员','ဝန်ထမ်း ခေါ်ရန်'],
+  '見つかりませんでした。': ['No results found.','未找到结果。','ရှာမတွေ့ပါ။'],
+  '別のキーワードで試してみてください！': ['Try a different keyword!','请尝试其他关键词！','တခြားစကားလုံးဖြင့် ထပ်ရှာကြည့်ပါ!'],
+  '特別なリクエスト、アレルギーなど...': ['Special requests, allergies...','特殊要求、过敏等...','အထူးတောင်းဆိုချက်၊ ဓာတ်မတည့်မှု စသည်...'],
+  'キャンセル': ['Cancel','取消','မလုပ်တော့ပါ'],
+  '確認': ['Confirm','确认','အတည်ပြုရန်'],
+  'ご注文の確認': ['Confirm order','确认订单','အော်ဒါ အတည်ပြုခြင်း'],
+  'ご注文を確定しますか？': ['Place this order?','确定下单吗？','ဒီအော်ဒါကို အတည်ပြုမလား?'],
+  '読み込み中...': ['Loading...','加载中...','ဖွင့်နေသည်...'],
   // floating buttons
-  'スタッフ相談': ['Ask staff','咨询服务员'],
-  'おまかせ': ['Surprise me','随机推荐'],
-  '注文履歴・会計': ['Order history & bill','订单记录・结账'],
-  '注文履歴': ['Order history','订单记录'],
+  'スタッフ相談': ['Ask staff','咨询服务员','ဝန်ထမ်းနှင့် တိုင်ပင်ရန်'],
+  'おまかせ': ['Surprise me','随机推荐','ကံစမ်းရွေးမယ်'],
+  '注文履歴・会計': ['Order history & bill','订单记录・结账','အော်ဒါမှတ်တမ်း / ငွေရှင်းရန်'],
+  '注文履歴': ['Order history','订单记录','အော်ဒါမှတ်တမ်း'],
   // call staff
-  '何が必要ですか？すぐにスタッフが参ります！': ['What do you need? Staff will be right there!','需要什么？服务员马上就来！'],
-  'お水': ['Water','水'],
-  'お皿': ['Plates','盘子'],
-  'おしぼり': ['Towel','湿毛巾'],
-  'お手伝い': ['Help','帮助'],
-  ' のご依頼を承りました！': [' request received!',' 请求已收到！'],
-  'スタッフが向かっています...': ['Staff is on the way...','服务员正在赶来...'],
-  'もうすぐスタッフが参ります！': ['Staff will arrive shortly!','服务员马上就到！'],
-  'スタッフが到着しました！🙋': ['Staff has arrived! 🙋','服务员已到达！🙋'],
+  '何が必要ですか？すぐにスタッフが参ります！': ['What do you need? Staff will be right there!','需要什么？服务员马上就来！','ဘာလိုအပ်ပါသလဲ? ဝန်ထမ်း ချက်ချင်း လာပါမည်!'],
+  'お水': ['Water','水','ရေ'],
+  'お皿': ['Plates','盘子','ပန်းကန်'],
+  'おしぼり': ['Towel','湿毛巾','လက်သုတ်ပဝါ'],
+  'お手伝い': ['Help','帮助','အကူအညီ'],
+  ' のご依頼を承りました！': [' request received!',' 请求已收到！',' တောင်းဆိုချက်ကို လက်ခံရရှိပါပြီ!'],
+  'スタッフが向かっています...': ['Staff is on the way...','服务员正在赶来...','ဝန်ထမ်း လာနေပါပြီ...'],
+  'もうすぐスタッフが参ります！': ['Staff will arrive shortly!','服务员马上就到！','ဝန်ထမ်း မကြာမီ ရောက်ပါမည်!'],
+  'スタッフが到着しました！🙋': ['Staff has arrived! 🙋','服务员已到达！🙋','ဝန်ထမ်း ရောက်ပါပြီ!🙋'],
   // combo
-  '🍱 セットメニューはいかが？': ['🍱 How about a set?','🍱 来个套餐吗？'],
-  '一緒に注文してお得にしよう！': ['Order together and enjoy more!','一起点更划算！'],
-  '✨ こちらも一緒にどうぞ...': ['✨ Goes well with...','✨ 也推荐搭配...'],
-  'おすすめの組み合わせ': ['Recommended pairings','推荐搭配'],
-  'いいえ、結構です': ['No, thanks','不用了，谢谢'],
-  '＋ 注文に追加': ['+ Add to order','＋ 加入订单'],
-  '素敵な組み合わせですね♪': ['Great combination!','很棒的搭配！'],
+  '🍱 セットメニューはいかが？': ['🍱 How about a set?','🍱 来个套餐吗？','🍱 ဆက်တ်မီနူး ယူမလား?'],
+  '一緒に注文してお得にしよう！': ['Order together and enjoy more!','一起点更划算！','အတူတူမှာပြီး ပိုတန်အောင် လုပ်ပါ!'],
+  '✨ こちらも一緒にどうぞ...': ['✨ Goes well with...','✨ 也推荐搭配...','✨ ဒါနဲ့လည်း လိုက်ဖက်ပါတယ်...'],
+  'おすすめの組み合わせ': ['Recommended pairings','推荐搭配','အကြံပြု တွဲဖက်မှုများ'],
+  'いいえ、結構です': ['No, thanks','不用了，谢谢','မလိုပါ၊ ကျေးဇူးပါ'],
+  '＋ 注文に追加': ['+ Add to order','＋ 加入订单','＋ အော်ဒါထဲ ထည့်ရန်'],
+  '素敵な組み合わせですね♪': ['Great combination!','很棒的搭配！','တွဲဖက်မှု ကောင်းလိုက်တာ♪'],
   // stamp card
-  'スタンプ': ['Stamps','印章'],
-  'スタンプ達成！': ['Stamp card complete!','集章完成！'],
-  '5回ご注文ありがとうございます！': ['Thanks for ordering 5 times!','感谢您5次点餐！'],
-  'スタッフにこの画面をお見せください✨': ['Please show this screen to staff ✨','请向服务员出示此画面✨'],
-  '✓ 閉じる': ['✓ Close','✓ 关闭'],
-  '閉じる': ['Close','关闭'],
+  'スタンプ': ['Stamps','印章','တံဆိပ်'],
+  'スタンプ達成！': ['Stamp card complete!','集章完成！','တံဆိပ် ပြည့်ပါပြီ!'],
+  '5回ご注文ありがとうございます！': ['Thanks for ordering 5 times!','感谢您5次点餐！','၅ ကြိမ် မှာယူပေးလို့ ကျေးဇူးတင်ပါတယ်!'],
+  'スタッフにこの画面をお見せください✨': ['Please show this screen to staff ✨','请向服务员出示此画面✨','ဒီစခရင်ကို ဝန်ထမ်းကို ပြပါ✨'],
+  '✓ 閉じる': ['✓ Close','✓ 关闭','✓ ပိတ်ရန်'],
+  '閉じる': ['Close','关闭','ပိတ်ရန်'],
   // last order
-  '⏰ ラストオーダーが近づいています。気になる一品は今のうちにどうぞ': ['⏰ Last order is coming up. Order anything you\'d like now!','⏰ 即将最后点餐，想吃的请尽快点！'],
+  '⏰ ラストオーダーが近づいています。気になる一品は今のうちにどうぞ': ['⏰ Last order is coming up. Order anything you\'d like now!','⏰ 即将最后点餐，想吃的请尽快点！','⏰ နောက်ဆုံးအော်ဒါ အချိန် နီးလာပါပြီ။ စားချင်တာရှိရင် အခုပဲ မှာပါ'],
   // chat
-  'まだメッセージはありません': ['No messages yet','暂无消息'],
-  '例: おすすめのドリンクはありますか？': ['e.g. Any drink recommendations?','例：有推荐的饮品吗？'],
-  '送信': ['Send','发送'],
-  'スタッフからメッセージ': ['Message from staff','来自服务员的消息'],
-  'ご相談があればこちらからどうぞ。おすすめやアレルギー確認も承ります。': ['Ask us anything here — recommendations, allergy checks and more.','有任何问题请在这里咨询，推荐或过敏确认都可以。'],
-  'ありがとうございます。スタッフが対応いたします。': ['Thank you. A staff member will help you.','谢谢，服务员会为您处理。'],
-  'スタッフをお呼びしました。内容を確認して向かいます。': ['We\'ve called staff. They\'ll be right with you.','已呼叫服务员，马上为您服务。'],
-  '申し訳ございません。ただいま接続中です。スタッフを呼んでください。': ['Sorry, we\'re reconnecting. Please call staff.','抱歉，正在连接中，请呼叫服务员。'],
+  'まだメッセージはありません': ['No messages yet','暂无消息','မက်ဆေ့ချ် မရှိသေးပါ'],
+  '例: おすすめのドリンクはありますか？': ['e.g. Any drink recommendations?','例：有推荐的饮品吗？','ဥပမာ - အကြံပြုချင်တဲ့ သောက်စရာ ရှိလား?'],
+  '送信': ['Send','发送','ပို့ရန်'],
+  'スタッフからメッセージ': ['Message from staff','来自服务员的消息','ဝန်ထမ်းထံမှ မက်ဆေ့ချ်'],
+  'ご相談があればこちらからどうぞ。おすすめやアレルギー確認も承ります。': ['Ask us anything here — recommendations, allergy checks and more.','有任何问题请在这里咨询，推荐或过敏确认都可以。','မေးချင်တာရှိရင် ဒီမှာ မေးပါ။ အကြံပြုချက်နဲ့ ဓာတ်မတည့်မှု စစ်ဆေးခြင်းလည်း ကူညီပေးပါတယ်။'],
+  'ありがとうございます。スタッフが対応いたします。': ['Thank you. A staff member will help you.','谢谢，服务员会为您处理。','ကျေးဇူးတင်ပါတယ်။ ဝန်ထမ်းက ကူညီပေးပါမယ်။'],
+  'スタッフをお呼びしました。内容を確認して向かいます。': ['We\'ve called staff. They\'ll be right with you.','已呼叫服务员，马上为您服务。','ဝန်ထမ်းကို ခေါ်ပြီးပါပြီ။ မကြာမီ လာပါမယ်။'],
+  '申し訳ございません。ただいま接続中です。スタッフを呼んでください。': ['Sorry, we\'re reconnecting. Please call staff.','抱歉，正在连接中，请呼叫服务员。','တောင်းပန်ပါတယ်။ ချိတ်ဆက်နေဆဲဖြစ်လို့ ဝန်ထမ်းကို ခေါ်ပေးပါ။'],
   // lucky
-  '今日のラッキーセレクト': ['Today\'s lucky pick','今日幸运推荐'],
-  'おすすめメニュー': ['Recommended dish','推荐菜品'],
-  'これにする': ['I\'ll take it','就要这个'],
-  'また今度': ['Maybe later','下次吧'],
+  '今日のラッキーセレクト': ['Today\'s lucky pick','今日幸运推荐','ဒီနေ့ရဲ့ ကံကောင်းရွေးချယ်မှု'],
+  'おすすめメニュー': ['Recommended dish','推荐菜品','အကြံပြုဟင်းလျာ'],
+  'これにする': ['I\'ll take it','就要这个','ဒါယူမယ်'],
+  'また今度': ['Maybe later','下次吧','နောက်မှ'],
   // receipt
-  'まだ注文がありません': ['No orders yet','暂无订单'],
-  '人数で割り勘': ['Split the bill','分摊账单'],
-  '人で': ['people','人分摊'],
-  '/ 人': ['/ person','/ 人'],
-  'データの取得に失敗しました': ['Failed to load data','数据加载失败'],
+  'まだ注文がありません': ['No orders yet','暂无订单','အော်ဒါ မရှိသေးပါ'],
+  '人数で割り勘': ['Split the bill','分摊账单','လူအရေအတွက်နဲ့ ခွဲပေးရန်'],
+  '人で': ['people','人分摊','ယောက်'],
+  '/ 人': ['/ person','/ 人','/ တစ်ယောက်'],
+  'データの取得に失敗しました': ['Failed to load data','数据加载失败','ဒေတာ ရယူ၍ မရပါ'],
   // toasts & feedback
-  'ご注文ありがとうございます！少々お待ちください🎉': ['Thank you for your order! Please wait a moment 🎉','感谢您的点餐！请稍候🎉'],
-  '申し訳ございません。追加できませんでした。': ['Sorry, could not add the item.','抱歉，无法添加。'],
-  '申し訳ございません。もう一度お試しください。': ['Sorry, please try again.','抱歉，请重试。'],
-  '申し訳ございません。更新できませんでした。': ['Sorry, could not update.','抱歉，无法更新。'],
-  'お気に入りから外しました': ['Removed from favorites','已取消收藏'],
-  '❤️ お気に入りに追加しました！': ['❤️ Added to favorites!','❤️ 已加入收藏！'],
-  '表示中のメニューがありません。検索をクリアしてお試しください。': ['No items shown. Clear the search and try again.','没有显示的菜单，请清除搜索后重试。'],
-  'ご注文ありがとうございます。できあがりをお楽しみに。': ['Thank you! Your food is on its way.','谢谢！请期待您的美食。'],
-  '人気の一品ですね。良いお選びです。': ['A popular choice — great pick!','人气菜品，好眼光！'],
-  'こちら、相性の良いセットもございます。': ['We also have sets that go well with this.','还有很搭配的套餐哦。'],
-  'ご注文を承りました。少々お待ちください。': ['Order received. Please wait a moment.','已收到订单，请稍候。'],
-  'ありがとうございます。順番にご用意いたします。': ['Thank you. We\'ll prepare it in order.','谢谢，我们会按顺序准备。'],
-  'ただいま厨房へ共有しました。': ['Sent to the kitchen.','已通知厨房。'],
-  '気になるメニューは見つかりましたか。': ['Found something you like?','找到想吃的了吗？'],
-  'お好みがあればおすすめもご案内できます。': ['Ask us for recommendations anytime.','可以为您推荐哦。'],
-  '迷ったらおまかせボタンもどうぞ。': ['Can\'t decide? Try "Surprise me".','拿不定主意？试试随机推荐。'],
-  'スタッフへお声がけしました。': ['We\'ve notified staff.','已通知服务员。'],
-  'まもなくスタッフが参ります。': ['Staff will be with you shortly.','服务员马上就来。'],
-  'ご用件をしっかりお伝えしますね。': ['We\'ll pass on your request.','会转达您的需求。'],
-  '今日の運試しメニューです。': ['Here\'s today\'s lucky dish.','这是今天的幸运菜品。'],
-  '新しいお気に入りに出会えるかもしれません。': ['You might find a new favorite.','也许能遇到新的最爱。'],
-  '直感で選ぶのも楽しいですよ。': ['Going with your gut is fun too.','凭直觉选也很有趣。'],
-  'ありがとうございます！': ['Thank you!','谢谢！'],
-  '美味しそうでございます！': ['Looks delicious!','看起来很好吃！'],
-  '素晴らしいお選びです！': ['Excellent choice!','好眼光！'],
-  'こちらはお気に入りに追加されましたね！素敵なお選びです！': ['Added to your favorites — lovely choice!','已加入收藏，好选择！']
+  'ご注文ありがとうございます！少々お待ちください🎉': ['Thank you for your order! Please wait a moment 🎉','感谢您的点餐！请稍候🎉','မှာယူပေးလို့ ကျေးဇူးတင်ပါတယ်! ခဏစောင့်ပေးပါ🎉'],
+  '申し訳ございません。追加できませんでした。': ['Sorry, could not add the item.','抱歉，无法添加。','တောင်းပန်ပါတယ်။ ထည့်လို့ မရပါ။'],
+  '申し訳ございません。もう一度お試しください。': ['Sorry, please try again.','抱歉，请重试。','တောင်းပန်ပါတယ်။ ထပ်ကြိုးစားကြည့်ပါ။'],
+  '申し訳ございません。更新できませんでした。': ['Sorry, could not update.','抱歉，无法更新。','တောင်းပန်ပါတယ်။ ပြင်လို့ မရပါ။'],
+  'お気に入りから外しました': ['Removed from favorites','已取消收藏','အကြိုက်ဆုံးထဲက ဖယ်လိုက်ပါပြီ'],
+  '❤️ お気に入りに追加しました！': ['❤️ Added to favorites!','❤️ 已加入收藏！','❤️ အကြိုက်ဆုံးထဲ ထည့်ပြီးပါပြီ!'],
+  '表示中のメニューがありません。検索をクリアしてお試しください。': ['No items shown. Clear the search and try again.','没有显示的菜单，请清除搜索后重试。','ပြသနေတဲ့ မီနူး မရှိပါ။ ရှာဖွေမှုကို ဖျက်ပြီး ထပ်ကြည့်ပါ။'],
+  'ご注文ありがとうございます。できあがりをお楽しみに。': ['Thank you! Your food is on its way.','谢谢！请期待您的美食。','မှာယူပေးလို့ ကျေးဇူးတင်ပါတယ်။ အဆင်သင့်ဖြစ်တာကို စောင့်မျှော်ပါ။'],
+  '人気の一品ですね。良いお選びです。': ['A popular choice — great pick!','人气菜品，好眼光！','လူကြိုက်များတဲ့ ဟင်းလျာပါ။ ရွေးချယ်မှု ကောင်းပါတယ်။'],
+  'こちら、相性の良いセットもございます。': ['We also have sets that go well with this.','还有很搭配的套餐哦。','ဒါနဲ့ လိုက်ဖက်တဲ့ ဆက်တ်လည်း ရှိပါတယ်။'],
+  'ご注文を承りました。少々お待ちください。': ['Order received. Please wait a moment.','已收到订单，请稍候。','အော်ဒါ လက်ခံရရှိပါပြီ။ ခဏစောင့်ပေးပါ။'],
+  'ありがとうございます。順番にご用意いたします。': ['Thank you. We\'ll prepare it in order.','谢谢，我们会按顺序准备。','ကျေးဇူးတင်ပါတယ်။ အစဉ်လိုက် ပြင်ဆင်ပေးပါမယ်။'],
+  'ただいま厨房へ共有しました。': ['Sent to the kitchen.','已通知厨房。','မီးဖိုချောင်ကို ပို့ပြီးပါပြီ။'],
+  '気になるメニューは見つかりましたか。': ['Found something you like?','找到想吃的了吗？','စားချင်တာ တွေ့ပြီလား။'],
+  'お好みがあればおすすめもご案内できます。': ['Ask us for recommendations anytime.','可以为您推荐哦。','ကြိုက်တာ ပြောပြရင် အကြံပြုပေးနိုင်ပါတယ်။'],
+  '迷ったらおまかせボタンもどうぞ。': ['Can\'t decide? Try "Surprise me".','拿不定主意？试试随机推荐。','မဆုံးဖြတ်နိုင်ရင် "ကံစမ်းရွေးမယ်" ကို နှိပ်ကြည့်ပါ။'],
+  'スタッフへお声がけしました。': ['We\'ve notified staff.','已通知服务员。','ဝန်ထမ်းကို အကြောင်းကြားပြီးပါပြီ။'],
+  'まもなくスタッフが参ります。': ['Staff will be with you shortly.','服务员马上就来。','ဝန်ထမ်း မကြာမီ ရောက်ပါမယ်။'],
+  'ご用件をしっかりお伝えしますね。': ['We\'ll pass on your request.','会转达您的需求。','တောင်းဆိုချက်ကို သေချာ ပြောပေးပါမယ်။'],
+  '今日の運試しメニューです。': ['Here\'s today\'s lucky dish.','这是今天的幸运菜品。','ဒီနေ့ရဲ့ ကံစမ်းဟင်းလျာပါ။'],
+  '新しいお気に入りに出会えるかもしれません。': ['You might find a new favorite.','也许能遇到新的最爱。','အကြိုက်ဆုံး အသစ်တစ်ခု တွေ့နိုင်ပါတယ်။'],
+  '直感で選ぶのも楽しいですよ。': ['Going with your gut is fun too.','凭直觉选也很有趣。','စိတ်ထဲရှိတာ ရွေးတာလည်း ပျော်စရာပါ။'],
+  'ありがとうございます！': ['Thank you!','谢谢！','ကျေးဇူးတင်ပါတယ်!'],
+  '美味しそうでございます！': ['Looks delicious!','看起来很好吃！','စားလို့ကောင်းမယ့်ပုံပါ!'],
+  '素晴らしいお選びです！': ['Excellent choice!','好眼光！','ရွေးချယ်မှု ကောင်းပါတယ်!'],
+  'こちらはお気に入りに追加されましたね！素敵なお選びです！': ['Added to your favorites — lovely choice!','已加入收藏，好选择！','အကြိုက်ဆုံးထဲ ထည့်ပြီးပါပြီ! ရွေးချယ်မှု ကောင်းပါတယ်!']
 };
 const I18N_RULES = [
-  [/ただいまの目安:\s*(\d+)〜(\d+)分/, ['Estimated wait: $1–$2 min','预计等待：$1–$2 分钟']],
-  [/カート\s*(\d+)点。混雑状況を反映しています/, ['$1 item(s) in cart · reflects current traffic','购物车 $1 件 · 已反映拥挤情况']],
-  [/あと\s*(\d+)\s*秒/, ['$1s left','还剩 $1 秒']],
-  [/👔 スタッフ:/, ['👔 Staff:','👔 服务员：']]
+  [/ただいまの目安:\s*(\d+)〜(\d+)分/, ['Estimated wait: $1–$2 min','预计等待：$1–$2 分钟','ခန့်မှန်း စောင့်ချိန် - $1–$2 မိနစ်']],
+  [/カート\s*(\d+)点。混雑状況を反映しています/, ['$1 item(s) in cart · reflects current traffic','购物车 $1 件 · 已反映拥挤情况','ခြင်းတောင်းထဲ $1 ခု · လူစည်မှုအလိုက်']],
+  [/あと\s*(\d+)\s*秒/, ['$1s left','还剩 $1 秒','$1 စက္ကန့် ကျန်']],
+  [/👔 スタッフ:/, ['👔 Staff:','👔 服务员：','👔 ဝန်ထမ်း -']]
 ];
 const I18N_KEYS = Object.keys(I18N_DICT).sort((a,b) => b.length - a.length);
 const I18N_NAME_SEL = '.item-name,.cart-item-name,.receipt-item-name,#modalTitle,#comboAddedName,.combo-suggest-name,#lucky-reveal-name';
@@ -2042,7 +2036,7 @@ const i18nOrig = new WeakMap(); // node -> {src, out}
 let i18nBusy = false;
 
 function I18N_T(ja){
-  const idx = currentLang === 'en' ? 0 : currentLang === 'zh' ? 1 : -1;
+  const idx = currentLang === 'en' ? 0 : currentLang === 'zh' ? 1 : currentLang === 'my' ? 2 : -1;
   if (idx < 0 || !I18N_DICT[ja]) return ja;
   return I18N_DICT[ja][idx];
 }
@@ -2054,7 +2048,7 @@ function i18nNameMap(){
 }
 function i18nPhrase(text, exactOnly){
   if (currentLang === 'ja') return text;
-  const idx = currentLang === 'en' ? 0 : 1;
+  const idx = currentLang === 'en' ? 0 : currentLang === 'zh' ? 1 : 2;
   const trimmed = text.trim();
   if (I18N_DICT[trimmed]) return text.replace(trimmed, I18N_DICT[trimmed][idx]);
   if (exactOnly) return text;
