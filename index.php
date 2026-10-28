@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: text/html; charset=UTF-8');
 require_once 'pdo.php';
+require __DIR__ . '/table_assign.php';
 $tableNo = isset($_GET['tableNo']) ? (int)$_GET['tableNo'] : 1;
 // Basic mode (basic.php): Myanmar only, no AI chat — used as System A in user tests
 $isBasic = defined('SMARTORDER_BASIC');
