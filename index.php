@@ -442,7 +442,8 @@ body{font-family:'Inter','Noto Sans Myanmar','Noto Sans JP',sans-serif;backgroun
 #chat-overlay.show{display:flex}
 #chat-box{background:var(--surface,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:480px;max-height:75vh;display:flex;flex-direction:column;animation:slideUp .3s ease}
 #chat-title{font-size:1rem;font-weight:700;margin-bottom:4px;color:#0f766e}
-#chat-subtitle{font-size:.78rem;color:#94a3b8;margin-bottom:14px}
+#chat-subtitle{font-size:.78rem;color:#94a3b8;margin-bottom:8px}
+#chat-lang-hint{font-size:.8rem;font-weight:600;color:#0f766e;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:7px 10px;margin-bottom:12px;text-align:center}
 #chat-messages{flex:1;overflow-y:auto;min-height:80px;max-height:200px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
 .chat-msg{padding:8px 12px;border-radius:12px;font-size:.82rem;max-width:85%;line-height:1.4}
 .chat-msg.sent{background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
@@ -772,9 +773,10 @@ button{font-family:inherit}
   <div id="chat-box">
     <div id="chat-title">スタッフチャット</div>
     <div id="chat-subtitle">注文前の相談やおすすめ確認にどうぞ</div>
+    <div id="chat-lang-hint" translate="no">🌐 Ask in any language ・ 何語でも質問できます</div>
     <div id="chat-messages"><div class="chat-empty">まだメッセージはありません</div></div>
     <div id="chat-input-row">
-      <textarea id="chat-input" placeholder="例: おすすめのドリンクはありますか？"></textarea>
+      <textarea id="chat-input" placeholder="Type in any language… / 何語でもOK"></textarea>
       <button id="chat-send" type="button" onclick="sendStaffChat()">送信</button>
     </div>
     <button id="chat-close" type="button" onclick="toggleStaffChat(false)">閉じる</button>
