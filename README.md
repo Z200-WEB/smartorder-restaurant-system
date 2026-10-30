@@ -1,184 +1,164 @@
-# SmartOrder — AI-Powered Restaurant Ordering System
+# SmartOrder — 外国人観光客の「言語の壁」をAIチャットボットで解消する飲食店注文システム
 
-A QR code-based self-ordering system for restaurants, built with PHP, MySQL, and Gemini AI.
+QRコードを読み取るだけで注文できる、飲食店向けのセルフオーダーシステムです。
+大手前大学のゼミ研究として、**外国人観光客が飲食店で直面する言語の壁を、AIチャットボットでどこまで解消できるか**を検証するために開発しました。
 
-🔗 **Live Demo:** https://smartorder-restaurant-system.onrender.com/index.php?tableNo=1
-🔗 **Management Dashboard:** https://smartorder-restaurant-system.onrender.com/management.php
-
----
-
-## What Makes This Different
-
-It's a QR-based ordering system — but the interesting part is the AI. Customers can ask about the menu in English, Japanese, or Chinese, and the AI responds using real menu data from the database, not hallucinated answers.
-
-このシステムはQRコードで注文できるだけでなく、AIが実際のデータベースのメニューを元に日本語・英語・中国語で質問に答えます。架空のメニューを答えるのではなく、実データに基づいた回答を返します。
-
----
-
-## Features / 機能一覧
-
-### 🤖 AI Chat (Gemini 2.5 Flash)
-- Customers can ask the AI anything about the menu in any language
-- AI reads directly from the database — no hallucinated menu items
-- Auto language detection: responds in the same language the customer used (JA / EN / ZH)
-- Staff can also use the chat to answer customer questions
-
-> お客様はAIにメニューについて何でも質問できます。AIはデータベースから直接メニューを読み込むため、架空の料理を答えることはありません。自動言語検出により、お客様が使った言語（日本語・英語・中国語）で返答します。スタッフ側のチャットにも対応しています。
-
-### 🌐 Multilingual Support / 多言語対応
-- Language switcher in the header (JP / EN / 中)
-- Menu display translates dynamically via Gemini API
-- AI chat responds automatically in the customer's language
-
-> ヘッダーの言語ボタン（JP / EN / 中）でメニュー表示を切り替えられます。AIチャットはお客様の言語に自動で合わせて返答します。
-
-### 📱 Customer Ordering (QR Code) / QRコード注文
-- Each table has a unique QR code
-- Mobile-first responsive design
-- Browse menu by category with search
-- Add items to cart, adjust quantities, and place orders
-- Real-time wait time estimate based on current orders
-
-> テーブルごとに専用QRコードを設置。スマホからカテゴリ別にメニューを閲覧・検索し、カートに追加して注文できます。現在の注文状況に基づいたリアルタイム待ち時間も表示されます。
-
-### 🎯 Smart UX Features / スマートUX
-- **Stamp Card** — customers earn stamps with each order
-- **Lucky Roulette** — AI randomly picks a recommended dish
-- **Floating buttons** — Staff chat and Lucky Roulette accessible at all times
-- **Last order alert** — banner appears when closing time approaches
-
-> 注文ごとにスタンプが貯まるスタンプカード、AIがランダムにおすすめ料理を選ぶルーレットなど、使いやすさを重視したUXを実装しています。
-
-### 🖥️ Staff Management Dashboard / スタッフ管理
-- Real-time order view with auto-refresh every 10 seconds
-- Mark orders as paid
-- View order details per table
-
-> 10秒ごとに自動更新されるリアルタイム注文管理画面。テーブルごとの注文内容確認や会計処理が可能です。
-
-### 👨‍🍳 Kitchen Display / キッチンモニター
-- **Live tickets** — new orders appear on the kitchen screen within ~3 seconds (`kitchen.php`)
-- **3-step flow** — 新規 → 調理中 → 完成・提供待ち → 提供済み, with one-tap buttons and undo
-- **Timers** — each ticket shows elapsed time; turns orange after 10 min and red after 20 min
-- **Customer notes** — allergy / preference notes (e.g. 「わさび抜き」) are highlighted on the ticket
-- **Alerts & TV mode** — optional chime for new orders and a fullscreen mode for a kitchen monitor
-
-> 注文が入ると数秒でキッチン画面に表示され、ワンタップで「調理開始→完成→提供済み」と進められます。経過時間の色分け、お客様のメモ表示、通知音、全画面モードに対応しています。
-
-### ⚙️ Admin Panel / 管理者パネル
-- Add, edit, delete menu items and categories
-- Set items as popular / new / spicy
-- Manage table QR codes
-
-> メニュー商品・カテゴリのCRUD操作、人気・新着・辛さフラグの設定、テーブルQRコードの管理ができます。
-
----
-
-## Tech Stack / 技術スタック
-
-| Category | Technology |
+| | URL |
 |---|---|
-| Frontend | HTML, CSS, JavaScript |
-| Backend | PHP 8.2 |
-| Database | MySQL / MariaDB |
-| AI | Google Gemini 2.5 Flash (via Gemini API) |
-| Deployment | Render (Free tier) |
-| Version Control | Git / GitHub |
-| QR Code | goqr.me API |
+| システムB：チャットボット版 | https://smartorder-restaurant-system.onrender.com/index.php |
+| システムA：普通版（比較用） | https://smartorder-restaurant-system.onrender.com/basic.php |
+
+> 無料サーバーのため、しばらくアクセスがないと初回の表示に30秒〜1分ほどかかります。
 
 ---
 
-## How It Works / システムの仕組み
+## 1. 研究の背景
 
-**Customer Flow**
-1. Scan QR code at the table → opens ordering page on smartphone
-2. Browse menu by category or use search
-3. Ask the AI anything: "What's popular?" / "Do you have vegetarian options?" (in any language)
-4. Add items to cart → place order
-5. Earn stamps, spin the Lucky Roulette for suggestions
+私の両親は飲食業界で働いており、私は幼い頃から飲食店の現場を身近に見てきました。その中で何度も目にしたのが、**言葉が通じないために注文に困っている外国人のお客様**の姿です。
 
-**Staff Flow**
-1. Management page shows all active orders in real-time
-2. Respond to customer AI chat messages
-3. Mark orders as paid when customers check out
+- メニューが現地語で書かれていて、どんな料理なのかわからない
+- アレルギーや食べられない食材が入っているか、店員に確認できない
+- 結果として、写真だけで「なんとなく」選ぶか、注文自体をあきらめてしまう
 
----
+特に**アレルギーの確認ができないことは、食事の楽しさだけでなく安全にも関わる問題**です。
+この課題を長年見てきた者として、自分の手で解決したいと考えたことが、この研究の出発点です。
 
-## System Architecture / アーキテクチャ
+## 2. 研究の目的
 
-```
-[Customer Smartphone]
-        |
-   QR Code Scan
-        |
-        v
-[Render Cloud Server]
-   PHP 8.2
-        |
-        v
-[MySQL Database]  ←──→  [Gemini AI API]
-        |                      |
-        v                      v
-[Management Dashboard]   [AI Chat Response]
-   (Staff Browser)       (Real menu data)
-```
+1. 利用者が**どの言語で質問しても、その言語で答えてくれる**AIチャットボット付きの注文システムを開発する
+2. チャットボットのない一般的な注文システムと比較し、**使いやすさ・注文の正確さ・注文にかかる時間**がどう変わるかを検証する
 
----
+## 3. 研究の設定
 
-## Project Structure / プロジェクト構成
+外国人観光客の言語の壁を再現するため、**メニューも画面もすべてミャンマー語のミャンマー料理店**を想定しました。
+参加者（日本人学生）は「ミャンマーを旅行中の日本人観光客」という役になり、読めない言語のメニューから注文します。
 
-```
-smartorder/
-├── index.php              # Customer ordering page
-├── gemini_chat.php        # AI chat API (Gemini 2.5 Flash)
-├── translate_menu.php     # Menu translation API (EN/ZH)
-├── logic.php              # Menu data API
-├── checkout.php           # Order submission
-├── management.php         # Staff order management
-├── process_payment.php    # Payment processing
-├── admin.php              # Admin dashboard
-├── qr.php                 # QR code generator
-├── login.php / logout.php # Authentication
-├── pdo.php                # Database connection
-└── database_utf8.sql      # Database schema & seed data
-```
+ミャンマー料理を選んだのは、私の出身国であり、料理や食材について正確な情報を用意できるためです。また、日本人の多くにとってミャンマー語は文字も読めない言語であり、言語の壁を公平に再現できます。
 
----
+## 4. 2つのシステム
 
-## Database Schema / データベース構成
+| | システムA：普通版 | システムB：チャットボット版 |
+|---|---|---|
+| URL | `basic.php` | `index.php` |
+| 画面の言語 | ミャンマー語のみ | ミャンマー語のみ |
+| 料理写真・価格 | あり | あり |
+| AIチャットボット | なし | **あり** |
+| 困ったとき | 店員を呼ぶ（店員はミャンマー語のみの設定） | チャットボットに質問できる |
 
-| Table | Description |
+画面の条件をそろえ、**違いはチャットボットの有無だけ**になるように設計しています。
+
+## 5. AIチャットボットの工夫
+
+### 質問した言語で答える
+日本語で聞けば日本語、英語で聞けば英語で回答します。料理名は画面と同じミャンマー語の表記に、利用者の言語での説明を添えて答えるため、画面上で料理を探しやすくしています。チャット画面には「Ask in any language ・ 何語でも質問できます」と表示し、どの言語でも使えることがすぐにわかるようにしました。
+
+### アレルギーには「推測で答えない」
+開発中、チャットボットが「このデザートには卵が入っていません」と**事実と異なる回答をする問題**（AIのハルシネーション）が起きました。アレルギーは命に関わることもあるため、次のように改善しました。
+
+- 料理ごとに**アレルゲン情報（卵・乳・小麦・エビ・ピーナッツなど）をデータベースに登録**
+- チャットボットは**登録された情報だけをもとに回答**し、推測では答えない
+- 情報がない場合は「店員に確認してください」と案内する
+
+### 回答からそのまま注文できる
+チャットボットがおすすめした料理には「カートに追加」ボタンが表示され、会話の流れのまま注文できます。
+
+## 6. 実験方法
+
+### シナリオ
+学習効果（2回目は答えを知っている状態になること）を防ぐため、難易度をそろえた2つのシナリオを用意しました。
+
+**シナリオ1（エビアレルギー）** — 次の3品を注文する
+1. ミャンマーの「国民食」と言われる、魚のスープの麺料理
+2. エビが入っていない揚げ物を1つ
+3. エビが入っていないサラダを1つ
+
+**シナリオ2（卵アレルギー）** — 次の3品を注文する
+1. ミャンマー名物の、お茶の葉を使ったサラダ
+2. 卵が入っていない麺料理またはご飯料理を1つ
+3. 卵が入っていないデザートを1つ
+
+制限時間はいずれも7分です。
+
+### 手順
+1. 参加者は2つのシステムを両方使用する（システム・シナリオの組み合わせと順番は参加者ごとに入れ替える＝カウンターバランス）
+2. 各システムの使用後に **SUS** に回答する
+3. 最後に、チャットボットについて **CUQ** に回答する
+
+### 評価指標
+| 指標 | 内容 |
 |---|---|
-| sCategory | Menu categories |
-| sItem | Menu items (name, price, description, state, is_popular, is_new, is_spicy) |
-| sManagement | Order sessions per table |
-| sOrder | Individual order items and quantities |
+| **SUS**（System Usability Scale） | システム全体の使いやすさ（0〜100点、一般的な平均は68点） |
+| **CUQ**（Chatbot Usability Questionnaire） | チャットボットの使いやすさ（0〜100点） |
+| 所要時間 | 注文開始から注文確定までの秒数 |
+| 正答数 | 条件に合う料理を何品正しく注文できたか（0〜3品） |
 
----
+システムAとBの差は、対応のあるt検定で分析します。
 
-## Local Development / ローカル開発
+### 現在の状況
+システムの開発が完了し、現在は比較実験を進めています。
 
-**Requirements:** XAMPP (PHP 8.x + MariaDB)
+## 7. 主な機能
+
+**お客様向け**
+- QRコードから注文（テーブル番号付きのQRがない場合は、アクセスごとに別のテーブル番号を自動で割り当て）
+- 料理写真・価格（チャット／Ks）・カテゴリ表示、カート、注文履歴
+- AIチャットボット（システムBのみ）
+
+**店舗向け**（ミャンマー語）
+- 注文管理画面、メニュー・画像管理、会計
+- **キッチンモニター**：新しい注文がリアルタイムで表示され、調理状況を管理できる
+
+## 8. 使用技術
+
+| 分類 | 技術 |
+|---|---|
+| バックエンド | PHP 8.2 |
+| データベース | MariaDB（MySQL互換） |
+| AI | Google Gemini API |
+| フロントエンド | HTML / CSS / JavaScript |
+| インフラ | Docker、Render |
+| テスト | PHPUnit |
+
+開発にあたっては、実装やデバッグの効率化にAIを活用しました。研究テーマの設定、システムの設計方針、実験の設計は自分で行っています。
+
+## 9. ファイル構成（主なもの）
+
+```
+index.php          お客様向け注文画面（システムB：チャットボット版）
+basic.php          比較用の普通版（システムA：チャットボットなし）
+gemini_chat.php    AIチャットボット（言語ルール・アレルゲン情報にもとづく回答）
+table_assign.php   テーブル番号の自動割り当て
+kitchen.php        キッチンモニター
+management.php     注文管理画面
+admin.php          メニュー管理画面
+database_utf8.sql  メニュー（ミャンマー料理23品・アレルゲン情報）
+itemImages/        料理写真（出典は CREDITS.md）
+Dockerfile, start.sh  コンテナ起動・データベース初期化
+```
+
+## 10. ローカルでの起動
 
 ```bash
-git clone https://github.com/Z200-WEB/smartorder-restaurant-system.git
+docker build -t smartorder .
+docker run -p 10000:10000 -e GEMINI_API_KEY=あなたのAPIキー smartorder
+# http://localhost:10000/index.php
 ```
 
-1. Place in XAMPP htdocs: `C:\xampp\htdocs\smartorder\`
-2. Import `database_utf8.sql` via phpMyAdmin
-3. Set your Gemini API key in `gemini_chat.php` and `translate_menu.php`
-4. Access: `http://localhost/smartorder/index.php?tableNo=1`
+`GEMINI_API_KEY` を設定しない場合、チャットボットは簡易的な自動応答になります。
+データベースはコンテナ起動時に `database_utf8.sql` から初期化されます。
+
+## 11. 写真の出典
+
+メニューの写真はすべて [Wikimedia Commons](https://commons.wikimedia.org/) の自由ライセンスの画像を使用しています。作者とライセンスの一覧は [`itemImages/CREDITS.md`](itemImages/CREDITS.md) をご覧ください。
+
+アレルゲン情報は一般的なレシピをもとに作成した研究用のデータです。実際の店舗での利用を想定したものではありません。
 
 ---
 
-## Tools Used / 使用ツール
+## English summary
 
-- **Google Gemini API** — AI chat and menu translation
-- **GitHub** — Version control
-- **Render** — Cloud deployment (free tier)
-- **VSCode** — Code editor
-- **Claude AI** — AI coding assistant
+**SmartOrder** is a QR-code restaurant ordering system built for a university seminar study at Otemae University. It examines how far an AI chatbot can remove the language barrier foreign tourists face at restaurants. The setting is a Myanmar restaurant whose menu and UI are entirely in Burmese. Japanese participants compare a plain ordering system (A) with the same system plus a multilingual AI chatbot (B). The chatbot replies in the user's own language and answers allergy questions only from registered allergen data, never by guessing. Usability is measured with SUS and CUQ, together with task time and accuracy.
 
-## Photo credits / ဓာတ်ပုံ ရင်းမြစ်
+---
 
-Menu photos are from Wikimedia Commons under free licenses (CC0 / CC BY / CC BY-SA / public domain). See [itemImages/CREDITS.md](itemImages/CREDITS.md) for each photo's author and license.
+制作：大手前大学 ゼミ研究
